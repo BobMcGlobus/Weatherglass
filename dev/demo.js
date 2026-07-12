@@ -99,6 +99,25 @@ const sunset = new Date(now);
 sunset.setHours(20, 34, 0, 0);
 const nextRising = new Date(sunrise.getTime() + 86400000);
 
+// self-contained fake radar frame (data URI) for the dev preview
+const radarImg =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 190">
+    <rect width="300" height="190" fill="#12233a"/>
+    <g stroke="#ffffff18" stroke-width="1">
+      <line x1="0" y1="63" x2="300" y2="63"/><line x1="0" y1="126" x2="300" y2="126"/>
+      <line x1="100" y1="0" x2="100" y2="190"/><line x1="200" y1="0" x2="200" y2="190"/>
+    </g>
+    <circle cx="150" cy="95" r="70" fill="none" stroke="#ffffff22"/>
+    <circle cx="150" cy="95" r="40" fill="none" stroke="#ffffff22"/>
+    <g opacity="0.85">
+      <ellipse cx="120" cy="80" rx="40" ry="26" fill="#39d353"/>
+      <ellipse cx="132" cy="86" rx="24" ry="16" fill="#f4d03f"/>
+      <ellipse cx="140" cy="90" rx="12" ry="9" fill="#e74c3c"/>
+      <ellipse cx="210" cy="130" rx="30" ry="18" fill="#39d353" opacity="0.7"/>
+    </g>
+  </svg>`);
+
 const states = {
   'weather.home': entity('weather.home', currentCondition, {
     friendly_name: 'Zuhause',
@@ -140,6 +159,19 @@ const states = {
   'sensor.pm10': entity('sensor.pm10', 18, { unit_of_measurement: 'µg/m³', friendly_name: 'PM10' }),
   'sensor.ozon': entity('sensor.ozon', 46, { unit_of_measurement: 'µg/m³', friendly_name: 'Ozon' }),
   'sensor.warnstufe': entity('sensor.warnstufe', 20, { friendly_name: 'Warnstufe' }),
+  'sensor.mond': entity('sensor.mond', 'waxing_gibbous', { friendly_name: 'Mondphase' }),
+  'sensor.mondbeleuchtung': entity('sensor.mondbeleuchtung', 72, { unit_of_measurement: '%', friendly_name: 'Mondbeleuchtung' }),
+  'sensor.pegel': entity('sensor.pegel', 1.8, {
+    unit_of_measurement: 'm',
+    friendly_name: 'Pegel',
+    next_high_tide: at(14, 20),
+    next_low_tide: at(20, 35),
+  }),
+  'sensor.pollen_graeser': entity('sensor.pollen_graeser', 3, { friendly_name: 'Gräser' }),
+  'sensor.pollen_birke': entity('sensor.pollen_birke', 2, { friendly_name: 'Birke' }),
+  'sensor.pollen_beifuss': entity('sensor.pollen_beifuss', 1, { friendly_name: 'Beifuß' }),
+  'sensor.pollen_ambrosia': entity('sensor.pollen_ambrosia', 4, { friendly_name: 'Ambrosia' }),
+  'camera.regenradar': entity('camera.regenradar', 'idle', { friendly_name: 'Regenradar', entity_picture: radarImg }),
 };
 
 function syncWeather() {
@@ -210,6 +242,16 @@ function fakeHistory(id, startMs, endMs) {
         const t = dayStart + rand() * dayMs;
         if (t >= startMs && t <= endMs) points.push({ s: String((rand() * 4).toFixed(1)), lu: t / 1000 });
       }
+    }
+    return points;
+  }
+  if (id === 'sensor.pegel') {
+    // semidiurnal tide: ~2 highs per day
+    const points = [];
+    for (let t = startMs; t <= endMs; t += 3600000) {
+      const hours = t / 3600000;
+      const v = 1.9 + 1.4 * Math.sin((hours / 12.42) * 2 * Math.PI);
+      points.push({ s: v.toFixed(2), lu: t / 1000 });
     }
     return points;
   }
@@ -346,6 +388,24 @@ const config = {
       ],
     },
     { type: 'sun', sun_entity: 'sun.sun' },
+    { type: 'moon', entity: 'sensor.mond', illumination_entity: 'sensor.mondbeleuchtung' },
+    {
+      type: 'tides',
+      entity: 'sensor.pegel',
+      high_tide_entity: null,
+      low_tide_entity: null,
+    },
+    {
+      type: 'pollen',
+      max: 5,
+      entities: [
+        { entity: 'sensor.pollen_graeser', name: 'Gräser' },
+        { entity: 'sensor.pollen_birke', name: 'Birke' },
+        { entity: 'sensor.pollen_beifuss', name: 'Beifuß' },
+        { entity: 'sensor.pollen_ambrosia', name: 'Ambrosia' },
+      ],
+    },
+    { type: 'radar', entity: 'camera.regenradar' },
   ],
 };
 

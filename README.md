@@ -16,6 +16,10 @@ Theme-kompatibel (Light & Dark).
 - 🌗 **100 % Theme-Support**: nutzt ausschließlich HA-Theme-Variablen (`--primary-text-color`, `--ha-card-background`, `--red-color`, …)
 - 🌤️ **Himmel-Szene** (`type: sky`): große, animierte Szene aus Himmelsverlauf, Sonne mit drehenden Strahlen bzw. Mond mit funkelnden Sternen, driftenden Wolken und — je nach Wetterlage — Regen, Schnee, Blitz oder Nebel. Aktuelle Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, frei platzierbare **Wert-Anker** (z. B. Wind, Feuchte) sitzen auf der Szene. Ein `score_entity` (z. B. Warnstufe) legt einen Warn-Glow über die Szene.
 - 🌅 **Sonnen-Bogen** (`type: sun`): Sonnenauf- und -untergang als Tageslicht-Bogen mit Sonnen-Marker am aktuellen Stand, Tageslänge und „Untergang in X" — das Wetter-Pendant zum Zyklus-Ring.
+- 🌙 **Mondphase** (`type: moon`): Mondscheibe mit exakt berechnetem Terminator (Sichel/Halb/Voll, zu-/abnehmend), Phasenname und Beleuchtung in %.
+- 🌊 **Gezeiten** (`type: tides`): Tiden-Kurve über den Tag mit Jetzt-Marker (aus der Recorder-History oder synthetisch halbtägig), aktuellem Pegel und nächster Flut/Ebbe-Zeit.
+- 🤧 **Pollen** (`type: pollen`): Belastung je Allergen als Balken, nach Stufe eingefärbt (grün → gelb → rot); versteht Zahlen **und** Textstufen (`none`/`low`/`hoch` …).
+- 📡 **Wetterradar** (`type: radar`): Radarbild aus einer `camera.*`-Entität (`entity_picture`) oder einer festen `image_url`.
 - 💯 **Luftqualitäts-/Index-Ring** (`type: air_quality`): Withings-Punktering mit „34 von 100", Ampelfarbe nach Wert (niedrig = gut), **Sub-Indizes** (PM2.5 / PM10 / Ozon …) als Mini-Balken.
 - 🤖 **AI-Zusammenfassung** (`type: summary`): natürlich­sprachiger Wetter­text. Entweder aus einem Text-Sensor (`summary_entity`, z. B. ein LLM-/AI-Task-Sensor) — oder, wenn keiner gesetzt ist, **selbst erzeugt** aus Wetter­lage, Temperatur, Tages-Hoch/-Tief, Wind, Regen­wahrscheinlichkeit, UV und der Aussicht auf morgen (Deutsch & Englisch).
 - 📅 **Vorhersage** (`Vorhersage`-Streifen): stündlich oder täglich, aus der HA-Wetter-Entität (`weather.get_forecasts` → Live-Abo → Legacy-Attribut). Pro Schritt Zeit/Tag, Wetter-Icon, Regen­wahrscheinlichkeit und Temperatur (bzw. Hoch/Tief). Die Temperatur-Kurve wird um eine gestrichelte Vorhersage-Verlängerung ergänzt.
@@ -149,6 +153,10 @@ metrics: [...]
 | `visibility`   | `mdi:eye`                   | cyan        | line     | Sichtweite                                         |
 | `air_quality`  | `mdi:air-filter`            | green       | Ring     | Luftqualitäts-/Index-Ring mit `breakdown`          |
 | `sun`          | `mdi:weather-sunset`        | amber       | Bogen    | Sonnenauf-/untergang, Tageslänge                   |
+| `moon`         | `mdi:moon-waning-crescent`  | blue-grey   | Scheibe  | Mondphase mit korrektem Terminator + Beleuchtung   |
+| `tides`        | `mdi:waves`                 | light-blue  | Welle    | Gezeiten-Kurve mit Jetzt-Marker, Flut/Ebbe-Zeiten  |
+| `pollen`       | `mdi:flower-pollen`         | green       | Balken   | Pollenbelastung je Allergen, nach Stufe eingefärbt |
+| `radar`        | `mdi:radar`                 | blue        | Bild     | Wetterradar aus einer `camera.*`-Entität oder URL  |
 | `sky`          | `mdi:weather-partly-cloudy` | blue        | Szene    | Große animierte Himmel-Szene mit Ankern            |
 | `summary`      | `mdi:creation`              | deep-purple | Text     | AI-/Text-Zusammenfassung                           |
 | `custom`       | `mdi:chart-line`            | primary     | line     | Beliebiger Sensor                                  |
@@ -185,6 +193,12 @@ metrics: [...]
 | `label_opacity` / `scene_offset_y` | – | Feinjustierung                                            |
 | **Sonne (`sun`)** |              |                                                                        |
 | `sun_entity` / `sunrise_entity` / `sunset_entity` / `moon_entity` | – | Sonnen-/Zeit-Quellen                    |
+| **Mond (`moon`)** |              |                                                                        |
+| `illumination_entity` | string  | Beleuchtungs-Entität (0–1 oder %), falls getrennt von der Phase        |
+| **Gezeiten (`tides`)** |         |                                                                        |
+| `high_tide_entity` / `low_tide_entity` | – | Zeit-Entitäten für nächste Flut/Ebbe (sonst aus den Attributen) |
+| **Radar (`radar`)** |            |                                                                        |
+| `image_url` / `refresh`  | –      | Feste Bild-URL (statt Kamera) · Auto-Aktualisierung in Sekunden        |
 | **Zusammenfassung (`summary`)** |               |                                                          |
 | `summary_entity` | string        | Text-Sensor mit fertiger Zusammenfassung (z. B. LLM/AI Task)         |
 | `summary_sources`| list          | Quell-Sensoren für die selbst erzeugte Zusammenfassung               |

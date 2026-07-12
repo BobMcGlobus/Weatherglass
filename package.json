@@ -1,6 +1,6 @@
 {
   "name": "weatherglass-card",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Weatherglass — a Withings-style, fully themeable weather dashboard card for Home Assistant: forecast, wind, precipitation, air quality, sun and an AI summary.",
   "type": "module",
   "license": "MIT",

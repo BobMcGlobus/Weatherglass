@@ -402,6 +402,87 @@ export function sunArc(
   </svg>`;
 }
 
+/**
+ * Moon disc with a correct terminator for the given illuminated fraction.
+ * `waxing` puts the lit limb on the right (growing); otherwise it is mirrored.
+ */
+export function moonDisc(illum: number, waxing: boolean): TemplateResult {
+  const R = 62;
+  const f = Math.max(0, Math.min(illum, 1));
+  const lit = '#eef1f6';
+  const shadow = '#39435a';
+  // terminator half-ellipse: crescent bulges right (sweep 1), gibbous left (0)
+  const term = 1 - 2 * f;
+  const rx = R * Math.abs(term);
+  const sweep = term > 0 ? 1 : 0;
+  const litPath = `M 0 ${-R} A ${R} ${R} 0 0 1 0 ${R} A ${rx.toFixed(1)} ${R} 0 0 ${sweep} 0 ${-R} Z`;
+  return html`<svg class="moondisc" viewBox="0 0 200 200" aria-hidden="true">
+    <defs>
+      <radialGradient id="wc-moon-glow">
+        <stop offset="0%" stop-color="#eef1f6" stop-opacity="0.5" />
+        <stop offset="70%" stop-color="#eef1f6" stop-opacity="0.1" />
+        <stop offset="100%" stop-color="#eef1f6" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+    <circle cx="100" cy="100" r="88" fill="url(#wc-moon-glow)" opacity=${0.25 + f * 0.65} />
+    <g transform="translate(100 100)">
+      <circle r=${R} fill=${shadow} />
+      <path d=${litPath} fill=${lit} transform=${waxing ? nothing : 'scale(-1 1)'} />
+      <g fill="rgba(90,96,120,0.28)">
+        <circle cx="-16" cy="-16" r="9" />
+        <circle cx="15" cy="9" r="12" />
+        <circle cx="26" cy="-20" r="6" />
+        <circle cx="-6" cy="27" r="7" />
+        <circle cx="8" cy="-30" r="4" />
+      </g>
+    </g>
+  </svg>`;
+}
+
+/**
+ * Tide curve: a smooth filled wave across the day with a marker at "now".
+ * Falls back to a synthetic semidiurnal wave when there is too little data.
+ */
+export function tideChart(values: number[], accent: string, nowIdx?: number): TemplateResult {
+  const finite = values.filter(Number.isFinite);
+  let data = values;
+  let mark = nowIdx ?? values.length - 1;
+  if (finite.length < 3) {
+    data = Array.from({ length: 24 }, (_, i) => Math.sin((i / 24) * 2 * Math.PI * 2 - Math.PI / 2));
+    mark = new Date().getHours();
+  }
+  const w = 300;
+  const h = 96;
+  const pad = 8;
+  const lo = Math.min(...data.filter(Number.isFinite));
+  const hi = Math.max(...data.filter(Number.isFinite));
+  const range = hi - lo || 1;
+  const x = (i: number) => pad + (i * (w - 2 * pad)) / Math.max(data.length - 1, 1);
+  const y = (v: number) => h - pad - ((v - lo) / range) * (h - 2 * pad);
+  const pts = data.map((v, i) => ({ x: x(i), y: y(Number.isFinite(v) ? v : lo) }));
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const cx = (pts[i - 1].x + pts[i].x) / 2;
+    d += ` C ${cx} ${pts[i - 1].y}, ${cx} ${pts[i].y}, ${pts[i].x} ${pts[i].y}`;
+  }
+  const area = `${d} L ${pts[pts.length - 1].x} ${h} L ${pts[0].x} ${h} Z`;
+  const mi = Math.max(0, Math.min(Math.round(mark), pts.length - 1));
+  return html`<svg class="tidechart" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <defs>
+      <linearGradient id="wc-tide-fill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color=${accent} stop-opacity="0.35" />
+        <stop offset="100%" stop-color=${accent} stop-opacity="0.02" />
+      </linearGradient>
+    </defs>
+    <path d=${area} fill="url(#wc-tide-fill)" />
+    <path d=${d} fill="none" stroke=${accent} stroke-width="2.4" stroke-linecap="round" />
+    <line x1=${pts[mi].x} x2=${pts[mi].x} y1=${pts[mi].y} y2=${h}
+      stroke=${accent} stroke-width="1" stroke-dasharray="2 3" opacity="0.5" />
+    <circle cx=${pts[mi].x} cy=${pts[mi].y} r="5" fill=${accent}
+      stroke="var(--wc-card-bg)" stroke-width="2.5" />
+  </svg>`;
+}
+
 /** Compass rose with an arrow pointing where the wind blows FROM. */
 export function windCompass(bearing: number, speed: number, color: string): TemplateResult {
   const ok = Number.isFinite(bearing);

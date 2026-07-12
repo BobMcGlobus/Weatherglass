@@ -32,6 +32,10 @@ export type MetricType =
   | 'visibility'
   | 'air_quality'
   | 'sun'
+  | 'moon'
+  | 'tides'
+  | 'pollen'
+  | 'radar'
   | 'sky'
   | 'summary'
   | 'custom';
@@ -201,6 +205,22 @@ export interface MetricConfig {
   sunset_entity?: string;
   /** Moon phase entity (optional, shown as a small badge) */
   moon_entity?: string;
+
+  /** ---- moon ----------------------------------------------------------- */
+  /** Moon illumination entity (0-1 or 0-100 %), if separate from the phase */
+  illumination_entity?: string;
+
+  /** ---- tides ---------------------------------------------------------- */
+  /** Next high tide time entity/attribute */
+  high_tide_entity?: string;
+  /** Next low tide time entity/attribute */
+  low_tide_entity?: string;
+
+  /** ---- radar ---------------------------------------------------------- */
+  /** Static radar image URL (alternative to a camera.* entity) */
+  image_url?: string;
+  /** Auto-refresh interval in seconds for the radar image/camera */
+  refresh?: number;
 
   /** ---- summary (AI) --------------------------------------------------- */
   /** Text entity providing a ready-made summary (e.g. an LLM/AI Task sensor) */

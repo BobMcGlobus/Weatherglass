@@ -48,11 +48,19 @@ import {
 } from './history';
 import type { HistoryMap, StatsMap, StatsPeriod } from './history';
 import { fetchForecast, forecastSeries, isWeatherEntity } from './forecast';
-import { barChart, lineChart, scoreGraphic, sunArc, windCompass } from './charts';
+import {
+  barChart,
+  lineChart,
+  moonDisc,
+  scoreGraphic,
+  sunArc,
+  tideChart,
+  windCompass,
+} from './charts';
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.1.0';
+const CARD_VERSION = '0.2.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -558,6 +566,9 @@ export class WeatherCard extends LitElement {
     // metrics that don't need a numeric primary entity
     if (c.type === 'summary') return this._renderSummary(c, index);
     if (c.type === 'sun') return this._renderSun(c, index);
+    if (c.type === 'moon') return this._renderMoon(c, index);
+    if (c.type === 'tides') return this._renderTides(c, index);
+    if (c.type === 'radar') return this._renderRadar(c, index);
 
     if (!c.series.length || !c.primaryState) {
       return html`
@@ -576,6 +587,7 @@ export class WeatherCard extends LitElement {
     }
 
     if (c.type === 'sky') return this._renderSky(c, index);
+    if (c.type === 'pollen') return this._renderPollen(c, index);
     if (RING_TYPES.includes(c.type)) return this._renderScore(c, index);
 
     if (m.expanded) {
@@ -864,6 +876,221 @@ export class WeatherCard extends LitElement {
           </div>
         </div>
         ${note ? html`<div class="sun-note">${note}</div>` : nothing}
+      </div>
+    `;
+  }
+
+  /* ---- moon phase ----------------------------------------------------- */
+
+  private static readonly MOON_MAP: Record<string, [number, boolean]> = {
+    new_moon: [0, true],
+    waxing_crescent: [0.25, true],
+    first_quarter: [0.5, true],
+    waxing_gibbous: [0.75, true],
+    full_moon: [1, true],
+    waning_gibbous: [0.75, false],
+    last_quarter: [0.5, false],
+    waning_crescent: [0.25, false],
+  };
+
+  private _renderMoon(c: MetricCtx, index: number): TemplateResult {
+    const m = c.m;
+    const st = c.primaryState;
+    const phaseState = st?.state;
+    const map = phaseState ? WeatherCard.MOON_MAP[phaseState] : undefined;
+    let illum = map ? map[0] : NaN;
+    const waxing = map ? map[1] : true;
+    // illumination override (or a purely numeric primary entity)
+    const illRaw = m.illumination_entity
+      ? this._numeric(this.hass.states[m.illumination_entity])
+      : map
+        ? NaN
+        : this._numeric(st);
+    if (Number.isFinite(illRaw)) illum = illRaw > 1 ? illRaw / 100 : illRaw;
+    if (!Number.isFinite(illum)) illum = 0;
+    const name = map ? t(this.hass, `moon_${phaseState}`) : (phaseState ?? '');
+    const tapId = m.entity ?? m.moon_entity ?? m.illumination_entity;
+    return html`
+      <div
+        class="metric moon-metric ${(m.tap_action ?? 'more-info') === 'none' ? 'noclick' : ''}"
+        style="--wc-accent:${c.accent}"
+        @click=${() => this._handleTap({ tap_action: 'more-info', ...m }, index, tapId)}
+      >
+        <div class="head">
+          <div class="iconchip"><ha-icon .icon=${c.icon}></ha-icon></div>
+          <div class="name">${c.name}</div>
+          ${st ? html`<div class="time">${fmtLastUpdated(this.hass, st.last_updated)}</div>` : nothing}
+        </div>
+        <div class="moonwrap">${moonDisc(illum, waxing)}</div>
+        <div class="moon-phase" style="color:${c.accent}">${name}</div>
+        <div class="moon-note">${t(this.hass, 'illumination')}: ${fmtNumber(this.hass, illum * 100, 0)}%</div>
+      </div>
+    `;
+  }
+
+  /* ---- tides ---------------------------------------------------------- */
+
+  private _parseTime(raw?: string): Date | undefined {
+    if (!raw) return undefined;
+    const d = new Date(raw);
+    if (!isNaN(d.getTime())) return d;
+    const hm = /^(\d{1,2}):(\d{2})/.exec(raw);
+    if (hm) {
+      const t2 = new Date();
+      t2.setHours(+hm[1], +hm[2], 0, 0);
+      return t2;
+    }
+    return undefined;
+  }
+
+  private _renderTides(c: MetricCtx, index: number): TemplateResult {
+    const m = c.m;
+    const st = c.primaryState;
+    const height = this._numeric(st, m.attribute);
+    const values = st
+      ? fillGaps(this._bucketsFor(st.entity_id, 'hour', 24, c.aggregate))
+      : [];
+    const high =
+      this._parseTime(this.hass.states[m.high_tide_entity ?? '']?.state) ??
+      this._parseTime(st?.attributes?.next_high_tide);
+    const low =
+      this._parseTime(this.hass.states[m.low_tide_entity ?? '']?.state) ??
+      this._parseTime(st?.attributes?.next_low_tide);
+    const tapId = m.entity ?? m.high_tide_entity;
+    return html`
+      <div
+        class="metric tides-metric ${(m.tap_action ?? 'popup') === 'none' ? 'noclick' : ''}"
+        style="--wc-accent:${c.accent}"
+        @click=${() => this._handleTap(m, index, tapId)}
+      >
+        <div class="head">
+          <div class="iconchip"><ha-icon .icon=${c.icon}></ha-icon></div>
+          <div class="name">${c.name}</div>
+          ${st ? html`<div class="time">${fmtLastUpdated(this.hass, st.last_updated)}</div>` : nothing}
+        </div>
+        ${Number.isFinite(height)
+          ? html`<div class="value">
+              ${fmtNumber(this.hass, height, c.precision)}<span class="unit">${c.unit}</span>
+            </div>`
+          : nothing}
+        <div class="tidewrap">${tideChart(values, c.accent)}</div>
+        ${high || low
+          ? html`<div class="tide-times">
+              ${high
+                ? html`<div class="tide-end">
+                    <ha-icon icon="mdi:arrow-up-bold"></ha-icon>
+                    <span>${t(this.hass, 'high_tide')} ${fmtTime(this.hass, high.toISOString())}</span>
+                  </div>`
+                : nothing}
+              ${low
+                ? html`<div class="tide-end">
+                    <ha-icon icon="mdi:arrow-down-bold"></ha-icon>
+                    <span>${t(this.hass, 'low_tide')} ${fmtTime(this.hass, low.toISOString())}</span>
+                  </div>`
+                : nothing}
+            </div>`
+          : nothing}
+      </div>
+    `;
+  }
+
+  /* ---- pollen --------------------------------------------------------- */
+
+  private _pollenValue(st?: HassEntity, max = 5): number {
+    if (!st) return NaN;
+    const num = this._numeric(st);
+    if (Number.isFinite(num)) return num;
+    const text = st.state.toLowerCase().replace(/[\s_-]/g, '');
+    const words: Record<string, number> = {
+      none: 0, keine: 0, no: 0,
+      verylow: 1, sehrgering: 1, verygering: 1,
+      low: 2, gering: 2, niedrig: 2,
+      moderate: 3, mäßig: 3, maessig: 3, medium: 3, mittel: 3,
+      high: 4, hoch: 4,
+      veryhigh: 5, sehrhoch: 5, extreme: 5,
+    };
+    return text in words ? (words[text] / 5) * max : NaN;
+  }
+
+  private _pollenColor(value: number, max: number): string {
+    const r = Number.isFinite(value) ? value / max : 0;
+    if (r <= 0.05) return 'var(--grey-color, #9E9E9E)';
+    if (r < 0.4) return 'var(--green-color, #4CAF50)';
+    if (r < 0.7) return 'var(--amber-color, #FFC107)';
+    return 'var(--red-color, #F44336)';
+  }
+
+  private _renderPollen(c: MetricCtx, index: number): TemplateResult {
+    const m = c.m;
+    const max = m.max ?? 5;
+    const items = c.series.map((s) => {
+      const st = this.hass.states[s.entity];
+      const value = this._pollenValue(st, max);
+      const idx = Number.isFinite(value) ? Math.max(0, Math.min(Math.round((value / max) * 5), 5)) : 0;
+      return {
+        name: s.name ?? st?.attributes.friendly_name ?? s.entity,
+        value,
+        color: resolveColor(s.color) ?? this._pollenColor(value, max),
+        level: t(this.hass, `pollen_lvl_${idx}`),
+      };
+    });
+    return html`
+      <div
+        class="metric pollen-metric ${(m.tap_action ?? 'popup') === 'none' ? 'noclick' : ''}"
+        style="--wc-accent:${c.accent}"
+        @click=${() => this._handleTap(m, index, c.series[0].entity)}
+      >
+        <div class="head">
+          <div class="iconchip"><ha-icon .icon=${c.icon}></ha-icon></div>
+          <div class="name">${c.name}</div>
+          ${this._renderScoreBadge(m)}
+        </div>
+        <div class="pbars">
+          ${items.map(
+            (it) => html`<div class="pbar">
+              <div class="pbar-label">
+                <span>${it.name}</span>
+                <span style="color:${it.color};font-weight:700">${it.level}</span>
+              </div>
+              <div class="ptrack" style="--wc-p:${it.color}">
+                <div
+                  class="pfill"
+                  style="width:${Number.isFinite(it.value)
+                    ? Math.max(0, Math.min((it.value / max) * 100, 100))
+                    : 0}%"
+                ></div>
+              </div>
+            </div>`
+          )}
+        </div>
+      </div>
+    `;
+  }
+
+  /* ---- radar ---------------------------------------------------------- */
+
+  private _renderRadar(c: MetricCtx, index: number): TemplateResult {
+    const m = c.m;
+    const st = c.primaryState;
+    let src = m.image_url;
+    if (!src && st) src = st.attributes.entity_picture;
+    const tapId = m.entity;
+    return html`
+      <div
+        class="metric radar-metric ${(m.tap_action ?? (m.entity ? 'more-info' : 'none')) === 'none' ? 'noclick' : ''}"
+        style="--wc-accent:${c.accent}"
+        @click=${() => tapId && this._handleTap({ tap_action: 'more-info', ...m }, index, tapId)}
+      >
+        <div class="head">
+          <div class="iconchip"><ha-icon .icon=${c.icon}></ha-icon></div>
+          <div class="name">${c.name}</div>
+          ${st ? html`<div class="time">${fmtLastUpdated(this.hass, st.last_updated)}</div>` : nothing}
+        </div>
+        ${src
+          ? html`<div class="radarframe">
+              <img class="radar-img" src=${src} alt="" />
+            </div>`
+          : html`<div class="missing">${t(this.hass, 'no_data')}</div>`}
       </div>
     `;
   }
@@ -1851,6 +2078,9 @@ export class WeatherCard extends LitElement {
     .s-mirror .skyscene,
     .s-mirror .sunarc,
     .s-mirror .windrose,
+    .s-mirror .moondisc,
+    .s-mirror .tidechart,
+    .s-mirror .radar-img,
     .s-mirror .fc-ico {
       filter: grayscale(1) brightness(1.6);
     }
@@ -2371,6 +2601,71 @@ export class WeatherCard extends LitElement {
       text-align: center;
       font-size: 13px;
       color: var(--secondary-text-color);
+    }
+
+    /* ---- moon ---------------------------------------------------------- */
+    .moonwrap {
+      width: min(190px, 72%);
+      margin: 0 auto;
+    }
+    .moondisc {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .moon-phase {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .moon-note {
+      text-align: center;
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      margin-top: -2px;
+    }
+
+    /* ---- tides --------------------------------------------------------- */
+    .tidewrap {
+      width: 100%;
+    }
+    .tidechart {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .tide-times {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tide-end {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+    }
+    .tide-end ha-icon {
+      --mdc-icon-size: 16px;
+      color: var(--wc-accent);
+    }
+
+    /* ---- radar --------------------------------------------------------- */
+    .radarframe {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+      aspect-ratio: 16 / 10;
+    }
+    .radar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .windrose-wrap {
       display: flex;

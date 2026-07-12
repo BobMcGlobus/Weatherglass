@@ -12,7 +12,7 @@ import { COLOR_NAMES, PRESETS, resolveColor } from './presets';
 import { lang, t } from './i18n';
 
 const METRIC_TYPES = Object.keys(PRESETS) as MetricType[];
-const MULTI_TYPES: MetricType[] = ['air_quality'];
+const MULTI_TYPES: MetricType[] = ['air_quality', 'pollen'];
 const FORECAST_TYPES: MetricType[] = [
   'temperature',
   'feels_like',
@@ -53,7 +53,15 @@ const LABELS: Record<string, Record<string, string>> = {
     sec_parts: 'Precipitation by time of day',
     sec_sky: 'Sky scene',
     sec_sun: 'Sun',
+    sec_moon: 'Moon',
+    sec_tides: 'Tides',
+    sec_radar: 'Radar',
     sec_summary: 'AI summary',
+    illumination_entity: 'Illumination entity (0-1 or %)',
+    high_tide_entity: 'Next high tide entity',
+    low_tide_entity: 'Next low tide entity',
+    image_url: 'Radar image URL',
+    refresh: 'Refresh (seconds)',
     goal_type: 'Goal direction',
     gt_atleast: 'Reach at least',
     gt_atmost: 'Stay at/below',
@@ -156,7 +164,15 @@ const LABELS: Record<string, Record<string, string>> = {
     sec_parts: 'Niederschlag nach Tageszeit',
     sec_sky: 'Himmel-Szene',
     sec_sun: 'Sonne',
+    sec_moon: 'Mond',
+    sec_tides: 'Gezeiten',
+    sec_radar: 'Radar',
     sec_summary: 'AI-Zusammenfassung',
+    illumination_entity: 'Beleuchtungs-Entität (0-1 oder %)',
+    high_tide_entity: 'Nächste-Flut-Entität',
+    low_tide_entity: 'Nächste-Ebbe-Entität',
+    image_url: 'Radar-Bild-URL',
+    refresh: 'Aktualisierung (Sekunden)',
     goal_type: 'Zielrichtung',
     gt_atleast: 'Mindestens erreichen',
     gt_atmost: 'Höchstens',
@@ -416,7 +432,7 @@ export class WeatherCardEditor extends LitElement {
               name: 'goal_type',
               selector: { select: { mode: 'dropdown', options: opts(['atleast', 'atmost'], 'gt') } },
             },
-            ...(type === 'air_quality'
+            ...(type === 'air_quality' || type === 'pollen'
               ? [{ name: 'max', selector: { number: { min: 1, mode: 'box' } } }]
               : []),
           ],
@@ -494,6 +510,35 @@ export class WeatherCardEditor extends LitElement {
                 ],
               },
               { name: 'moon_entity', selector: { entity: {} } },
+            ]),
+          ]
+        : []),
+      ...(type === 'moon'
+        ? [
+            section('sec_moon', 'mdi:moon-waning-crescent', [
+              { name: 'illumination_entity', selector: { entity: {} } },
+            ]),
+          ]
+        : []),
+      ...(type === 'tides'
+        ? [
+            section('sec_tides', 'mdi:waves', [
+              {
+                type: 'grid',
+                name: '',
+                schema: [
+                  { name: 'high_tide_entity', selector: { entity: {} } },
+                  { name: 'low_tide_entity', selector: { entity: {} } },
+                ],
+              },
+            ]),
+          ]
+        : []),
+      ...(type === 'radar'
+        ? [
+            section('sec_radar', 'mdi:radar', [
+              { name: 'image_url', selector: { text: {} } },
+              { name: 'refresh', selector: { number: { min: 5, mode: 'box' } } },
             ]),
           ]
         : []),
