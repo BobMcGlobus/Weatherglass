@@ -1,0 +1,228 @@
+# Weatherglass
+
+Eine voll konfigurierbare Lovelace-Karte im **Withings-Stil** für Home Assistant:
+Temperatur, gefühlte Temperatur, Wind, Niederschlag, Luftfeuchte, Luftdruck,
+UV-Index, Bewölkung, Sichtweite, Luftqualität, Sonne — mit **Vorhersage**,
+Sparklines, Balken- und Fortschrittsdiagrammen, Trend-Pfeilen, einer großen
+animierten **Himmel-Szene** und einer **AI-Zusammenfassung**. Vollständig
+Theme-kompatibel (Light & Dark).
+
+> Schwesterkarte zur [Health Card](https://github.com/BobMcGlobus/HealthCard) —
+> gleicher Look, gleiche Bedienung, gleiche Editor-Logik, nur fürs Wetter.
+
+## Features
+
+- 🎨 **Withings-Look**: Kacheln mit großen Werten, Icon-Chips, geglättete Verlaufskurven mit Ring-Punkten
+- 🌗 **100 % Theme-Support**: nutzt ausschließlich HA-Theme-Variablen (`--primary-text-color`, `--ha-card-background`, `--red-color`, …)
+- 🌤️ **Himmel-Szene** (`type: sky`): große, animierte Szene aus Himmelsverlauf, Sonne mit drehenden Strahlen bzw. Mond mit funkelnden Sternen, driftenden Wolken und — je nach Wetterlage — Regen, Schnee, Blitz oder Nebel. Aktuelle Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, frei platzierbare **Wert-Anker** (z. B. Wind, Feuchte) sitzen auf der Szene. Ein `score_entity` (z. B. Warnstufe) legt einen Warn-Glow über die Szene.
+- 🌅 **Sonnen-Bogen** (`type: sun`): Sonnenauf- und -untergang als Tageslicht-Bogen mit Sonnen-Marker am aktuellen Stand, Tageslänge und „Untergang in X" — das Wetter-Pendant zum Zyklus-Ring.
+- 💯 **Luftqualitäts-/Index-Ring** (`type: air_quality`): Withings-Punktering mit „34 von 100", Ampelfarbe nach Wert (niedrig = gut), **Sub-Indizes** (PM2.5 / PM10 / Ozon …) als Mini-Balken.
+- 🤖 **AI-Zusammenfassung** (`type: summary`): natürlich­sprachiger Wetter­text. Entweder aus einem Text-Sensor (`summary_entity`, z. B. ein LLM-/AI-Task-Sensor) — oder, wenn keiner gesetzt ist, **selbst erzeugt** aus Wetter­lage, Temperatur, Tages-Hoch/-Tief, Wind, Regen­wahrscheinlichkeit, UV und der Aussicht auf morgen (Deutsch & Englisch).
+- 📅 **Vorhersage** (`Vorhersage`-Streifen): stündlich oder täglich, aus der HA-Wetter-Entität (`weather.get_forecasts` → Live-Abo → Legacy-Attribut). Pro Schritt Zeit/Tag, Wetter-Icon, Regen­wahrscheinlichkeit und Temperatur (bzw. Hoch/Tief). Die Temperatur-Kurve wird um eine gestrichelte Vorhersage-Verlängerung ergänzt.
+- 📈 **Diagramme pro Metrik**: Linie, Balken, Fortschrittsbalken oder keins
+- 🌧️ **Niederschlag nach Tageszeit** (`parts`): Segmentbalken + Aufschlüsselung (Morgen/Mittag/Abend/Nacht), plus eine Regen-Ereignis-Timeline im Popup
+- 💨 **Wind** mit Böen (`entity2`) und einer **Kompass-Rose** im Popup (Windrichtung + Geschwindigkeit)
+- ↗️ **Trends**: automatische Trend-Pfeile aus der Recorder-History
+- 🚦 **Warn-Badge**: `score_entity` zeigt eine Ampel-Plakette auf der Kachel
+- 🎠 **Carousel-Layout**: alle Kacheln horizontal scrollbar auf minimalem Platz
+- 🫥 **Einbettbar**: Kartenhintergrund abschaltbar (`background: false`) + randlose Darstellung (`flush`)
+- 🔍 **Detail-Popup**: Klick auf eine Kachel öffnet eine Detailansicht mit Vorhersage, großem Verlauf, Wochentagen und Min/Ø/Max/Trend
+- 📅 **Zeiträume im Popup**: Tag (stündlich) / Woche / Monat / 3 Monate / Jahr / **Max** — lange Zeiträume kommen aus den Langzeit-Statistiken und der Graph wird horizontal scrollbar
+- 🖱️ **Klick-Aktion pro Kachel**: Popup, More-Info, Link oder nichts
+- 🎨 **6 Kartenstile** über `card_style`: HA-Standard, Withings (Default), Liquid Glass, Material You, Bubble, Magic Mirror
+- 🖱️ **Visueller Editor**: Metriken per UI hinzufügen, sortieren, konfigurieren
+- 🌍 Deutsch & Englisch (automatisch nach HA-Sprache)
+
+## Installation
+
+### HACS
+
+1. HACS → *Custom repositories* → dieses Repository als Typ **Dashboard** hinzufügen
+2. „Weatherglass" installieren
+3. Die Ressource wird automatisch registriert
+
+### Manuell
+
+1. [`dist/weatherglass-card.js`](dist/weatherglass-card.js) nach `config/www/weatherglass-card.js` kopieren
+2. *Einstellungen → Dashboards → ⋮ → Ressourcen* → `/local/weatherglass-card.js` als **JavaScript-Modul** hinzufügen
+
+## Konfiguration
+
+```yaml
+type: custom:weatherglass-card
+title: Wetter
+subtitle: Zuhause
+weather: weather.home        # Wetter-Entität für Vorhersage + Wetterlage
+metrics:
+  - type: sky                # große animierte Himmel-Szene
+    entity: weather.home
+    score_entity: sensor.warnstufe
+    anchors:
+      - entity: sensor.wind
+        name: Wind
+        x: 78
+        y: 20
+        dot: left
+      - entity: sensor.luftfeuchte
+        name: Feuchte
+        x: 24
+        y: 74
+        dot: right
+  - type: summary            # AI-/Text-Zusammenfassung
+    # summary_entity: sensor.wetter_text_ki   # optional: fertiger LLM-Text
+  - type: temperature
+    entity: sensor.aussentemperatur
+    expanded: true
+  - type: feels_like
+    entity: sensor.gefuehlt
+  - type: wind
+    entity: sensor.wind
+    entity2: sensor.windboe   # Böen
+  - type: precipitation
+    entity: sensor.niederschlag
+    parts:
+      morning: sensor.regen_morgen
+      noon: sensor.regen_mittag
+      evening: sensor.regen_abend
+      night: sensor.regen_nacht
+  - type: humidity
+    entity: sensor.luftfeuchte
+  - type: uv
+    entity: sensor.uv
+    max: 11                   # Skala des Fortschrittsbalkens
+  - type: pressure
+    entity: sensor.luftdruck
+  - type: cloud
+    entity: sensor.bewoelkung
+  - type: visibility
+    entity: sensor.sichtweite
+  - type: air_quality        # Index-Ring
+    entity: sensor.aqi
+    max: 100
+    breakdown:
+      - { entity: sensor.pm25, name: PM2.5, color: teal }
+      - { entity: sensor.pm10, name: PM10, color: amber }
+      - { entity: sensor.ozon, name: Ozon, color: deep-orange }
+  - type: sun
+    sun_entity: sun.sun
+```
+
+Kompakt in einem Container, scrollbar und ohne eigenen Hintergrund:
+
+```yaml
+type: custom:weatherglass-card
+layout: carousel
+background: false
+flush: true
+weather: weather.home
+metrics: [...]
+```
+
+### Karten-Optionen
+
+| Option       | Typ     | Default    | Beschreibung                                               |
+| ------------ | ------- | ---------- | ---------------------------------------------------------- |
+| `title`      | string  | –          | Überschrift                                                |
+| `subtitle`   | string  | –          | Untertitel                                                 |
+| `weather`    | string  | –          | Standard-Wetter-Entität für Vorhersage + Wetterlage        |
+| `days`       | number  | `7`        | History-Zeitraum in Tagen (für alle Metriken)              |
+| `columns`    | number  | `1`        | Kachel-Spalten (1–3)                                       |
+| `layout`     | string  | `grid`     | `grid` oder `carousel`                                     |
+| `card_style` | string  | `withings` | `default`, `withings`, `glass`, `material`, `bubble`, `mirror` |
+| `tiles`      | boolean | `true`     | Metriken als Kacheln (`false` = flache Zeilen)             |
+| `background` | boolean | `true`     | `false`: Kartenhintergrund/-schatten entfernen             |
+| `flush`      | boolean | `false`    | `true`: kein Außenabstand                                  |
+| `metrics`    | list    | –          | **Pflicht.** Liste der Metriken                            |
+
+### Metrik-Typen
+
+| Typ            | Icon                        | Farbe       | Diagramm | Beschreibung                                       |
+| -------------- | --------------------------- | ----------- | -------- | -------------------------------------------------- |
+| `temperature`  | `mdi:thermometer`           | orange      | line     | Temperatur (mit Vorhersage-Verlängerung)           |
+| `feels_like`   | `mdi:thermometer-lines`     | deep-orange | line     | Gefühlte Temperatur                                |
+| `wind`         | `mdi:weather-windy`         | teal        | line     | Windgeschwindigkeit; `entity2` = Böen; Kompass im Popup |
+| `precipitation`| `mdi:weather-pouring`       | blue        | bar      | Niederschlag; `parts` = Tageszeiten; Regen-Timeline |
+| `humidity`     | `mdi:water-percent`         | light-blue  | progress | Luftfeuchte (0–100 %)                              |
+| `pressure`     | `mdi:gauge`                 | blue-grey   | line     | Luftdruck                                          |
+| `uv`           | `mdi:weather-sunny-alert`   | amber       | progress | UV-Index (`max` = Skala, z. B. 11)                 |
+| `cloud`        | `mdi:weather-cloudy`        | blue-grey   | progress | Bewölkung (0–100 %)                                |
+| `visibility`   | `mdi:eye`                   | cyan        | line     | Sichtweite                                         |
+| `air_quality`  | `mdi:air-filter`            | green       | Ring     | Luftqualitäts-/Index-Ring mit `breakdown`          |
+| `sun`          | `mdi:weather-sunset`        | amber       | Bogen    | Sonnenauf-/untergang, Tageslänge                   |
+| `sky`          | `mdi:weather-partly-cloudy` | blue        | Szene    | Große animierte Himmel-Szene mit Ankern            |
+| `summary`      | `mdi:creation`              | deep-purple | Text     | AI-/Text-Zusammenfassung                           |
+| `custom`       | `mdi:chart-line`            | primary     | line     | Beliebiger Sensor                                  |
+
+### Metrik-Optionen
+
+| Option           | Typ           | Beschreibung                                                            |
+| ---------------- | ------------- | ---------------------------------------------------------------------- |
+| `entity`         | string        | Primäre Entität (Sensor oder — bei `sky` — eine `weather.*`-Entität)   |
+| `entity2`        | string        | Zweite Entität (Wind: Böen)                                            |
+| `entities`       | list          | Mehrere Serien (Luftqualität): Entity-IDs oder Objekte                 |
+| `secondary`      | list          | Zusatz-Entitäten als Infozeile                                        |
+| `name` / `icon` / `color` / `unit` | – | Anzeige                                                     |
+| `graph`          | string        | `line`, `bar`, `progress`, `none`                                     |
+| `goal` / `start` / `goal_type` | – | Ziel & Fortschritt (Zahl oder Sensor)                           |
+| `max`            | number        | `air_quality`: Ring-Maximum · `progress`: Balken-Skala                 |
+| `precision` / `aggregate` / `trend` / `duration` | – | Datenverhalten                            |
+| `days`           | number        | History-Zeitraum nur für diese Metrik                                 |
+| `tap_action` / `link` | –        | `popup` (Default), `more-info`, `link`, `none`                        |
+| `expanded`       | bool          | Popup-Details direkt auf der Kachel                                   |
+| `score_entity`   | string        | Warn-/Index-Sensor → Ampel-Badge; bei `sky` der Warn-Glow            |
+| **Vorhersage**   |               |                                                                        |
+| `forecast`       | string        | Wetter-Entität für die Vorhersage (Default: `weather` der Karte)     |
+| `forecast_type`  | string        | `hourly` (Default bei Temp/Wind/Regen), `daily`, `twice_daily`       |
+| `forecast_count` | number        | Anzahl der angezeigten Vorhersage-Schritte                           |
+| **Niederschlag** |               |                                                                        |
+| `parts`          | object        | `morning`/`noon`/`evening`/`night`-Entitäten                          |
+| **Himmel (`sky`)** |             |                                                                        |
+| `condition_entity` | string      | Wetterlage-Sensor (überschreibt die Wetter-Entität)                  |
+| `sun_entity`     | string        | `sun.sun` für Tag/Nacht                                               |
+| `wind_entity`    | string        | stärkerer Wind → schnellere Wolken                                    |
+| `night`          | bool          | Nachtmodus erzwingen                                                   |
+| `anchors`        | list          | Wert-Labels auf der Szene (`{entity, name, x, y, dot}`)               |
+| `label_opacity` / `scene_offset_y` | – | Feinjustierung                                            |
+| **Sonne (`sun`)** |              |                                                                        |
+| `sun_entity` / `sunrise_entity` / `sunset_entity` / `moon_entity` | – | Sonnen-/Zeit-Quellen                    |
+| **Zusammenfassung (`summary`)** |               |                                                          |
+| `summary_entity` | string        | Text-Sensor mit fertiger Zusammenfassung (z. B. LLM/AI Task)         |
+| `summary_sources`| list          | Quell-Sensoren für die selbst erzeugte Zusammenfassung               |
+
+## Vorhersage-Quelle
+
+Die Vorhersage wird — in dieser Reihenfolge, je nach dem was die Integration
+bietet — geladen über:
+
+1. `weather.get_forecasts` (Service-Aufruf mit Antwort) — funktioniert auf jeder
+   modernen HA-Wetter-Integration,
+2. das Live-Abo `weather/subscribe_forecast`,
+3. das (ältere) `forecast`-Attribut der Wetter-Entität.
+
+Es reicht also, unter `weather:` (bzw. `forecast:` je Metrik) eine
+`weather.*`-Entität anzugeben.
+
+## Theming
+
+Die Karte verwendet ausschließlich Theme-Variablen. Benannte Farben (`red`,
+`teal`, …) werden auf die HA-Farbvariablen abgebildet. Zusätzlich anpassbar:
+
+```yaml
+# im Theme
+weatherglass-beispiel:
+  wc-tile-radius: 20px   # Eckenradius der Kacheln (--wc-tile-radius)
+```
+
+## Entwicklung
+
+> **Node 18+** erforderlich (Vite 5).
+
+```bash
+npm install
+npm run build       # dist/weatherglass-card.js
+npx vite            # Dev-Vorschau mit Mock-Daten (index.html + dev/demo.js)
+```
+
+## Lizenz
+
+MIT
