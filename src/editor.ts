@@ -117,6 +117,8 @@ const LABELS: Record<string, Record<string, string>> = {
     summary_sources: 'Source sensors (generated summary)',
     score_entity: 'Warning/index sensor (badge)',
     breakdown: 'Sub-indices (category colors)',
+    allergens: 'Allergens (entity, name, icon)',
+    add_allergen: 'Add allergen',
     expanded: 'Expanded tile (details inline)',
     type: 'Type',
     entity: 'Entity',
@@ -228,6 +230,8 @@ const LABELS: Record<string, Record<string, string>> = {
     summary_sources: 'Quell-Sensoren (erzeugte Zusammenfassung)',
     score_entity: 'Warn-/Index-Sensor (Badge)',
     breakdown: 'Sub-Indizes (Kategoriefarben)',
+    allergens: 'Allergene (Entität, Name, Icon)',
+    add_allergen: 'Allergen hinzufügen',
     expanded: 'Erweiterte Kachel (Details eingeblendet)',
     type: 'Typ',
     entity: 'Entität',
@@ -619,9 +623,10 @@ export class WeatherCardEditor extends LitElement {
               { name: 'name', selector: { text: {} } },
             ],
           },
-          { name: 'entity', selector: { entity: {} } },
+          // pollen manages its entities in the per-allergen editor below
+          ...(type === 'pollen' ? [] : [{ name: 'entity', selector: { entity: {} } }]),
           ...(type === 'wind' ? [{ name: 'entity2', selector: { entity: {} } }] : []),
-          ...(MULTI_TYPES.includes(type) && entitiesEditable
+          ...(MULTI_TYPES.includes(type) && type !== 'pollen' && entitiesEditable
             ? [{ name: 'entities', selector: { entity: { multiple: true } } }]
             : []),
           ...(type === 'air_quality' &&
@@ -729,7 +734,90 @@ export class WeatherCardEditor extends LitElement {
         .computeLabel=${(s: { name: string }) => this._label(s.name)}
         @value-changed=${(ev: CustomEvent) => this._metricChanged(ev, i)}
       ></ha-form>
+      ${active === 'general' && type === 'pollen' ? this._renderPollenEditor(m, i) : nothing}
     </div>`;
+  }
+
+  /* ---- per-allergen editor (pollen) ----------------------------------- */
+
+  private _pollenRowSchema(): unknown[] {
+    return [
+      { name: 'entity', selector: { entity: {} } },
+      {
+        type: 'grid',
+        name: '',
+        schema: [
+          { name: 'name', selector: { text: {} } },
+          { name: 'icon', selector: { icon: {} } },
+        ],
+      },
+    ];
+  }
+
+  private _renderPollenEditor(m: MetricConfig, mi: number): TemplateResult {
+    const entries = (m.entities ?? []).map((e) =>
+      typeof e === 'string' ? { entity: e } : e
+    );
+    return html`
+      <div class="sub-editor">
+        <div class="sub-editor-title">${this._label('allergens')}</div>
+        ${entries.map(
+          (e, pi) => html`
+            <div class="sub-row">
+              <ha-form
+                .hass=${this.hass}
+                .data=${e}
+                .schema=${this._pollenRowSchema()}
+                .computeLabel=${(s: { name: string }) => this._label(s.name)}
+                @value-changed=${(ev: CustomEvent) => this._pollenRowChanged(ev, mi, pi)}
+              ></ha-form>
+              <button class="icon-btn danger" title="✕" @click=${() => this._removePollenRow(mi, pi)}>
+                <ha-icon icon="mdi:delete-outline"></ha-icon>
+              </button>
+            </div>
+          `
+        )}
+        <button class="add small" @click=${() => this._addPollenRow(mi)}>
+          <ha-icon icon="mdi:plus"></ha-icon>
+          ${this._label('add_allergen')}
+        </button>
+      </div>
+    `;
+  }
+
+  private _pollenRowChanged(ev: CustomEvent, mi: number, pi: number): void {
+    ev.stopPropagation();
+    if (!this._config) return;
+    const v = ev.detail.value as Record<string, unknown>;
+    const entry: Record<string, unknown> = {};
+    if (v.entity) entry.entity = v.entity;
+    if (v.name) entry.name = v.name;
+    if (v.icon) entry.icon = v.icon;
+    const metrics = [...this._config.metrics];
+    const entities = [...(metrics[mi].entities ?? [])];
+    // plain entity ids stay strings so the YAML remains tidy
+    entities[pi] =
+      entry.name || entry.icon
+        ? (entry as { entity: string })
+        : ((entry.entity as string) ?? '');
+    metrics[mi] = { ...metrics[mi], entities };
+    this._emit({ ...this._config, metrics });
+  }
+
+  private _addPollenRow(mi: number): void {
+    if (!this._config) return;
+    const metrics = [...this._config.metrics];
+    const entities = [...(metrics[mi].entities ?? []), ''];
+    metrics[mi] = { ...metrics[mi], entities };
+    this._emit({ ...this._config, metrics });
+  }
+
+  private _removePollenRow(mi: number, pi: number): void {
+    if (!this._config) return;
+    const metrics = [...this._config.metrics];
+    const entities = (metrics[mi].entities ?? []).filter((_, i) => i !== pi);
+    metrics[mi] = { ...metrics[mi], entities };
+    this._emit({ ...this._config, metrics });
   }
 
   private _emit(config: WeatherCardConfig): void {
@@ -942,6 +1030,30 @@ export class WeatherCardEditor extends LitElement {
       margin-top: 8px;
       padding: 6px 12px;
       font-size: 13px;
+    }
+    .sub-editor {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--divider-color);
+    }
+    .sub-editor-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--primary-text-color);
+    }
+    .sub-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--divider-color);
+      border-radius: 10px;
+    }
+    .sub-row ha-form {
+      flex: 1;
+      min-width: 0;
     }
   `;
 }

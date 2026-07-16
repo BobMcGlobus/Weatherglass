@@ -92,6 +92,8 @@ export interface DetailConfig {
 export interface SeriesConfig {
   entity: string;
   name?: string;
+  /** MDI icon shown next to the name (pollen rows) */
+  icon?: string;
   color?: string;
   unit?: string;
   /** Target: a number or an entity id */

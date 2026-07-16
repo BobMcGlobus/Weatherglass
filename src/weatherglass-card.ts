@@ -59,7 +59,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.6.0';
+const CARD_VERSION = '0.6.1';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -1184,6 +1184,36 @@ export class WeatherCard extends LitElement {
     return PAL[idx - 1];
   }
 
+  /** DWD entity ids (sensor.pollenflug_beifuss_41) → proper allergen names */
+  private static readonly DWD_ALLERGENS: Record<string, string> = {
+    graeser: 'Gräser',
+    beifuss: 'Beifuß',
+    ambrosia: 'Ambrosia',
+    birke: 'Birke',
+    erle: 'Erle',
+    esche: 'Esche',
+    hasel: 'Hasel',
+    roggen: 'Roggen',
+  };
+
+  /**
+   * Display name for an allergen row: explicit name → allergen parsed from a
+   * DWD entity id (their friendly names are all "Pollenflug-Gefahrenindex…")
+   * → friendly name → entity id.
+   */
+  private _pollenName(s: SeriesConfig, st?: HassEntity): string {
+    if (s.name) return s.name;
+    const objectId = s.entity.split('.')[1] ?? '';
+    const dwd = /^pollenflug_([a-z]+?)_?\d*$/i.exec(objectId);
+    if (dwd) {
+      const key = dwd[1].toLowerCase();
+      return (
+        WeatherCard.DWD_ALLERGENS[key] ?? key.charAt(0).toUpperCase() + key.slice(1)
+      );
+    }
+    return st?.attributes.friendly_name ?? s.entity;
+  }
+
   private _pollenLabel(v: number, max: number, dwd: boolean): string {
     if (!Number.isFinite(v)) return '–';
     if (dwd) {
@@ -1211,7 +1241,8 @@ export class WeatherCard extends LitElement {
           st.entity_id.includes('pollenflug'));
       return {
         dwd,
-        name: s.name ?? st?.attributes.friendly_name ?? s.entity,
+        name: this._pollenName(s, st),
+        icon: s.icon,
         days: [
           dwd ? this._pollenNum(st!.state) : this._pollenValue(st, m.max ?? 5),
           this._pollenAttr(st, WeatherCard.DWD_TOMORROW),
@@ -1274,7 +1305,12 @@ export class WeatherCard extends LitElement {
                   : 'down'
                 : undefined;
             return html`<div class="prow">
-              <span class="prow-name">${e.name}</span>
+              <span class="prow-name">
+                ${e.icon
+                  ? html`<ha-icon .icon=${e.icon} style="color:${color}"></ha-icon>`
+                  : nothing}
+                <span class="prow-text">${e.name}</span>
+              </span>
               <div class="psegs">
                 ${Array.from({ length: segs }, (_, si) =>
                   si < filled
@@ -3069,8 +3105,18 @@ export class WeatherCard extends LitElement {
       font-size: 12px;
     }
     .prow-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       font-weight: 500;
       color: var(--primary-text-color);
+      min-width: 0;
+    }
+    .prow-name ha-icon {
+      --mdc-icon-size: 16px;
+      flex: none;
+    }
+    .prow-text {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

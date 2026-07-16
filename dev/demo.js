@@ -409,11 +409,11 @@ const config = {
     {
       type: 'pollen',
       entities: [
-        'sensor.pollenflug_graeser_124',
-        'sensor.pollenflug_roggen_124',
-        'sensor.pollenflug_birke_124',
-        'sensor.pollenflug_beifuss_124',
-        'sensor.pollenflug_ambrosia_124',
+        { entity: 'sensor.pollenflug_graeser_124', icon: 'mdi:grass' },
+        { entity: 'sensor.pollenflug_roggen_124', icon: 'mdi:barley' },
+        { entity: 'sensor.pollenflug_birke_124', icon: 'mdi:tree' },
+        { entity: 'sensor.pollenflug_beifuss_124', icon: 'mdi:flower' },
+        { entity: 'sensor.pollenflug_ambrosia_124', icon: 'mdi:flower-pollen' },
         'sensor.pollenflug_hasel_124',
       ],
     },
