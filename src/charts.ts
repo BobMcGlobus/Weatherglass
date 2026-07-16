@@ -27,6 +27,10 @@ export interface ChartOpts {
   yFmt?: (v: number) => string;
   /** x-axis marks (vertical lines / labels at bucket indices) */
   xMarks?: AxisMark[];
+  /** soft tinted fill under the first series (forecast look) */
+  area?: boolean;
+  /** ring dot on the first point of the first series ("now") */
+  nowDot?: boolean;
 }
 
 const W = 220;
@@ -93,7 +97,7 @@ export function lineChart(
       }`
   );
 
-  const parts = drawable.map((s) => {
+  const parts = drawable.map((s, si) => {
     const pts = s.values
       .map((v, i) => ({ x: x(i), y: y(v), ok: Number.isFinite(v) }))
       .filter((p) => p.ok);
@@ -103,7 +107,13 @@ export function lineChart(
       const cx = (pts[i - 1].x + pts[i].x) / 2;
       d += ` C ${cx} ${pts[i - 1].y}, ${cx} ${pts[i].y}, ${pts[i].x} ${pts[i].y}`;
     }
+    const area =
+      opts.area && si === 0
+        ? svg`<path d="${d} L ${pts[pts.length - 1].x} ${h - padB} L ${pts[0].x} ${h - padB} Z"
+            fill="color-mix(in srgb, ${s.color} 13%, transparent)"/>`
+        : nothing;
     return svg`
+      ${area}
       <path d=${d} fill="none" stroke=${s.color} stroke-width="2.2"
         stroke-linecap="round" stroke-linejoin="round"
         stroke-dasharray=${s.dashed ? '4 4' : nothing} opacity=${s.dashed ? 0.75 : 1}/>
@@ -113,6 +123,12 @@ export function lineChart(
               (p) => svg`<circle cx=${p.x} cy=${p.y} r="3.1" fill="var(--wc-dot-fill)"
                 stroke=${s.color} stroke-width="2"/>`
             )
+          : nothing
+      }
+      ${
+        opts.nowDot && si === 0
+          ? svg`<circle cx=${pts[0].x} cy=${pts[0].y} r="3.6" fill="var(--wc-dot-fill)"
+              stroke=${s.color} stroke-width="2.2"/>`
           : nothing
       }
     `;
@@ -182,62 +198,10 @@ export function barChart(
   </svg>`;
 }
 
-const SCORE_PALETTE = [
-  'var(--teal-color, #009688)',
-  'var(--light-blue-color, #03A9F4)',
-  'var(--amber-color, #FFC107)',
-];
-const NEUTRAL_DOT = 'color-mix(in srgb, var(--primary-text-color) 16%, transparent)';
-
 /** Sub-index segment: category color plus its share (0..1) of the score. */
 export interface ScoreSegment {
   color: string;
   share: number;
-}
-
-/**
- * Withings-style confetti dot ring for the air-quality index. The share of
- * colored dots (clockwise from the top) reflects the score ratio; with
- * segments the colored dots take the category colors proportionally.
- */
-export function scoreRing(
-  scoreColor: string,
-  ratio: number,
-  segments?: ScoreSegment[]
-): TemplateResult {
-  const rnd = (i: number) => Math.abs((Math.sin(i * 127.1) * 43758.5453) % 1);
-  const pick = (seed: number): string => {
-    if (!segments?.length) {
-      return SCORE_PALETTE[Math.floor(rnd(seed) * SCORE_PALETTE.length)];
-    }
-    const r = rnd(seed);
-    let acc = 0;
-    for (const s of segments) {
-      acc += s.share;
-      if (r <= acc) return s.color;
-    }
-    return segments[segments.length - 1].color;
-  };
-  const dots = [];
-  for (let ring = 0; ring < 2; ring++) {
-    const base = ring === 0 ? 74 : 88;
-    const count = ring === 0 ? 26 : 32;
-    for (let i = 0; i < count; i++) {
-      const frac = i / count;
-      const a = frac * Math.PI * 2 - Math.PI / 2 + rnd(i + ring * 100) * 0.12;
-      const r = base + (rnd(i * 3 + ring * 7) - 0.5) * 6;
-      const size = 2.4 + rnd(i * 7 + ring * 13) * 2.4;
-      const color = frac < ratio ? pick(i * 11 + ring * 29) : NEUTRAL_DOT;
-      dots.push(
-        svg`<circle cx=${100 + Math.cos(a) * r} cy=${100 + Math.sin(a) * r}
-          r=${size} fill=${color} opacity="0.75"/>`
-      );
-    }
-  }
-  return html`<svg class="scorering" viewBox="0 0 200 200" aria-hidden="true">
-    <circle cx="100" cy="100" r="62" fill="color-mix(in srgb, ${scoreColor} 10%, transparent)" />
-    ${dots}
-  </svg>`;
 }
 
 /** Single progress arc with round caps. */
@@ -351,8 +315,7 @@ export function scoreGraphic(
   if (variant === 'bubble') return scoreArc(scoreColor, ratio, 15);
   if (variant === 'mirror') return scoreArc('#fff', ratio, 7);
   if (variant === 'glass') return scoreArcGlass(scoreColor, ratio, segments);
-  if (variant === 'default') return scoreArc(scoreColor, ratio, 10);
-  return scoreRing(scoreColor, ratio, segments);
+  return scoreArc(scoreColor, ratio, 10);
 }
 
 /**

@@ -47,13 +47,7 @@ export type TrendMode = 'up_good' | 'down_good' | 'neutral' | 'none';
 export type GoalType = 'atleast' | 'atmost';
 /** popup = built-in detail popup, more-info = native HA dialog */
 export type TapAction = 'popup' | 'more-info' | 'link' | 'none';
-export type CardStyle =
-  | 'default'
-  | 'withings'
-  | 'glass'
-  | 'material'
-  | 'bubble'
-  | 'mirror';
+export type CardStyle = 'default' | 'glass' | 'material' | 'bubble' | 'mirror';
 
 /** Forecast resolution requested from a weather entity */
 export type ForecastType = 'hourly' | 'daily' | 'twice_daily';
@@ -181,6 +175,11 @@ export interface MetricConfig {
   forecast_type?: ForecastType;
   /** how many forecast steps to show in the strip (default 8) */
   forecast_count?: number;
+  /**
+   * What the tile chart plots: the upcoming forecast (default when the metric
+   * has one) or the recorder history (the old behaviour; always in the popup).
+   */
+  chart_source?: 'forecast' | 'history';
 
   /** ---- sky (hero scene) ---------------------------------------------- */
   /** Weather entity or text sensor giving the condition (sunny/rainy/…) */
@@ -243,7 +242,7 @@ export interface WeatherCardConfig {
   tiles?: boolean;
   /** grid (default) or carousel: horizontally scrollable tiles */
   layout?: 'grid' | 'carousel';
-  /** Visual style: default, withings (default), glass, material, bubble, mirror */
+  /** Visual style: default (clean tiles), glass, material, bubble, mirror */
   card_style?: CardStyle;
   /** false: remove the ha-card background/shadow (for use inside containers) */
   background?: boolean;

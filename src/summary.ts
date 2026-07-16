@@ -37,8 +37,9 @@ export function generateSummary(hass: HomeAssistant | undefined, s: WeatherSnaps
   const tUnit = s.tempUnit ?? '°C';
   const parts: string[] = [];
 
-  // 1. now
-  if (s.condition && isNum(s.temp)) {
+  // 1. now — German condition names are nouns/adjective phrases, keep their case
+  const cond = s.condition ? (de ? s.condition : s.condition.toLowerCase()) : undefined;
+  if (cond && isNum(s.temp)) {
     const feels =
       isNum(s.feels) && Math.abs(s.feels - s.temp) >= 2
         ? de
@@ -47,11 +48,11 @@ export function generateSummary(hass: HomeAssistant | undefined, s: WeatherSnaps
         : '';
     parts.push(
       de
-        ? `Aktuell ${s.condition.toLowerCase()} bei ${joinUnit(n(s.temp), tUnit)}${feels}.`
-        : `Currently ${s.condition.toLowerCase()} at ${joinUnit(n(s.temp), tUnit)}${feels}.`
+        ? `Aktuell ${cond} bei ${joinUnit(n(s.temp), tUnit)}${feels}.`
+        : `Currently ${cond} at ${joinUnit(n(s.temp), tUnit)}${feels}.`
     );
-  } else if (s.condition) {
-    parts.push(de ? `Aktuell ${s.condition.toLowerCase()}.` : `Currently ${s.condition.toLowerCase()}.`);
+  } else if (cond) {
+    parts.push(de ? `Aktuell ${cond}.` : `Currently ${cond}.`);
   } else if (isNum(s.temp)) {
     parts.push(de ? `Aktuell ${joinUnit(n(s.temp), tUnit)}.` : `Currently ${joinUnit(n(s.temp), tUnit)}.`);
   }
@@ -111,11 +112,12 @@ export function generateSummary(hass: HomeAssistant | undefined, s: WeatherSnaps
 
   // 7. tomorrow
   if (s.tomorrowCondition && isNum(s.tomorrowHi)) {
+    const tc = de ? s.tomorrowCondition : s.tomorrowCondition.toLowerCase();
     const lo = isNum(s.tomorrowLo) ? `${joinUnit(n(s.tomorrowLo), tUnit)}–` : '';
     parts.push(
       de
-        ? `Morgen ${s.tomorrowCondition.toLowerCase()}, ${lo}${joinUnit(n(s.tomorrowHi), tUnit)}.`
-        : `Tomorrow ${s.tomorrowCondition.toLowerCase()}, ${lo}${joinUnit(n(s.tomorrowHi), tUnit)}.`
+        ? `Morgen ${tc}, ${lo}${joinUnit(n(s.tomorrowHi), tUnit)}.`
+        : `Tomorrow ${tc}, ${lo}${joinUnit(n(s.tomorrowHi), tUnit)}.`
     );
   }
 

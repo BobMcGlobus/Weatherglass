@@ -47,7 +47,7 @@ import {
   trendDelta,
 } from './history';
 import type { HistoryMap, StatsMap, StatsPeriod } from './history';
-import { fetchForecast, forecastSeries, isWeatherEntity } from './forecast';
+import { fetchForecast, isWeatherEntity } from './forecast';
 import {
   barChart,
   lineChart,
@@ -60,7 +60,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.2.0';
+const CARD_VERSION = '0.3.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -94,7 +94,7 @@ interface MetricCtx {
   multi: boolean;
 }
 
-const CARD_STYLES = ['default', 'withings', 'glass', 'material', 'bubble', 'mirror'];
+const CARD_STYLES = ['default', 'glass', 'material', 'bubble', 'mirror'];
 
 /** Types drawn as a score/index ring */
 const RING_TYPES: MetricType[] = ['air_quality'];
@@ -110,6 +110,18 @@ const FORECAST_TYPES: MetricType[] = [
   'cloud',
   'sky',
 ];
+
+/** Which forecast field feeds a metric's tile chart */
+const FC_KEYS: Partial<Record<MetricType, keyof ForecastPoint>> = {
+  temperature: 'temperature',
+  feels_like: 'temperature',
+  wind: 'wind_speed',
+  precipitation: 'precipitation',
+  humidity: 'humidity',
+  pressure: 'pressure',
+  cloud: 'cloud_coverage',
+  uv: 'uv_index',
+};
 
 type RangeKind = 'hour' | 'day' | 'month';
 
@@ -222,12 +234,8 @@ export class WeatherCard extends LitElement {
   /* ---- forecast ------------------------------------------------------- */
 
   private _defaultForecastType(type?: MetricType): ForecastType {
-    return type === 'precipitation' ||
-      type === 'temperature' ||
-      type === 'feels_like' ||
-      type === 'wind'
-      ? 'hourly'
-      : 'daily';
+    // hourly everywhere ("stündlich" first); the sky hero + summary stay daily
+    return type === 'sky' || type === 'summary' ? 'daily' : 'hourly';
   }
 
   /** The weather entity a metric draws its forecast from, if any. */
@@ -383,7 +391,8 @@ export class WeatherCard extends LitElement {
       this._moreInfo(entityId);
       return;
     }
-    this._popupRange = m.type === 'wind' || m.type === 'temperature' ? 'day' : null;
+    // hourly ("T") is the default view; daily-sum metrics open on the week
+    this._popupRange = m.type === 'precipitation' ? 'week' : 'day';
     this._popup = index;
   }
 
@@ -447,8 +456,8 @@ export class WeatherCard extends LitElement {
   }
 
   private _cardStyle(): string {
-    const s = this._config?.card_style ?? 'withings';
-    return CARD_STYLES.includes(s) ? s : 'withings';
+    const s = this._config?.card_style ?? 'default';
+    return CARD_STYLES.includes(s) ? s : 'default';
   }
 
   protected render(): TemplateResult | typeof nothing {
@@ -668,6 +677,43 @@ export class WeatherCard extends LitElement {
     const ftype = m.forecast_type ?? this._defaultForecastType(type);
     const points = this._forecastFor(id, ftype);
     return points.length ? { points, type: ftype } : undefined;
+  }
+
+  /**
+   * Numeric forecast series for a metric's tile chart (forecast-first view).
+   * Returns undefined when the metric opted into history (`chart_source`),
+   * has no matching forecast field or the forecast is too thin to plot.
+   */
+  private _forecastChartData(
+    m: MetricConfig,
+    type: MetricType
+  ): { values: number[]; xMarks: AxisMark[] } | undefined {
+    if ((m.chart_source ?? 'forecast') === 'history') return undefined;
+    const key = FC_KEYS[type];
+    if (!key) return undefined;
+    const fc = this._metricForecast(m);
+    if (!fc) return undefined;
+    const hourly = fc.type === 'hourly';
+    const count = m.forecast_count ?? (hourly ? 18 : 7);
+    const points = fc.points.slice(0, count);
+    const values = points.map((p) => {
+      const v = p[key];
+      return typeof v === 'number' && Number.isFinite(v) ? v : NaN;
+    });
+    if (values.filter(Number.isFinite).length < 2) return undefined;
+    const loc = locale(this.hass);
+    const xMarks: AxisMark[] = [];
+    points.forEach((p, i) => {
+      const d = new Date(p.datetime);
+      if (isNaN(d.getTime())) return;
+      if (hourly) {
+        const hh = d.getHours();
+        if (hh % 6 === 0) xMarks.push({ i, label: String(hh), line: hh === 0 });
+      } else {
+        xMarks.push({ i, label: d.toLocaleDateString(loc, { weekday: 'narrow' }) });
+      }
+    });
+    return { values, xMarks };
   }
 
   private _fcLabel(p: ForecastPoint, ftype: ForecastType, first: boolean): string {
@@ -1126,6 +1172,13 @@ export class WeatherCard extends LitElement {
       (isWeather ? weatherState.state : undefined);
     const sun = this.hass.states[m.sun_entity ?? 'sun.sun'];
     const isDay = m.night === true ? false : sun ? sun.state === 'above_horizon' : true;
+    const elevRaw = sun?.attributes?.elevation;
+    const elevation =
+      m.night === true
+        ? -20
+        : typeof elevRaw === 'number' && Number.isFinite(elevRaw)
+          ? elevRaw
+          : undefined;
     const windId = m.wind_entity ?? (isWeather ? weatherState.entity_id : undefined);
     const windRaw = m.wind_entity
       ? this._numeric(this.hass.states[m.wind_entity])
@@ -1162,7 +1215,7 @@ export class WeatherCard extends LitElement {
           <div class="time">${fmtLastUpdated(this.hass, weatherState.last_updated)}</div>
         </div>
         <div class="skywrap" style="--wc-oy:${m.scene_offset_y ?? 0}%">
-          ${skyScene({ condition, isDay, wind, glow, glowColor })}
+          ${skyScene({ condition, isDay, elevation, wind, glow, glowColor })}
           <div class="sky-overlay">
             <div class="sky-temp">
               ${Number.isFinite(temp)
@@ -1740,10 +1793,12 @@ export class WeatherCard extends LitElement {
     }
 
     if (trendMode === 'none') return nothing;
-    const delta = trendDelta(primary.filled);
+    // forecast-sourced tiles show the upcoming change, not the past one
+    const seriesVals = this._forecastChartData(m, c.type)?.values ?? primary.filled;
+    const delta = trendDelta(seriesVals);
     if (!Number.isFinite(delta)) return nothing;
 
-    const first = primary.filled.find(Number.isFinite) ?? 0;
+    const first = seriesVals.find(Number.isFinite) ?? 0;
     const stable = Math.abs(delta) < Math.max(Math.abs(first) * 0.005, 1e-9);
     const dirClass = stable
       ? 'neutral'
@@ -1776,26 +1831,29 @@ export class WeatherCard extends LitElement {
     unit: string,
     precision: number | undefined
   ): TemplateResult | typeof nothing {
+    const type = (m.type && PRESETS[m.type] ? m.type : 'custom') as MetricType;
+    // forecast first: the tile plots what is coming, history lives in the popup
+    const fcd = graph === 'line' || graph === 'bar' ? this._forecastChartData(m, type) : undefined;
     if (graph === 'line') {
-      // extend the temperature line with a dashed forecast tail when available
-      const series = data.map((s) => ({ values: s.filled, color: s.colorResolved }));
-      const fc = this._metricForecast(m);
-      if (fc && (m.type === 'temperature' || m.type === 'feels_like')) {
-        const tail = forecastSeries(fc.points.slice(0, 8), 'temperature');
-        if (tail.length) {
-          const last = data[0].filled.filter(Number.isFinite).slice(-1)[0];
-          const pad = new Array(Math.max(data[0].filled.length - 1, 0)).fill(NaN);
-          series.push({
-            values: [...pad, ...(Number.isFinite(last) ? [last] : []), ...tail],
-            color: data[0].colorResolved,
-            dashed: true,
-          } as any);
-        }
+      if (fcd) {
+        return html`${lineChart([{ values: fcd.values, color: data[0].colorResolved }], {
+          h: 66,
+          dots: false,
+          area: true,
+          nowDot: true,
+          xMarks: fcd.xMarks,
+        })}`;
       }
-      return html`${lineChart(series)}`;
+      return html`${lineChart(data.map((s) => ({ values: s.filled, color: s.colorResolved })))}`;
     }
     if (graph === 'bar') {
       const goal = this._resolveGoal(m.goal);
+      if (fcd) {
+        return html`${barChart(fcd.values, data[0].colorResolved, undefined, {
+          h: 66,
+          xMarks: fcd.xMarks,
+        })}`;
+      }
       return html`${barChart(
         data[0].buckets,
         data[0].colorResolved,
@@ -1855,15 +1913,7 @@ export class WeatherCard extends LitElement {
       padding: 0 0 14px 0;
     }
 
-    /* ---- card styles --------------------------------------------------- */
-    .s-default {
-      --wc-tile-bg: var(
-        --secondary-background-color,
-        color-mix(in srgb, var(--primary-text-color) 5%, var(--wc-card-bg))
-      );
-      --wc-dot-fill: var(--secondary-background-color, var(--wc-card-bg));
-      --wc-tile-radius: var(--ha-card-border-radius, 12px);
-    }
+    /* ---- card styles (default = soft tinted tiles from the base tokens) - */
     .s-glass {
       --wc-tile-bg: color-mix(in srgb, var(--wc-card-bg) 42%, transparent);
       --wc-dot-fill: var(--wc-card-bg);
@@ -3000,7 +3050,7 @@ window.customCards.push({
   type: 'weatherglass-card',
   name: 'Weatherglass',
   description:
-    'Withings-style weather dashboard: forecast, temperature, wind, precipitation, humidity, UV, air quality, sun and an AI summary.',
+    'Forecast-first weather dashboard with an animated sky scene: hourly forecast tiles, wind, precipitation, air quality, sun, moon, tides, pollen, radar and an AI summary.',
   preview: true,
   documentationURL: 'https://github.com/BobMcGlobus/Weatherglass',
 });

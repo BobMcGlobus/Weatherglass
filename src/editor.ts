@@ -25,6 +25,17 @@ const FORECAST_TYPES: MetricType[] = [
   'sky',
   'summary',
 ];
+/** Types whose tile chart can plot the forecast (chart_source select) */
+const FC_CHART_TYPES: MetricType[] = [
+  'temperature',
+  'feels_like',
+  'wind',
+  'precipitation',
+  'humidity',
+  'uv',
+  'pressure',
+  'cloud',
+];
 
 const LABELS: Record<string, Record<string, string>> = {
   en: {
@@ -40,28 +51,26 @@ const LABELS: Record<string, Record<string, string>> = {
     background: 'Card background',
     flush: 'Edge to edge (no outer padding)',
     card_style: 'Style',
-    style_default: 'HA default',
-    style_withings: 'Withings',
+    style_default: 'Default',
     style_glass: 'Liquid Glass',
     style_material: 'Material You',
     style_bubble: 'Bubble',
     style_mirror: 'Magic Mirror',
+    tab_general: 'General',
     sec_display: 'Appearance',
     sec_goal: 'Goal & progress',
     sec_behavior: 'Behavior & data',
     sec_forecast: 'Forecast',
-    sec_parts: 'Precipitation by time of day',
+    sec_parts: 'Day parts',
     sec_sky: 'Sky scene',
     sec_sun: 'Sun',
     sec_moon: 'Moon',
     sec_tides: 'Tides',
     sec_radar: 'Radar',
     sec_summary: 'AI summary',
-    illumination_entity: 'Illumination entity (0-1 or %)',
-    high_tide_entity: 'Next high tide entity',
-    low_tide_entity: 'Next low tide entity',
-    image_url: 'Radar image URL',
-    refresh: 'Refresh (seconds)',
+    chart_source: 'Tile chart shows',
+    cs_forecast: 'Forecast (upcoming)',
+    cs_history: 'History (past)',
     goal_type: 'Goal direction',
     gt_atleast: 'Reach at least',
     gt_atmost: 'Stay at/below',
@@ -103,6 +112,11 @@ const LABELS: Record<string, Record<string, string>> = {
     sunrise_entity: 'Sunrise entity (optional)',
     sunset_entity: 'Sunset entity (optional)',
     moon_entity: 'Moon phase entity (optional)',
+    illumination_entity: 'Illumination entity (0-1 or %)',
+    high_tide_entity: 'Next high tide entity',
+    low_tide_entity: 'Next low tide entity',
+    image_url: 'Radar image URL',
+    refresh: 'Refresh (seconds)',
     summary_entity: 'Summary text sensor (LLM/AI)',
     summary_sources: 'Source sensors (generated summary)',
     score_entity: 'Warning/index sensor (badge)',
@@ -151,28 +165,26 @@ const LABELS: Record<string, Record<string, string>> = {
     background: 'Kartenhintergrund',
     flush: 'Randlos (kein Außenabstand)',
     card_style: 'Stil',
-    style_default: 'HA-Standard',
-    style_withings: 'Withings',
+    style_default: 'Standard',
     style_glass: 'Liquid Glass',
     style_material: 'Material You',
     style_bubble: 'Bubble',
     style_mirror: 'Magic Mirror',
+    tab_general: 'Allgemein',
     sec_display: 'Darstellung',
     sec_goal: 'Ziel & Fortschritt',
     sec_behavior: 'Verhalten & Daten',
     sec_forecast: 'Vorhersage',
-    sec_parts: 'Niederschlag nach Tageszeit',
+    sec_parts: 'Tageszeiten',
     sec_sky: 'Himmel-Szene',
     sec_sun: 'Sonne',
     sec_moon: 'Mond',
     sec_tides: 'Gezeiten',
     sec_radar: 'Radar',
     sec_summary: 'AI-Zusammenfassung',
-    illumination_entity: 'Beleuchtungs-Entität (0-1 oder %)',
-    high_tide_entity: 'Nächste-Flut-Entität',
-    low_tide_entity: 'Nächste-Ebbe-Entität',
-    image_url: 'Radar-Bild-URL',
-    refresh: 'Aktualisierung (Sekunden)',
+    chart_source: 'Kachel-Diagramm zeigt',
+    cs_forecast: 'Vorhersage (kommend)',
+    cs_history: 'Verlauf (vergangen)',
     goal_type: 'Zielrichtung',
     gt_atleast: 'Mindestens erreichen',
     gt_atmost: 'Höchstens',
@@ -214,6 +226,11 @@ const LABELS: Record<string, Record<string, string>> = {
     sunrise_entity: 'Sonnenaufgang-Entität (optional)',
     sunset_entity: 'Sonnenuntergang-Entität (optional)',
     moon_entity: 'Mondphasen-Entität (optional)',
+    illumination_entity: 'Beleuchtungs-Entität (0-1 oder %)',
+    high_tide_entity: 'Nächste-Flut-Entität',
+    low_tide_entity: 'Nächste-Ebbe-Entität',
+    image_url: 'Radar-Bild-URL',
+    refresh: 'Aktualisierung (Sekunden)',
     summary_entity: 'Zusammenfassungs-Sensor (LLM/AI)',
     summary_sources: 'Quell-Sensoren (erzeugte Zusammenfassung)',
     score_entity: 'Warn-/Index-Sensor (Badge)',
@@ -256,6 +273,7 @@ export class WeatherCardEditor extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config?: WeatherCardConfig;
   @state() private _expanded = -1;
+  @state() private _tab = 'general';
 
   public setConfig(config: WeatherCardConfig): void {
     this._config = config;
@@ -294,9 +312,10 @@ export class WeatherCardEditor extends LitElement {
             selector: {
               select: {
                 mode: 'dropdown',
-                options: ['default', 'withings', 'glass', 'material', 'bubble', 'mirror'].map(
-                  (v) => ({ value: v, label: this._label(`style_${v}`) })
-                ),
+                options: ['default', 'glass', 'material', 'bubble', 'mirror'].map((v) => ({
+                  value: v,
+                  label: this._label(`style_${v}`),
+                })),
               },
             },
           },
@@ -308,265 +327,301 @@ export class WeatherCardEditor extends LitElement {
     ];
   }
 
-  private _metricSchema(m: MetricConfig): unknown[] {
+  /** Tabs shown for a metric — pill navigation like the Health Card editor. */
+  private _metricTabs(type: MetricType): Array<{ id: string; icon: string; label: string }> {
+    const tabs = [
+      { id: 'general', icon: 'mdi:tune-variant', label: this._label('tab_general') },
+      { id: 'display', icon: 'mdi:palette-outline', label: this._label('sec_display') },
+    ];
+    if (FORECAST_TYPES.includes(type)) {
+      tabs.push({
+        id: 'forecast',
+        icon: 'mdi:clock-fast',
+        label: this._label('sec_forecast'),
+      });
+    }
+    tabs.push(
+      { id: 'goal', icon: 'mdi:flag-checkered', label: this._label('sec_goal') },
+      { id: 'behavior', icon: 'mdi:gesture-tap', label: this._label('sec_behavior') }
+    );
+    const extra: Partial<Record<MetricType, { id: string; icon: string; label: string }>> = {
+      sky: { id: 'sky', icon: 'mdi:weather-partly-cloudy', label: this._label('sec_sky') },
+      sun: { id: 'sun', icon: 'mdi:weather-sunset', label: this._label('sec_sun') },
+      moon: { id: 'moon', icon: 'mdi:moon-waning-crescent', label: this._label('sec_moon') },
+      tides: { id: 'tides', icon: 'mdi:waves', label: this._label('sec_tides') },
+      radar: { id: 'radar', icon: 'mdi:radar', label: this._label('sec_radar') },
+      summary: { id: 'summary', icon: 'mdi:creation', label: this._label('sec_summary') },
+      precipitation: {
+        id: 'parts',
+        icon: 'mdi:weather-pouring',
+        label: this._label('sec_parts'),
+      },
+    };
+    if (extra[type]) tabs.push(extra[type]!);
+    return tabs;
+  }
+
+  private _metricSchema(m: MetricConfig, tab: string): unknown[] {
     const type = (m.type ?? 'custom') as MetricType;
     const opts = (keys: string[], prefix: string) =>
       keys.map((k) => ({ value: k, label: this._label(`${prefix}_${k}`) }));
     const entitiesEditable = !m.entities || m.entities.every((e) => typeof e === 'string');
-    const section = (title: string, icon: string, schema: unknown[]): Record<string, unknown> => ({
-      type: 'expandable',
-      name: '',
-      flatten: true,
-      title: this._label(title),
-      icon,
-      schema,
-    });
 
-    return [
-      {
-        type: 'grid',
-        name: '',
-        schema: [
+    switch (tab) {
+      case 'display':
+        return [
           {
-            name: 'type',
-            selector: {
-              select: {
-                mode: 'dropdown',
-                options: METRIC_TYPES.map((k) => ({ value: k, label: t(this.hass, k) })),
-              },
-            },
-          },
-          { name: 'name', selector: { text: {} } },
-        ],
-      },
-      { name: 'entity', selector: { entity: {} } },
-      ...(type === 'wind' ? [{ name: 'entity2', selector: { entity: {} } }] : []),
-      ...(MULTI_TYPES.includes(type) && entitiesEditable
-        ? [{ name: 'entities', selector: { entity: { multiple: true } } }]
-        : []),
-      ...(type === 'air_quality' &&
-      (!m.breakdown || m.breakdown.every((b) => typeof b === 'string'))
-        ? [{ name: 'breakdown', selector: { entity: { multiple: true } } }]
-        : []),
-      section('sec_display', 'mdi:palette-outline', [
-        {
-          type: 'grid',
-          name: '',
-          schema: [
-            { name: 'icon', selector: { icon: {} } },
-            {
-              name: 'color',
-              selector: {
-                select: {
-                  mode: 'dropdown',
-                  custom_value: true,
-                  options: COLOR_NAMES.map((c) => ({ value: c, label: c })),
-                },
-              },
-            },
-            { name: 'unit', selector: { text: {} } },
-            {
-              name: 'graph',
-              selector: {
-                select: {
-                  mode: 'dropdown',
-                  options: opts(['line', 'bar', 'progress', 'none'], 'graph'),
-                },
-              },
-            },
-            { name: 'days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
-            { name: 'precision', selector: { number: { min: 0, max: 3, mode: 'box' } } },
-          ],
-        },
-        { name: 'label', selector: { text: {} } },
-        { name: 'expanded', selector: { boolean: {} } },
-      ]),
-      ...(FORECAST_TYPES.includes(type)
-        ? [
-            section('sec_forecast', 'mdi:weather-partly-cloudy', [
-              { name: 'forecast', selector: { entity: { domain: 'weather' } } },
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'icon', selector: { icon: {} } },
               {
-                type: 'grid',
-                name: '',
-                schema: [
-                  {
-                    name: 'forecast_type',
-                    selector: {
-                      select: {
-                        mode: 'dropdown',
-                        options: opts(['hourly', 'daily', 'twice_daily'], 'ft'),
+                name: 'color',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    custom_value: true,
+                    options: COLOR_NAMES.map((c) => ({ value: c, label: c })),
+                  },
+                },
+              },
+              { name: 'unit', selector: { text: {} } },
+              {
+                name: 'graph',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: opts(['line', 'bar', 'progress', 'none'], 'graph'),
+                  },
+                },
+              },
+              ...(FC_CHART_TYPES.includes(type)
+                ? [
+                    {
+                      name: 'chart_source',
+                      selector: {
+                        select: {
+                          mode: 'dropdown',
+                          options: opts(['forecast', 'history'], 'cs'),
+                        },
                       },
                     },
-                  },
-                  {
-                    name: 'forecast_count',
-                    selector: { number: { min: 2, max: 24, mode: 'box' } },
-                  },
-                ],
-              },
-            ]),
-          ]
-        : []),
-      section('sec_goal', 'mdi:flag-checkered', [
-        {
-          type: 'grid',
-          name: '',
-          schema: [
-            { name: 'goal', selector: { number: { mode: 'box', step: 'any' } } },
-            { name: 'start', selector: { number: { mode: 'box', step: 'any' } } },
-          ],
-        },
-        {
-          type: 'grid',
-          name: '',
-          schema: [
-            { name: 'goal_entity', selector: { entity: {} } },
-            { name: 'start_entity', selector: { entity: {} } },
-          ],
-        },
-        {
-          type: 'grid',
-          name: '',
-          schema: [
-            {
-              name: 'goal_type',
-              selector: { select: { mode: 'dropdown', options: opts(['atleast', 'atmost'], 'gt') } },
-            },
-            ...(type === 'air_quality' || type === 'pollen'
-              ? [{ name: 'max', selector: { number: { min: 1, mode: 'box' } } }]
-              : []),
-          ],
-        },
-      ]),
-      section('sec_behavior', 'mdi:gesture-tap', [
-        {
-          type: 'grid',
-          name: '',
-          schema: [
-            {
-              name: 'tap_action',
-              selector: {
-                select: {
-                  mode: 'dropdown',
-                  options: opts(['popup', 'more-info', 'link', 'none'], 'ta'),
-                },
-              },
-            },
-            ...(m.tap_action === 'link' ? [{ name: 'link', selector: { text: {} } }] : []),
-            {
-              name: 'aggregate',
-              selector: {
-                select: {
-                  mode: 'dropdown',
-                  options: opts(['mean', 'min', 'max', 'sum', 'last'], 'agg'),
-                },
-              },
-            },
-            {
-              name: 'trend',
-              selector: {
-                select: {
-                  mode: 'dropdown',
-                  options: opts(['up_good', 'down_good', 'neutral', 'none'], 'trend'),
-                },
-              },
-            },
-          ],
-        },
-        { name: 'secondary', selector: { entity: { multiple: true } } },
-        { name: 'score_entity', selector: { entity: {} } },
-      ]),
-      ...(type === 'sky'
-        ? [
-            section('sec_sky', 'mdi:weather-partly-cloudy', [
+                  ]
+                : []),
+              { name: 'precision', selector: { number: { min: 0, max: 3, mode: 'box' } } },
+            ],
+          },
+          { name: 'label', selector: { text: {} } },
+          { name: 'expanded', selector: { boolean: {} } },
+        ];
+
+      case 'forecast':
+        return [
+          { name: 'forecast', selector: { entity: { domain: 'weather' } } },
+          {
+            type: 'grid',
+            name: '',
+            schema: [
               {
-                type: 'grid',
-                name: '',
-                schema: [
-                  { name: 'condition_entity', selector: { entity: {} } },
-                  { name: 'sun_entity', selector: { entity: { domain: 'sun' } } },
-                  { name: 'wind_entity', selector: { entity: {} } },
-                  { name: 'scene_offset_y', selector: { number: { min: -40, max: 40, mode: 'slider' } } },
-                ],
+                name: 'forecast_type',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: opts(['hourly', 'daily', 'twice_daily'], 'ft'),
+                  },
+                },
               },
               {
-                name: 'label_opacity',
-                selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } },
+                name: 'forecast_count',
+                selector: { number: { min: 2, max: 24, mode: 'box' } },
               },
-              { name: 'night', selector: { boolean: {} } },
-            ]),
-          ]
-        : []),
-      ...(type === 'sun'
-        ? [
-            section('sec_sun', 'mdi:weather-sunset', [
+            ],
+          },
+        ];
+
+      case 'goal':
+        return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'goal', selector: { number: { mode: 'box', step: 'any' } } },
+              { name: 'start', selector: { number: { mode: 'box', step: 'any' } } },
+            ],
+          },
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'goal_entity', selector: { entity: {} } },
+              { name: 'start_entity', selector: { entity: {} } },
+            ],
+          },
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              {
+                name: 'goal_type',
+                selector: {
+                  select: { mode: 'dropdown', options: opts(['atleast', 'atmost'], 'gt') },
+                },
+              },
+              ...(type === 'air_quality' || type === 'pollen'
+                ? [{ name: 'max', selector: { number: { min: 1, mode: 'box' } } }]
+                : []),
+            ],
+          },
+        ];
+
+      case 'behavior':
+        return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              {
+                name: 'tap_action',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: opts(['popup', 'more-info', 'link', 'none'], 'ta'),
+                  },
+                },
+              },
+              ...(m.tap_action === 'link' ? [{ name: 'link', selector: { text: {} } }] : []),
+              {
+                name: 'aggregate',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: opts(['mean', 'min', 'max', 'sum', 'last'], 'agg'),
+                  },
+                },
+              },
+              {
+                name: 'trend',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: opts(['up_good', 'down_good', 'neutral', 'none'], 'trend'),
+                  },
+                },
+              },
+              { name: 'days', selector: { number: { min: 1, max: 60, mode: 'box' } } },
+            ],
+          },
+          { name: 'secondary', selector: { entity: { multiple: true } } },
+          { name: 'score_entity', selector: { entity: {} } },
+        ];
+
+      case 'sky':
+        return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'condition_entity', selector: { entity: {} } },
               { name: 'sun_entity', selector: { entity: { domain: 'sun' } } },
+              { name: 'wind_entity', selector: { entity: {} } },
               {
-                type: 'grid',
-                name: '',
-                schema: [
-                  { name: 'sunrise_entity', selector: { entity: {} } },
-                  { name: 'sunset_entity', selector: { entity: {} } },
-                ],
+                name: 'scene_offset_y',
+                selector: { number: { min: -40, max: 40, mode: 'slider' } },
               },
-              { name: 'moon_entity', selector: { entity: {} } },
-            ]),
-          ]
-        : []),
-      ...(type === 'moon'
-        ? [
-            section('sec_moon', 'mdi:moon-waning-crescent', [
-              { name: 'illumination_entity', selector: { entity: {} } },
-            ]),
-          ]
-        : []),
-      ...(type === 'tides'
-        ? [
-            section('sec_tides', 'mdi:waves', [
+            ],
+          },
+          {
+            name: 'label_opacity',
+            selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } },
+          },
+          { name: 'night', selector: { boolean: {} } },
+        ];
+
+      case 'sun':
+        return [
+          { name: 'sun_entity', selector: { entity: { domain: 'sun' } } },
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'sunrise_entity', selector: { entity: {} } },
+              { name: 'sunset_entity', selector: { entity: {} } },
+            ],
+          },
+          { name: 'moon_entity', selector: { entity: {} } },
+        ];
+
+      case 'moon':
+        return [{ name: 'illumination_entity', selector: { entity: {} } }];
+
+      case 'tides':
+        return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'high_tide_entity', selector: { entity: {} } },
+              { name: 'low_tide_entity', selector: { entity: {} } },
+            ],
+          },
+        ];
+
+      case 'radar':
+        return [
+          { name: 'image_url', selector: { text: {} } },
+          { name: 'refresh', selector: { number: { min: 5, mode: 'box' } } },
+        ];
+
+      case 'summary':
+        return [
+          { name: 'summary_entity', selector: { entity: {} } },
+          { name: 'summary_sources', selector: { entity: { multiple: true } } },
+        ];
+
+      case 'parts':
+        return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'parts_morning', selector: { entity: {} } },
+              { name: 'parts_noon', selector: { entity: {} } },
+              { name: 'parts_evening', selector: { entity: {} } },
+              { name: 'parts_night', selector: { entity: {} } },
+            ],
+          },
+        ];
+
+      default:
+        // general
+        return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
               {
-                type: 'grid',
-                name: '',
-                schema: [
-                  { name: 'high_tide_entity', selector: { entity: {} } },
-                  { name: 'low_tide_entity', selector: { entity: {} } },
-                ],
+                name: 'type',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: METRIC_TYPES.map((k) => ({ value: k, label: t(this.hass, k) })),
+                  },
+                },
               },
-            ]),
-          ]
-        : []),
-      ...(type === 'radar'
-        ? [
-            section('sec_radar', 'mdi:radar', [
-              { name: 'image_url', selector: { text: {} } },
-              { name: 'refresh', selector: { number: { min: 5, mode: 'box' } } },
-            ]),
-          ]
-        : []),
-      ...(type === 'summary'
-        ? [
-            section('sec_summary', 'mdi:creation', [
-              { name: 'summary_entity', selector: { entity: {} } },
-              { name: 'summary_sources', selector: { entity: { multiple: true } } },
-            ]),
-          ]
-        : []),
-      ...(type === 'precipitation'
-        ? [
-            section('sec_parts', 'mdi:weather-pouring', [
-              {
-                type: 'grid',
-                name: '',
-                schema: [
-                  { name: 'parts_morning', selector: { entity: {} } },
-                  { name: 'parts_noon', selector: { entity: {} } },
-                  { name: 'parts_evening', selector: { entity: {} } },
-                  { name: 'parts_night', selector: { entity: {} } },
-                ],
-              },
-            ]),
-          ]
-        : []),
-    ];
+              { name: 'name', selector: { text: {} } },
+            ],
+          },
+          { name: 'entity', selector: { entity: {} } },
+          ...(type === 'wind' ? [{ name: 'entity2', selector: { entity: {} } }] : []),
+          ...(MULTI_TYPES.includes(type) && entitiesEditable
+            ? [{ name: 'entities', selector: { entity: { multiple: true } } }]
+            : []),
+          ...(type === 'air_quality' &&
+          (!m.breakdown || m.breakdown.every((b) => typeof b === 'string'))
+            ? [{ name: 'breakdown', selector: { entity: { multiple: true } } }]
+            : []),
+        ];
+    }
   }
 
   protected render(): TemplateResult | typeof nothing {
@@ -578,7 +633,7 @@ export class WeatherCardEditor extends LitElement {
           tiles: true,
           background: true,
           layout: 'grid',
-          card_style: 'withings',
+          card_style: 'default',
           ...this._config,
         }}
         .schema=${this._topSchema()}
@@ -604,7 +659,13 @@ export class WeatherCardEditor extends LitElement {
     const count = this._config!.metrics.length;
     return html`
       <div class="metric ${open ? 'open' : ''}">
-        <div class="metric-head" @click=${() => (this._expanded = open ? -1 : i)}>
+        <div
+          class="metric-head"
+          @click=${() => {
+            this._expanded = open ? -1 : i;
+            this._tab = 'general';
+          }}
+        >
           <span class="chip" style="--c:${resolveColor(m.color) ?? resolveColor(preset.color)}">
             <ha-icon .icon=${m.icon ?? preset.icon}></ha-icon>
           </span>
@@ -623,30 +684,45 @@ export class WeatherCardEditor extends LitElement {
           </button>
           <ha-icon class="expand" icon=${open ? 'mdi:chevron-up' : 'mdi:chevron-down'}></ha-icon>
         </div>
-        ${open
-          ? html`<div class="metric-body">
-              <ha-form
-                .hass=${this.hass}
-                .data=${{
-                  ...m,
-                  goal: typeof m.goal === 'number' ? m.goal : undefined,
-                  goal_entity: typeof m.goal === 'string' ? m.goal : undefined,
-                  start: typeof m.start === 'number' ? m.start : undefined,
-                  start_entity: typeof m.start === 'string' ? m.start : undefined,
-                  parts_morning: m.parts?.morning,
-                  parts_noon: m.parts?.noon,
-                  parts_evening: m.parts?.evening,
-                  parts_night: m.parts?.night,
-                }}
-                .schema=${this._metricSchema(m)}
-                .computeLabel=${(s: { name: string }) => this._label(s.name)}
-                @value-changed=${(ev: CustomEvent) => this._metricChanged(ev, i)}
-              ></ha-form>
-              ${type === 'sky' ? this._renderAnchorEditor(m, i) : nothing}
-            </div>`
-          : nothing}
+        ${open ? this._renderMetricBody(m, i, type) : nothing}
       </div>
     `;
+  }
+
+  private _renderMetricBody(m: MetricConfig, i: number, type: MetricType): TemplateResult {
+    const tabs = this._metricTabs(type);
+    const active = tabs.some((x) => x.id === this._tab) ? this._tab : 'general';
+    return html`<div class="metric-body">
+      <div class="tabs">
+        ${tabs.map(
+          (x) => html`<button
+            class="tab ${active === x.id ? 'active' : ''}"
+            @click=${() => (this._tab = x.id)}
+          >
+            <ha-icon .icon=${x.icon}></ha-icon>
+            <span>${x.label}</span>
+          </button>`
+        )}
+      </div>
+      <ha-form
+        .hass=${this.hass}
+        .data=${{
+          ...m,
+          goal: typeof m.goal === 'number' ? m.goal : undefined,
+          goal_entity: typeof m.goal === 'string' ? m.goal : undefined,
+          start: typeof m.start === 'number' ? m.start : undefined,
+          start_entity: typeof m.start === 'string' ? m.start : undefined,
+          parts_morning: m.parts?.morning,
+          parts_noon: m.parts?.noon,
+          parts_evening: m.parts?.evening,
+          parts_night: m.parts?.night,
+        }}
+        .schema=${this._metricSchema(m, active)}
+        .computeLabel=${(s: { name: string }) => this._label(s.name)}
+        @value-changed=${(ev: CustomEvent) => this._metricChanged(ev, i)}
+      ></ha-form>
+      ${active === 'sky' ? this._renderAnchorEditor(m, i) : nothing}
+    </div>`;
   }
 
   private _anchorSchema(): unknown[] {
@@ -871,7 +947,9 @@ export class WeatherCardEditor extends LitElement {
       color: var(--c, var(--primary-color));
       background: color-mix(in srgb, var(--c, var(--primary-color)) 15%, transparent);
     }
-    .chip ha-icon { --mdc-icon-size: 17px; }
+    .chip ha-icon {
+      --mdc-icon-size: 17px;
+    }
     .metric-title {
       flex: 1;
       font-weight: 500;
@@ -887,6 +965,38 @@ export class WeatherCardEditor extends LitElement {
     .metric-body {
       padding: 12px;
       border-top: 1px solid var(--divider-color);
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--divider-color);
+    }
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 11px;
+      border: none;
+      border-radius: 999px;
+      background: none;
+      cursor: pointer;
+      color: var(--secondary-text-color);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+    }
+    .tab ha-icon {
+      --mdc-icon-size: 15px;
+    }
+    .tab:hover {
+      background: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+    }
+    .tab.active {
+      background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+      color: var(--primary-color);
     }
     .icon-btn {
       background: none;
@@ -907,8 +1017,12 @@ export class WeatherCardEditor extends LitElement {
     .icon-btn.danger:hover {
       color: var(--error-color, #db4437);
     }
-    .icon-btn ha-icon { --mdc-icon-size: 18px; }
-    .expand { color: var(--secondary-text-color); }
+    .icon-btn ha-icon {
+      --mdc-icon-size: 18px;
+    }
+    .expand {
+      color: var(--secondary-text-color);
+    }
     .add {
       margin-top: 12px;
       display: flex;
@@ -922,7 +1036,9 @@ export class WeatherCardEditor extends LitElement {
       color: var(--primary-color);
       background: color-mix(in srgb, var(--primary-color) 12%, transparent);
     }
-    .add ha-icon { --mdc-icon-size: 18px; }
+    .add ha-icon {
+      --mdc-icon-size: 18px;
+    }
     .add.small {
       margin-top: 8px;
       padding: 6px 12px;

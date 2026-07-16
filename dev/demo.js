@@ -137,7 +137,7 @@ const states = {
     friendly_name: 'Sonne',
     next_rising: iso(nextRising),
     next_setting: iso(sunset),
-    elevation: 34,
+    elevation: 38,
     rising: false,
   }),
   'sensor.aussentemperatur': entity('sensor.aussentemperatur', 18.4, { unit_of_measurement: '°C', device_class: 'temperature', friendly_name: 'Außentemperatur' }),
@@ -177,6 +177,7 @@ const states = {
 function syncWeather() {
   states['weather.home'].state = currentCondition;
   states['sun.sun'].state = sunUp ? 'above_horizon' : 'below_horizon';
+  states['sun.sun'].attributes.elevation = sunUp ? 38 : -18;
 }
 
 // ---- fake history + statistics ----------------------------------------------
@@ -276,8 +277,12 @@ function forecastFor(type) {
         temperature: +temp.toFixed(1),
         precipitation: i % 5 === 0 ? +(rand() * 2).toFixed(1) : 0,
         precipitation_probability: (i * 13) % 100,
-        wind_speed: 10 + (i % 5) * 3,
+        wind_speed: 10 + (i % 5) * 3 + Math.round(4 * Math.sin(i / 3)),
         wind_bearing: (200 + i * 6) % 360,
+        humidity: Math.round(60 + 14 * Math.sin((i - 4) / 5)),
+        pressure: Math.round(1012 + 4 * Math.sin(i / 7) + i * 0.15),
+        cloud_coverage: Math.round(40 + 30 * Math.sin(i / 4)),
+        uv_index: day ? Math.max(0, Math.round(6 * Math.sin(((hour - 6) / 14) * Math.PI))) : 0,
         is_daytime: day,
       });
     }
@@ -441,9 +446,9 @@ document.getElementById('bg').addEventListener('click', () => {
   apply({ background: off ? false : true, flush: off });
 });
 
-const STYLES = ['withings', 'default', 'glass', 'material', 'bubble', 'mirror'];
+const STYLES = ['default', 'glass', 'material', 'bubble', 'mirror'];
 document.getElementById('style').addEventListener('click', () => {
-  const next = STYLES[(STYLES.indexOf(current.card_style ?? 'withings') + 1) % STYLES.length];
+  const next = STYLES[(STYLES.indexOf(current.card_style ?? 'default') + 1) % STYLES.length];
   apply({ card_style: next });
   document.getElementById('style').textContent = `Stil: ${next}`;
   document.body.style.background =

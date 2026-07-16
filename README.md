@@ -1,26 +1,27 @@
 # Weatherglass
 
-Eine voll konfigurierbare Lovelace-Karte im **Withings-Stil** für Home Assistant:
-Temperatur, gefühlte Temperatur, Wind, Niederschlag, Luftfeuchte, Luftdruck,
-UV-Index, Bewölkung, Sichtweite, Luftqualität, Sonne — mit **Vorhersage**,
-Sparklines, Balken- und Fortschrittsdiagrammen, Trend-Pfeilen, einer großen
-animierten **Himmel-Szene** und einer **AI-Zusammenfassung**. Vollständig
-Theme-kompatibel (Light & Dark).
+Eine voll konfigurierbare, **Vorhersage-zentrierte** Wetter-Dashboard-Karte für
+Home Assistant: Temperatur, gefühlte Temperatur, Wind, Niederschlag,
+Luftfeuchte, Luftdruck, UV-Index, Bewölkung, Sichtweite, Luftqualität, Sonne,
+Mond, Gezeiten, Pollen, Radar — mit einer großen **animierten Himmel-Szene**,
+die live auf das echte Wetter reagiert, und einer **AI-Zusammenfassung**.
+Vollständig Theme-kompatibel (Light & Dark).
 
 > Schwesterkarte zur [Health Card](https://github.com/BobMcGlobus/HealthCard) —
-> gleicher Look, gleiche Bedienung, gleiche Editor-Logik, nur fürs Wetter.
+> gleiche Bedienung, gleiche Editor-Logik, nur fürs Wetter.
 
 ## Features
 
-- 🎨 **Withings-Look**: Kacheln mit großen Werten, Icon-Chips, geglättete Verlaufskurven mit Ring-Punkten
+- 📅 **Vorhersage zuerst**: Kachel-Diagramme zeigen, was **kommt** — stündliche Prognose-Kurven/-Balken mit Stunden-Achse und „Jetzt"-Punkt; auch der Trend-Pfeil beschreibt die kommende Entwicklung. Der Verlauf (historische Daten) wohnt im Detail-Popup (Zeiträume: Tag stündlich / Woche / Monat / 3M / Jahr / Max). Umschaltbar je Kachel per `chart_source: history`.
+- 🎨 **Cleaner Look**: Kacheln mit großen Werten, Icon-Chips und weichen Kurven
 - 🌗 **100 % Theme-Support**: nutzt ausschließlich HA-Theme-Variablen (`--primary-text-color`, `--ha-card-background`, `--red-color`, …)
-- 🌤️ **Himmel-Szene** (`type: sky`): große, animierte Szene aus Himmelsverlauf, Sonne mit drehenden Strahlen bzw. Mond mit funkelnden Sternen, driftenden Wolken und — je nach Wetterlage — Regen, Schnee, Blitz oder Nebel. Aktuelle Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, frei platzierbare **Wert-Anker** (z. B. Wind, Feuchte) sitzen auf der Szene. Ein `score_entity` (z. B. Warnstufe) legt einen Warn-Glow über die Szene.
+- 🌤️ **Himmel-Szene** (`type: sky`): das animierte Herzstück. Der Himmelsverlauf folgt der **echten Sonnen-Elevation** (Nacht → Dämmerungsrosa → goldene Stunde → Tag), die Sonne steht auf ihrer wahren Höhe (pulsierender Glow, drehende Strahlen), nachts funkeln Sterne (mit gelegentlicher Sternschnuppe) um den Mond. Wolken driften auf **drei Parallax-Ebenen** (die hinterste unscharf) in Windgeschwindigkeit, Regen fällt **windschräg** in zwei Tiefen (bei Starkregen mit Boden-Splashes), Schnee taumelt, Blitze erhellen die ganze Szene, Nebelbänke ziehen, bei klarem Tag kreuzen Vögel. Eine **Hügel-Silhouette mit Tannen** erdet die Szene und dunkelt nachts ab. Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, frei platzierbare **Wert-Anker** sitzen auf der Szene, ein `score_entity` legt eine pulsierende Warn-Vignette darüber.
 - 🌅 **Sonnen-Bogen** (`type: sun`): Sonnenauf- und -untergang als Tageslicht-Bogen mit Sonnen-Marker am aktuellen Stand, Tageslänge und „Untergang in X" — das Wetter-Pendant zum Zyklus-Ring.
 - 🌙 **Mondphase** (`type: moon`): Mondscheibe mit exakt berechnetem Terminator (Sichel/Halb/Voll, zu-/abnehmend), Phasenname und Beleuchtung in %.
 - 🌊 **Gezeiten** (`type: tides`): Tiden-Kurve über den Tag mit Jetzt-Marker (aus der Recorder-History oder synthetisch halbtägig), aktuellem Pegel und nächster Flut/Ebbe-Zeit.
 - 🤧 **Pollen** (`type: pollen`): Belastung je Allergen als Balken, nach Stufe eingefärbt (grün → gelb → rot); versteht Zahlen **und** Textstufen (`none`/`low`/`hoch` …).
 - 📡 **Wetterradar** (`type: radar`): Radarbild aus einer `camera.*`-Entität (`entity_picture`) oder einer festen `image_url`.
-- 💯 **Luftqualitäts-/Index-Ring** (`type: air_quality`): Withings-Punktering mit „34 von 100", Ampelfarbe nach Wert (niedrig = gut), **Sub-Indizes** (PM2.5 / PM10 / Ozon …) als Mini-Balken.
+- 💯 **Luftqualitäts-/Index-Ring** (`type: air_quality`): Fortschrittsring mit „34 von 100", Ampelfarbe nach Wert (niedrig = gut), **Sub-Indizes** (PM2.5 / PM10 / Ozon …) als Mini-Balken.
 - 🤖 **AI-Zusammenfassung** (`type: summary`): natürlich­sprachiger Wetter­text. Entweder aus einem Text-Sensor (`summary_entity`, z. B. ein LLM-/AI-Task-Sensor) — oder, wenn keiner gesetzt ist, **selbst erzeugt** aus Wetter­lage, Temperatur, Tages-Hoch/-Tief, Wind, Regen­wahrscheinlichkeit, UV und der Aussicht auf morgen (Deutsch & Englisch).
 - 📅 **Vorhersage** (`Vorhersage`-Streifen): stündlich oder täglich, aus der HA-Wetter-Entität (`weather.get_forecasts` → Live-Abo → Legacy-Attribut). Pro Schritt Zeit/Tag, Wetter-Icon, Regen­wahrscheinlichkeit und Temperatur (bzw. Hoch/Tief). Die Temperatur-Kurve wird um eine gestrichelte Vorhersage-Verlängerung ergänzt.
 - 📈 **Diagramme pro Metrik**: Linie, Balken, Fortschrittsbalken oder keins
@@ -33,7 +34,8 @@ Theme-kompatibel (Light & Dark).
 - 🔍 **Detail-Popup**: Klick auf eine Kachel öffnet eine Detailansicht mit Vorhersage, großem Verlauf, Wochentagen und Min/Ø/Max/Trend
 - 📅 **Zeiträume im Popup**: Tag (stündlich) / Woche / Monat / 3 Monate / Jahr / **Max** — lange Zeiträume kommen aus den Langzeit-Statistiken und der Graph wird horizontal scrollbar
 - 🖱️ **Klick-Aktion pro Kachel**: Popup, More-Info, Link oder nichts
-- 🎨 **6 Kartenstile** über `card_style`: HA-Standard, Withings (Default), Liquid Glass, Material You, Bubble, Magic Mirror
+- 🎨 **5 Kartenstile** über `card_style`: Standard (Default), Liquid Glass, Material You, Bubble, Magic Mirror
+- 🖱️ **Visueller Editor mit Tabs**: Allgemein / Darstellung / Vorhersage / Ziel / Verhalten plus typspezifische Tabs (Himmel, Sonne, Mond, Gezeiten, Radar, Zusammenfassung, Tageszeiten)
 - 🖱️ **Visueller Editor**: Metriken per UI hinzufügen, sortieren, konfigurieren
 - 🌍 Deutsch & Englisch (automatisch nach HA-Sprache)
 
@@ -132,7 +134,7 @@ metrics: [...]
 | `days`       | number  | `7`        | History-Zeitraum in Tagen (für alle Metriken)              |
 | `columns`    | number  | `1`        | Kachel-Spalten (1–3)                                       |
 | `layout`     | string  | `grid`     | `grid` oder `carousel`                                     |
-| `card_style` | string  | `withings` | `default`, `withings`, `glass`, `material`, `bubble`, `mirror` |
+| `card_style` | string  | `default`  | `default`, `glass`, `material`, `bubble`, `mirror`              |
 | `tiles`      | boolean | `true`     | Metriken als Kacheln (`false` = flache Zeilen)             |
 | `background` | boolean | `true`     | `false`: Kartenhintergrund/-schatten entfernen             |
 | `flush`      | boolean | `false`    | `true`: kein Außenabstand                                  |
@@ -182,6 +184,7 @@ metrics: [...]
 | `forecast`       | string        | Wetter-Entität für die Vorhersage (Default: `weather` der Karte)     |
 | `forecast_type`  | string        | `hourly` (Default bei Temp/Wind/Regen), `daily`, `twice_daily`       |
 | `forecast_count` | number        | Anzahl der angezeigten Vorhersage-Schritte                           |
+| `chart_source`   | string        | Kachel-Diagramm: `forecast` (Default — kommende Werte) oder `history` |
 | **Niederschlag** |               |                                                                        |
 | `parts`          | object        | `morning`/`noon`/`evening`/`night`-Entitäten                          |
 | **Himmel (`sky`)** |             |                                                                        |
