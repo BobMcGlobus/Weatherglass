@@ -174,10 +174,13 @@ const states = {
   'camera.regenradar': entity('camera.regenradar', 'idle', { friendly_name: 'Regenradar', entity_picture: radarImg }),
 };
 
+let sunElevation = 38;
+
 function syncWeather() {
   states['weather.home'].state = currentCondition;
+  sunUp = sunElevation > 0;
   states['sun.sun'].state = sunUp ? 'above_horizon' : 'below_horizon';
-  states['sun.sun'].attributes.elevation = sunUp ? 38 : -18;
+  states['sun.sun'].attributes.elevation = sunElevation;
 }
 
 // ---- fake history + statistics ----------------------------------------------
@@ -459,14 +462,19 @@ document.getElementById('style').addEventListener('click', () => {
         : '';
 });
 
+// cycle the sun through the day: noon → golden hour → horizon → dusk → night
+const ELEVATIONS = [38, 12, 1, -5, -18];
 document.getElementById('night').addEventListener('click', () => {
-  sunUp = !sunUp;
-  if (!sunUp && (currentCondition === 'sunny' || currentCondition === 'partlycloudy')) {
+  const next = ELEVATIONS[(ELEVATIONS.indexOf(sunElevation) + 1) % ELEVATIONS.length];
+  sunElevation = next;
+  if (next <= -8 && (currentCondition === 'sunny' || currentCondition === 'partlycloudy')) {
     currentCondition = 'clear-night';
   }
+  if (next > 0 && currentCondition === 'clear-night') currentCondition = 'sunny';
   syncWeather();
   push();
-  document.getElementById('night').textContent = sunUp ? 'Tag/Nacht' : 'Nacht/Tag';
+  document.getElementById('night').textContent = `Sonne: ${next}°`;
+  document.getElementById('cond').textContent = `Lage: ${currentCondition}`;
 });
 
 const CONDS = ['sunny', 'partlycloudy', 'cloudy', 'rainy', 'pouring', 'lightning-rainy', 'snowy', 'fog', 'clear-night'];

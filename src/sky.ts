@@ -32,7 +32,8 @@ function mix(a: string, b: string, t: number): string {
   const r = Math.round(r1 + (r2 - r1) * q);
   const g = Math.round(g1 + (g2 - g1) * q);
   const bl = Math.round(b1 + (b2 - b1) * q);
-  return `rgb(${r},${g},${bl})`;
+  const to2 = (x: number) => x.toString(16).padStart(2, '0');
+  return `#${to2(r)}${to2(g)}${to2(bl)}`;
 }
 
 function mix3(a: string[], b: string[], t: number): string[] {
@@ -40,26 +41,35 @@ function mix3(a: string[], b: string[], t: number): string[] {
 }
 
 /* [top, mid, bottom] sky palettes along the day cycle */
-const NIGHT = ['#060b22', '#141f45', '#28406e'];
-const TWILIGHT = ['#2c2a5e', '#84487c', '#f0925c'];
-const GOLDEN = ['#3a76c4', '#7fb2e2', '#ffd08c'];
-const DAY = ['#3c86dd', '#7cb8ee', '#d2ecff'];
-const GREY_DAY = ['#67788c', '#90a2b2', '#c5cfd9'];
-const STORM_DAY = ['#414c5c', '#5f6c7c', '#8d99a6'];
-const GREY_NIGHT = ['#10151f', '#1f2a3a', '#354356'];
+const NIGHT = ['#050a20', '#101c40', '#2a4270'];
+const TWILIGHT = ['#292a5e', '#8c4a7c', '#ff9d5e'];
+const GOLDEN = ['#3572bf', '#7fb2e2', '#ffd994'.slice(0, 7)];
+const DAY = ['#2f80dc', '#79b7ee', '#d4edff'];
+const GREY_DAY = ['#64758a', '#8fa1b1', '#c4ced8'];
+const STORM_DAY = ['#3d4857', '#5c6976', '#8a96a3'];
+const GREY_NIGHT = ['#0e131d', '#1e2938', '#344254'];
 
 interface Scene {
   sky: string[];
+  ridgeFar: string;
   hillBack: string;
   hillFront: string;
   tree: string;
   cloudFill: string;
+  cloudShade: string;
+  cloudLight: string;
   cloudOpacity: number;
   isNight: boolean;
   sunY: number;
+  sunR: number;
   showSun: boolean;
   showRays: boolean;
   sunColor: string;
+  /** sunrise/sunset horizon glow strength 0..1 and its warm color */
+  horizon: number;
+  horizonColor: string;
+  /** rim light on the hill crests (golden hour) */
+  rim: number;
   showMoon: boolean;
   clouds: number;
   rain: 0 | 1 | 2;
@@ -89,14 +99,23 @@ function derive(o: SkyOpts): Scene {
   const greyTarget = isNight ? GREY_NIGHT : stormy ? STORM_DAY : GREY_DAY;
   const sky = mix3(base, greyTarget, gloom);
 
-  const groundBase = sky[2];
-  const hillBack = mix(mixToHex(groundBase), '#0a0f18', isNight ? 0.72 : 0.4);
-  const hillFront = mix(mixToHex(groundBase), '#0a0f18', isNight ? 0.84 : 0.56);
-  const tree = mix(mixToHex(groundBase), '#060a12', isNight ? 0.9 : 0.68);
+  // sunrise/sunset glow peaks with the sun at the horizon, killed by gloom
+  const horizon = Math.max(0, 1 - Math.abs(e - 1) / 13) * (1 - gloom * 0.8);
+  const horizonColor = e <= 2 ? '#ff7d4a' : mix('#ff9d5c', '#ffd28a', Math.min((e - 2) / 12, 1));
+
+  // atmospheric perspective: the farther the ridge, the closer to the sky
+  const ridgeFar = mix(sky[2], sky[1], 0.45);
+  const hillBack = mix(mix(sky[2], '#0a0f18', isNight ? 0.62 : 0.34), sky[1], 0.12);
+  const hillFront = mix(sky[2], '#0a0f18', isNight ? 0.84 : 0.58);
+  const tree = mix(sky[2], '#060a12', isNight ? 0.92 : 0.72);
 
   const cloudFill = isNight
-    ? mix('#93a3c0', '#55627a', gloom)
+    ? mix('#93a3c0', '#4f5c74', gloom)
     : mix('#ffffff', '#a9b6c4', gloom);
+  // clouds catch the warm light at sunrise/sunset
+  const litFill = horizon > 0.15 ? mix(cloudFill, horizonColor, horizon * 0.45) : cloudFill;
+  const cloudShade = mix(litFill, isNight ? '#232e44' : '#7e91a6', 0.4);
+  const cloudLight = mix(litFill, '#ffffff', isNight ? 0.22 : 0.8);
 
   const clouds =
     c === 'sunny' || c === 'clear-night'
@@ -109,16 +128,24 @@ function derive(o: SkyOpts): Scene {
 
   return {
     sky,
+    ridgeFar,
     hillBack,
     hillFront,
     tree,
-    cloudFill,
-    cloudOpacity: isNight ? 0.75 : 0.94,
+    cloudFill: litFill,
+    cloudShade,
+    cloudLight,
+    cloudOpacity: isNight ? 0.75 : 0.95,
     isNight,
-    sunY: e <= 0 ? 150 : 150 - (Math.min(e, 55) / 55) * 112,
+    sunY: e <= 0 ? 150 + Math.min(-e, 6) * 2 : 150 - (Math.min(e, 55) / 55) * 112,
+    // the low sun looms larger
+    sunR: 15 + Math.max(0, 14 - Math.min(Math.max(e, 0), 14)) * 0.45,
     showSun: !isNight && e > -3 && clouds < 3,
-    showRays: gloom < 0.3 && e > 8,
-    sunColor: e < 15 ? '#ffb347' : '#ffdf5e',
+    showRays: gloom < 0.3 && e > 10,
+    sunColor: e <= 2 ? '#ff8a4b' : mix('#ffb347', '#ffdf5e', Math.min((e - 2) / 13, 1)),
+    horizon,
+    horizonColor,
+    rim: horizon * 0.85,
     showMoon: isNight && clouds < 3,
     clouds,
     rain: c === 'pouring' || c === 'lightning-rainy' ? 2 : c === 'rainy' || c === 'snowy-rainy' || c === 'hail' ? 1 : 0,
@@ -130,42 +157,54 @@ function derive(o: SkyOpts): Scene {
   };
 }
 
-/** rgb(...) → #hex so mix() can chew on derived colors */
-function mixToHex(rgb: string): string {
-  const m = /rgb\((\d+),(\d+),(\d+)\)/.exec(rgb.replace(/\s/g, ''));
-  if (!m) return rgb;
-  const to2 = (x: string) => (+x).toString(16).padStart(2, '0');
-  return `#${to2(m[1])}${to2(m[2])}${to2(m[3])}`;
-}
-
 /* ---- scene pieces --------------------------------------------------------- */
 
-function puffCloud(fill: string, opacity: number) {
-  return svg`<g fill=${fill} opacity=${opacity}>
-    <ellipse cx="0" cy="0" rx="27" ry="16"/>
-    <ellipse cx="21" cy="4" rx="22" ry="13"/>
-    <ellipse cx="-21" cy="5" rx="20" ry="12"/>
-    <ellipse cx="2" cy="9" rx="31" ry="11"/>
+/** Shaded puff cloud: darker underside, lit body, bright cap. */
+function puffCloud(sc: Scene, opacity: number) {
+  return svg`<g opacity=${opacity}>
+    <g fill=${sc.cloudShade} transform="translate(1 3.5)">
+      <ellipse cx="0" cy="0" rx="27" ry="16"/>
+      <ellipse cx="21" cy="4" rx="22" ry="13"/>
+      <ellipse cx="-21" cy="5" rx="20" ry="12"/>
+      <ellipse cx="2" cy="9" rx="31" ry="11"/>
+    </g>
+    <g fill=${sc.cloudFill}>
+      <ellipse cx="0" cy="0" rx="27" ry="16"/>
+      <ellipse cx="21" cy="4" rx="22" ry="13"/>
+      <ellipse cx="-21" cy="5" rx="20" ry="12"/>
+      <ellipse cx="2" cy="9" rx="31" ry="11"/>
+    </g>
+    <ellipse cx="-5" cy="-8" rx="15" ry="7.5" fill=${sc.cloudLight} opacity="0.75"/>
+    <ellipse cx="17" cy="-3" rx="10" ry="5" fill=${sc.cloudLight} opacity="0.5"/>
   </g>`;
 }
 
-/** One drifting cloud on its own lane (negative delay staggers the phase). */
+/** One drifting cloud on its own lane, gently bobbing while it travels. */
 function cloud(
-  fill: string,
+  sc: Scene,
   opacity: number,
   y: number,
   scale: number,
   dur: number,
   delay: number,
+  bobDur: number,
   blurred = false
 ) {
   return svg`<g transform="translate(0 ${y})">
     <g class="cloud" style="animation-duration:${dur}s;animation-delay:${delay}s"
        filter=${blurred ? 'url(#wc-blur-far)' : nothing}>
-      <g transform="scale(${scale})">${puffCloud(fill, opacity)}</g>
+      <g class="cloudbob" style="animation-duration:${bobDur}s">
+        <g transform="scale(${scale})">${puffCloud(sc, opacity)}</g>
+      </g>
     </g>
   </g>`;
 }
+
+/* hill crests as open paths so the golden-hour rim light can stroke them */
+const CREST_FAR = 'M 0 152 Q 60 134 120 146 T 240 142 Q 272 138 300 145';
+const CREST_BACK = 'M 0 162 Q 40 138 85 154 T 170 150 Q 215 142 250 156 T 300 152';
+const CREST_FRONT = 'M 0 176 Q 55 158 110 172 T 220 170 Q 260 164 300 174';
+const closeHill = (crest: string) => `${crest} L 300 190 L 0 190 Z`;
 
 const TREES: Array<[number, number, number]> = [
   // x, ground y, scale
@@ -177,34 +216,45 @@ const TREES: Array<[number, number, number]> = [
 
 /**
  * Animated weather scene — the visual centrepiece of the card. Everything is
- * derived from live state: the sky gradient follows the real sun elevation
- * (night → twilight → golden hour → day) and darkens with the condition, the
- * sun rises and sets at its true height, clouds drift on three parallax lanes
- * at wind speed, rain slants with the wind (with ground splashes when
- * pouring), snow sways down, lightning flashes the whole scene, fog banks
- * drift, stars twinkle (with the occasional shooting star) and birds cross a
- * clear sky. A layered hill silhouette grounds the scene; a pulsing vignette
- * warns when a `score_entity` reports trouble. Self-contained SVG + CSS.
+ * derived from live state: the sky gradient follows the real sun elevation,
+ * a warm horizon glow blooms at sunrise/sunset (the low sun looms large and
+ * sinks visibly behind the hills), hill ridges fade into the sky with
+ * atmospheric haze and catch rim light at golden hour, shaded clouds bob
+ * along three parallax lanes at wind speed, trees sway in the wind, rain
+ * slants with gusts, snow tumbles, lightning flashes the whole scene, stars
+ * sparkle at varied rhythms with shooting stars, and birds cross clear skies.
  */
 export function skyScene(o: SkyOpts): TemplateResult {
   const sc = derive(o);
   const drift = 1 + o.wind * 1.6;
   const rainSlant = 3 + o.wind * 9;
+  const swayDur = (2.6 / (0.35 + o.wind)).toFixed(2);
+  const glowX = 208; // sun lane — the horizon glow lingers where the sun sets
 
   const rays = Array.from({ length: 12 }, (_, i) => {
     const a = (i / 12) * Math.PI * 2;
-    return svg`<line x1=${Math.cos(a) * 21} y1=${Math.sin(a) * 21}
-      x2=${Math.cos(a) * 31} y2=${Math.sin(a) * 31} stroke="#ffe08a"
+    const r0 = sc.sunR + 6;
+    const r1 = sc.sunR + 15;
+    return svg`<line x1=${Math.cos(a) * r0} y1=${Math.sin(a) * r0}
+      x2=${Math.cos(a) * r1} y2=${Math.sin(a) * r1} stroke="#ffe08a"
       stroke-width="3" stroke-linecap="round"/>`;
   });
 
   const stars = sc.stars
-    ? Array.from({ length: 26 }, (_, i) => {
+    ? Array.from({ length: 30 }, (_, i) => {
         const x = 10 + ((i * 61) % 280);
-        const y = 8 + ((i * 37) % 92);
-        const r = 0.6 + ((i * 13) % 10) / 9;
-        return svg`<circle class="star" cx=${x} cy=${y} r=${r} fill="#fff"
-          style="animation-delay:${(i % 9) * 0.45}s"/>`;
+        const y = 8 + ((i * 37) % 96);
+        const dur = `${(2.2 + (i % 5) * 0.8).toFixed(1)}s`;
+        const delay = `${((i % 9) * 0.45).toFixed(2)}s`;
+        if (i % 6 === 0) {
+          // a few bright cross-sparkle stars between the plain ones
+          const s = 2.4 + (i % 3);
+          return svg`<path class="star" d="M ${-s} 0 H ${s} M 0 ${-s} V ${s}"
+            transform="translate(${x} ${y})" stroke="#fff" stroke-width="1"
+            stroke-linecap="round" style="animation-duration:${dur};animation-delay:${delay}"/>`;
+        }
+        return svg`<circle class="star" cx=${x} cy=${y} r=${0.6 + ((i * 13) % 10) / 9}
+          fill="#fff" style="animation-duration:${dur};animation-delay:${delay}"/>`;
       })
     : [];
 
@@ -212,7 +262,8 @@ export function skyScene(o: SkyOpts): TemplateResult {
     Array.from({ length: n }, (_, i) => {
       const x = 14 + ((i * 53) % 272);
       const y = 62 + ((i * 29) % 96);
-      return svg`<line class=${cls} x1=${x} y1=${y} x2=${x - rainSlant} y2=${y + 11}
+      const len = 9 + (i % 3) * 3;
+      return svg`<line class=${cls} x1=${x} y1=${y} x2=${x - rainSlant} y2=${y + len}
         stroke="#cfe6ff" stroke-width=${w} stroke-linecap="round" opacity=${op}
         style="animation-delay:${(i % 7) * 0.09}s"/>`;
     });
@@ -254,7 +305,7 @@ export function skyScene(o: SkyOpts): TemplateResult {
   const clouds = lanes
     .slice(0, sc.clouds)
     .map((l, i) =>
-      cloud(sc.cloudFill, sc.cloudOpacity * l.op, l.y, l.s, l.dur / drift, -i * 5.5, l.blur)
+      cloud(sc, sc.cloudOpacity * l.op, l.y, l.s, l.dur / drift, -i * 5.5, 3.4 + i * 0.9, l.blur)
     );
 
   const birds =
@@ -274,13 +325,23 @@ export function skyScene(o: SkyOpts): TemplateResult {
     <defs>
       <linearGradient id="wc-sky-grad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color=${sc.sky[0]} />
-        <stop offset="55%" stop-color=${sc.sky[1]} />
-        <stop offset="100%" stop-color=${sc.sky[2]} />
+        <stop offset="50%" stop-color=${sc.sky[1]} />
+        <stop offset="82%" stop-color=${sc.sky[2]} />
       </linearGradient>
       <radialGradient id="wc-sun-glow">
         <stop offset="0%" stop-color="#fff3c4" stop-opacity="0.95" />
         <stop offset="55%" stop-color=${sc.sunColor} stop-opacity="0.4" />
         <stop offset="100%" stop-color=${sc.sunColor} stop-opacity="0" />
+      </radialGradient>
+      <radialGradient id="wc-sun-disc">
+        <stop offset="0%" stop-color="#fffbe6" />
+        <stop offset="55%" stop-color=${mix(sc.sunColor, '#ffffff', 0.35)} />
+        <stop offset="100%" stop-color=${sc.sunColor} />
+      </radialGradient>
+      <radialGradient id="wc-horizon">
+        <stop offset="0%" stop-color=${sc.horizonColor} stop-opacity="0.9" />
+        <stop offset="55%" stop-color=${sc.horizonColor} stop-opacity="0.35" />
+        <stop offset="100%" stop-color=${sc.horizonColor} stop-opacity="0" />
       </radialGradient>
       <radialGradient id="wc-moon-halo">
         <stop offset="0%" stop-color="#e8edf8" stop-opacity="0.55" />
@@ -293,6 +354,9 @@ export function skyScene(o: SkyOpts): TemplateResult {
       <filter id="wc-blur-far" x="-40%" y="-40%" width="180%" height="180%">
         <feGaussianBlur stdDeviation="1.6" />
       </filter>
+      <filter id="wc-blur-soft" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="3" />
+      </filter>
       <filter id="wc-bolt-glow" x="-60%" y="-60%" width="220%" height="220%">
         <feGaussianBlur stdDeviation="3.5" />
       </filter>
@@ -300,14 +364,21 @@ export function skyScene(o: SkyOpts): TemplateResult {
     <style>
       .skyscene .cloud { animation-name: wc-drift; animation-timing-function: linear; animation-iteration-count: infinite; }
       @keyframes wc-drift { from { transform: translateX(-85px); } to { transform: translateX(385px); } }
-      .skyscene .sunrays { animation: wc-spin 80s linear infinite; }
+      .skyscene .cloudbob { animation: wc-bob ease-in-out infinite alternate; }
+      @keyframes wc-bob { from { transform: translateY(-2.4px); } to { transform: translateY(2.4px); } }
+      .skyscene .sunrays { animation: wc-spin 70s linear infinite; }
       @keyframes wc-spin { to { transform: rotate(360deg); } }
-      .skyscene .sunglow { animation: wc-breathe 5s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-      @keyframes wc-breathe { 0%,100% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.12); opacity: 1; } }
-      .skyscene .star { animation: wc-twinkle 3.4s ease-in-out infinite; }
-      @keyframes wc-twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
-      .skyscene .shooting { animation: wc-shoot 13s linear infinite; opacity: 0; }
-      @keyframes wc-shoot { 0%,92% { opacity: 0; transform: translate(0,0); } 93% { opacity: 1; } 97% { opacity: 0; transform: translate(-90px,44px); } 100% { opacity: 0; } }
+      .skyscene .raypulse { animation: wc-raypulse 4.2s ease-in-out infinite; }
+      @keyframes wc-raypulse { 0%,100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.08); opacity: 1; } }
+      .skyscene .sunglow { animation: wc-breathe 5s ease-in-out infinite; }
+      @keyframes wc-breathe { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.15); opacity: 1; } }
+      .skyscene .moonhalo { animation: wc-breathe 6.5s ease-in-out infinite; }
+      .skyscene .horizonpulse { animation: wc-horizonpulse 7s ease-in-out infinite; }
+      @keyframes wc-horizonpulse { 0%,100% { opacity: 0.85; } 50% { opacity: 1; } }
+      .skyscene .star { animation-name: wc-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+      @keyframes wc-twinkle { 0%,100% { opacity: 0.15; } 50% { opacity: 1; } }
+      .skyscene .shooting { animation: wc-shoot linear infinite; opacity: 0; }
+      @keyframes wc-shoot { 0%,92% { opacity: 0; transform: translate(0,0); } 93% { opacity: 1; } 97% { opacity: 0; transform: translate(-95px,46px); } 100% { opacity: 0; } }
       .skyscene .rain { animation: wc-rain 0.55s linear infinite; }
       .skyscene .rain-back { animation: wc-rain 0.8s linear infinite; }
       @keyframes wc-rain { from { transform: translate(4px,-14px); opacity: 0; } 25% { opacity: 1; } to { transform: translate(-4px,18px); opacity: 0; } }
@@ -327,30 +398,46 @@ export function skyScene(o: SkyOpts): TemplateResult {
       @keyframes wc-gust { from { stroke-dashoffset: 124; } to { stroke-dashoffset: 0; } }
       .skyscene .birds { fill: none; stroke: rgba(30,40,55,0.65); stroke-width: 1.4; stroke-linecap: round; animation: wc-birds 36s linear infinite; }
       @keyframes wc-birds { from { transform: translateX(-24px); } to { transform: translateX(330px); } }
+      .skyscene .sway { animation: wc-sway ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+      @keyframes wc-sway { from { transform: rotate(-1.8deg); } to { transform: rotate(1.8deg); } }
       .skyscene .warnglow { animation: wc-warnpulse 2.4s ease-in-out infinite; }
       @keyframes wc-warnpulse { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+      .skyscene .sunglow, .skyscene .raypulse, .skyscene .moonhalo { transform-origin: center; transform-box: fill-box; }
     </style>
 
     <rect x="0" y="0" width="300" height="190" fill="url(#wc-sky-grad)" />
 
     ${stars}
     ${sc.stars
-      ? svg`<line class="shooting" x1="238" y1="26" x2="252" y2="19"
-          stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>`
+      ? svg`
+        <line class="shooting" x1="238" y1="26" x2="252" y2="19"
+          stroke="#fff" stroke-width="1.6" stroke-linecap="round"
+          style="animation-duration:13s"/>
+        <line class="shooting" x1="96" y1="18" x2="109" y2="12"
+          stroke="#fff" stroke-width="1.3" stroke-linecap="round"
+          style="animation-duration:19s;animation-delay:-8s"/>`
+      : nothing}
+
+    ${sc.horizon > 0.03
+      ? svg`<ellipse class="horizonpulse" cx=${glowX} cy="152" rx="205" ry="64"
+          fill="url(#wc-horizon)" opacity=${sc.horizon}/>`
       : nothing}
 
     ${sc.showSun
-      ? svg`<g transform="translate(208 ${sc.sunY})">
-          <circle class="sunglow" r="44" fill="url(#wc-sun-glow)"/>
-          ${sc.showRays ? svg`<g class="sunrays">${rays}</g>` : nothing}
-          <circle r="16" fill=${sc.sunColor}/>
+      ? svg`<g transform="translate(${glowX} ${sc.sunY})">
+          <g class="sunglow"><circle r=${sc.sunR * 2.9} fill="url(#wc-sun-glow)"/></g>
+          ${sc.showRays ? svg`<g class="raypulse"><g class="sunrays">${rays}</g></g>` : nothing}
+          <circle r=${sc.sunR + 6} fill=${sc.sunColor} opacity="0.3" filter="url(#wc-blur-soft)"/>
+          <circle r=${sc.sunR} fill="url(#wc-sun-disc)"/>
         </g>`
       : nothing}
     ${sc.showMoon
       ? svg`<g transform="translate(230 42)">
-          <circle r="30" fill="url(#wc-moon-halo)"/>
+          <g class="moonhalo"><circle r="32" fill="url(#wc-moon-halo)"/></g>
           <circle r="15" fill="#eef1f7"/>
           <circle cx="-6.5" cy="-4" r="13.5" fill=${sc.sky[0]}/>
+          <circle cx="4" cy="3" r="2.2" fill="#c9d2e4" opacity="0.8"/>
+          <circle cx="8.5" cy="-3" r="1.4" fill="#c9d2e4" opacity="0.7"/>
         </g>`
       : nothing}
 
@@ -364,18 +451,33 @@ export function skyScene(o: SkyOpts): TemplateResult {
         </g>`
       : nothing}
 
-    <!-- layered landscape -->
-    <path d="M 0 162 Q 40 138 85 154 T 170 150 Q 215 142 250 156 T 300 152 L 300 190 L 0 190 Z"
-      fill=${sc.hillBack}/>
-    <path d="M 0 176 Q 55 158 110 172 T 220 170 Q 260 164 300 174 L 300 190 L 0 190 Z"
-      fill=${sc.hillFront}/>
+    <!-- layered landscape with atmospheric haze; the crests catch golden light -->
+    <path d=${closeHill(CREST_FAR)} fill=${sc.ridgeFar}/>
+    <path d=${closeHill(CREST_BACK)} fill=${sc.hillBack}/>
+    ${sc.rim > 0.05
+      ? svg`<path d=${CREST_BACK} fill="none" stroke=${sc.horizonColor}
+          stroke-width="1.6" opacity=${sc.rim} stroke-linecap="round"/>`
+      : nothing}
+    <path d=${closeHill(CREST_FRONT)} fill=${sc.hillFront}/>
+    ${sc.rim > 0.05
+      ? svg`<path d=${CREST_FRONT} fill="none" stroke=${sc.horizonColor}
+          stroke-width="1.2" opacity=${sc.rim * 0.6} stroke-linecap="round"/>`
+      : nothing}
     ${TREES.map(
-      ([x, y, s]) => svg`<g transform="translate(${x} ${y}) scale(${s})" fill=${sc.tree}>
-        <polygon points="0,-16 6,-4 -6,-4"/>
-        <polygon points="0,-10 7.5,3 -7.5,3"/>
-        <rect x="-1.2" y="3" width="2.4" height="4" rx="1"/>
+      ([x, y, s], ti) => svg`<g transform="translate(${x} ${y})">
+        <g class="sway" style="animation-duration:${swayDur}s;animation-delay:${-ti * 0.7}s">
+          <g transform="scale(${s})" fill=${sc.tree}>
+            <polygon points="0,-16 6,-4 -6,-4"/>
+            <polygon points="0,-10 7.5,3 -7.5,3"/>
+            <rect x="-1.2" y="3" width="2.4" height="4" rx="1"/>
+          </g>
+        </g>
       </g>`
     )}
+    ${sc.horizon > 0.03
+      ? svg`<ellipse cx=${glowX} cy="156" rx="150" ry="26"
+          fill="url(#wc-horizon)" opacity=${sc.horizon * 0.45}/>`
+      : nothing}
 
     ${sc.fog
       ? svg`<g fill="rgba(255,255,255,0.5)">
