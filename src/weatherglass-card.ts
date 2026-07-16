@@ -59,7 +59,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.4.0';
+const CARD_VERSION = '0.5.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -149,6 +149,8 @@ export class WeatherCard extends LitElement {
   @state() private _tileRanges: Record<number, string> = {};
   /** sky tiles: chosen forecast resolution per metric index */
   @state() private _skyRanges: Record<number, ForecastType> = {};
+  /** pollen tiles: selected forecast day (0 = today) per metric index */
+  @state() private _pollenDays: Record<number, number> = {};
   @state() private _statsCache: Record<string, StatsMap> = {};
   @state() private _forecasts: Record<string, ForecastPoint[]> = {};
   private _statsCacheTime: Record<string, number> = {};
@@ -1043,14 +1045,38 @@ export class WeatherCard extends LitElement {
 
   /* ---- pollen --------------------------------------------------------- */
 
+  /** forecast attribute names used by the DWD Pollenflug integration */
+  private static readonly DWD_TOMORROW = ['state_tomorrow', 'tomorrow'];
+  private static readonly DWD_DAY2 = [
+    'state_in_2_days',
+    'state_dayafter_to',
+    'state_dayafter_tomorrow',
+    'dayafter_to',
+  ];
+
+  private _pollenNum(raw: unknown): number {
+    const n = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(',', '.'));
+    return Number.isFinite(n) ? n : NaN;
+  }
+
+  private _pollenAttr(st: HassEntity | undefined, keys: string[]): number {
+    if (!st) return NaN;
+    for (const k of keys) {
+      const n = this._pollenNum(st.attributes[k]);
+      if (Number.isFinite(n)) return n;
+    }
+    return NaN;
+  }
+
+  /** numeric pollen load; text states (none/low/hoch …) map onto the scale */
   private _pollenValue(st?: HassEntity, max = 5): number {
     if (!st) return NaN;
-    const num = this._numeric(st);
+    const num = this._pollenNum(st.state);
     if (Number.isFinite(num)) return num;
     const text = st.state.toLowerCase().replace(/[\s_-]/g, '');
     const words: Record<string, number> = {
       none: 0, keine: 0, no: 0,
-      verylow: 1, sehrgering: 1, verygering: 1,
+      verylow: 1, sehrgering: 1,
       low: 2, gering: 2, niedrig: 2,
       moderate: 3, mäßig: 3, maessig: 3, medium: 3, mittel: 3,
       high: 4, hoch: 4,
@@ -1059,28 +1085,60 @@ export class WeatherCard extends LitElement {
     return text in words ? (words[text] / 5) * max : NaN;
   }
 
-  private _pollenColor(value: number, max: number): string {
-    const r = Number.isFinite(value) ? value / max : 0;
-    if (r <= 0.05) return 'var(--grey-color, #9E9E9E)';
-    if (r < 0.4) return 'var(--green-color, #4CAF50)';
-    if (r < 0.7) return 'var(--amber-color, #FFC107)';
-    return 'var(--red-color, #F44336)';
+  /** green→red shade for a load on a 0..max scale (0 = out of season = grey) */
+  private _pollenShade(v: number, max: number): string {
+    if (!Number.isFinite(v) || v <= 0) return 'var(--grey-color, #9E9E9E)';
+    const PAL = ['#66bb6a', '#8bc34a', '#fdd835', '#ffb300', '#fb8c00', '#e53935'];
+    const idx = Math.max(1, Math.min(Math.ceil((v / max) * 6), 6));
+    return PAL[idx - 1];
   }
 
+  private _pollenLabel(v: number, max: number, dwd: boolean): string {
+    if (!Number.isFinite(v)) return '–';
+    if (dwd) {
+      // DWD index 0..3 in half steps → 7 named levels
+      return t(this.hass, `pollen_dwd_${Math.max(0, Math.min(Math.round(v * 2), 6))}`);
+    }
+    const idx = Math.max(0, Math.min(Math.round((v / max) * 5), 5));
+    return t(this.hass, `pollen_lvl_${idx}`);
+  }
+
+  /**
+   * Pollen tile, built for the DWD Pollenflug integration (index 0–3 in half
+   * steps with a 3-day forecast in the attributes) but happy with any numeric
+   * or text-level sensor. Segmented half-step bars per allergen (worst on
+   * top), a worst-load badge in the header, tomorrow-trend arrows and a
+   * today/tomorrow/day-after toggle when forecast data is available.
+   */
   private _renderPollen(c: MetricCtx, index: number): TemplateResult {
     const m = c.m;
-    const max = m.max ?? 5;
-    const items = c.series.map((s) => {
+    const entries = c.series.map((s) => {
       const st = this.hass.states[s.entity];
-      const value = this._pollenValue(st, max);
-      const idx = Number.isFinite(value) ? Math.max(0, Math.min(Math.round((value / max) * 5), 5)) : 0;
+      const dwd =
+        !!st &&
+        (Number.isFinite(this._pollenAttr(st, WeatherCard.DWD_TOMORROW)) ||
+          st.entity_id.includes('pollenflug'));
       return {
+        dwd,
         name: s.name ?? st?.attributes.friendly_name ?? s.entity,
-        value,
-        color: resolveColor(s.color) ?? this._pollenColor(value, max),
-        level: t(this.hass, `pollen_lvl_${idx}`),
+        days: [
+          dwd ? this._pollenNum(st!.state) : this._pollenValue(st, m.max ?? 5),
+          this._pollenAttr(st, WeatherCard.DWD_TOMORROW),
+          this._pollenAttr(st, WeatherCard.DWD_DAY2),
+        ] as [number, number, number],
       };
     });
+    const isDwd = entries.some((e) => e.dwd);
+    const max = m.max ?? (isDwd ? 3 : 5);
+    const segs = isDwd ? 6 : 5;
+    const hasForecast = entries.some((e) => Number.isFinite(e.days[1]));
+    const day = Math.min(this._pollenDays[index] ?? 0, 2);
+    // worst offenders first (stable across the day toggle: sorted by today)
+    const shown = [...entries]
+      .sort((a, b) => (b.days[0] || 0) - (a.days[0] || 0))
+      .map((e) => ({ ...e, v: e.days[day] }));
+    const worst = Math.max(...shown.map((e) => (Number.isFinite(e.v) ? e.v : 0)), 0);
+
     return html`
       <div
         class="metric pollen-metric ${(m.tap_action ?? 'popup') === 'none' ? 'noclick' : ''}"
@@ -1090,25 +1148,67 @@ export class WeatherCard extends LitElement {
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${c.icon}></ha-icon></div>
           <div class="name">${c.name}</div>
-          ${this._renderScoreBadge(m)}
+          ${m.score_entity
+            ? this._renderScoreBadge(m)
+            : html`<span class="scorebadge" style="background:${this._pollenShade(worst, max)}">
+                ${this._pollenLabel(worst, max, isDwd)}
+              </span>`}
         </div>
-        <div class="pbars">
-          ${items.map(
-            (it) => html`<div class="pbar">
-              <div class="pbar-label">
-                <span>${it.name}</span>
-                <span style="color:${it.color};font-weight:700">${it.level}</span>
-              </div>
-              <div class="ptrack" style="--wc-p:${it.color}">
-                <div
-                  class="pfill"
-                  style="width:${Number.isFinite(it.value)
-                    ? Math.max(0, Math.min((it.value / max) * 100, 100))
-                    : 0}%"
-                ></div>
-              </div>
+        ${hasForecast
+          ? html`<div class="periods sky-periods">
+              ${['today', 'tomorrow', 'day_after'].map(
+                (k, di) => html`<button
+                  class="period ${day === di ? 'active' : ''}"
+                  @click=${(e: Event) => {
+                    e.stopPropagation();
+                    this._pollenDays = { ...this._pollenDays, [index]: di };
+                  }}
+                >
+                  ${t(this.hass, k)}
+                </button>`
+              )}
             </div>`
-          )}
+          : nothing}
+        <div class="pollen-list">
+          ${shown.map((e) => {
+            const color = this._pollenShade(e.v, max);
+            const filled = Number.isFinite(e.v)
+              ? Math.max(0, Math.min(Math.round((e.v / max) * segs), segs))
+              : 0;
+            const tomorrow = e.days[1];
+            const trend =
+              day === 0 && Number.isFinite(tomorrow) && Number.isFinite(e.v) && tomorrow !== e.v
+                ? tomorrow > e.v
+                  ? 'up'
+                  : 'down'
+                : undefined;
+            return html`<div class="prow">
+              <span class="prow-name">${e.name}</span>
+              <div class="psegs">
+                ${Array.from({ length: segs }, (_, si) =>
+                  si < filled
+                    ? html`<span class="pseg" style="background:${color}"></span>`
+                    : html`<span class="pseg"></span>`
+                )}
+              </div>
+              <span
+                class="prow-lvl"
+                style="color:${Number.isFinite(e.v) && e.v > 0
+                  ? color
+                  : 'var(--secondary-text-color)'}"
+              >
+                ${trend
+                  ? html`<ha-icon
+                      .icon=${trend === 'up' ? 'mdi:menu-up' : 'mdi:menu-down'}
+                      style="color:${trend === 'up'
+                        ? 'var(--error-color, #e53935)'
+                        : 'var(--success-color, #43a047)'}"
+                    ></ha-icon>`
+                  : nothing}
+                ${this._pollenLabel(e.v, max, isDwd)}
+              </span>
+            </div>`;
+          })}
         </div>
       </div>
     `;
@@ -2821,6 +2921,52 @@ export class WeatherCard extends LitElement {
     }
     .s-mirror .skd-value {
       color: #fff;
+    }
+
+    /* ---- pollen rows (DWD half-step segments) --------------------------- */
+    .pollen-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .prow {
+      display: grid;
+      grid-template-columns: minmax(58px, 88px) 1fr minmax(72px, auto);
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .prow-name {
+      font-weight: 500;
+      color: var(--primary-text-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .psegs {
+      display: flex;
+      gap: 3px;
+    }
+    .pseg {
+      flex: 1;
+      height: 9px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+    }
+    .prow-lvl {
+      font-weight: 700;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1px;
+    }
+    .prow-lvl ha-icon {
+      --mdc-icon-size: 15px;
+      margin-right: -2px;
+    }
+    .s-mirror .pseg {
+      background: rgba(255, 255, 255, 0.15);
     }
 
     /* ---- detail popup -------------------------------------------------- */

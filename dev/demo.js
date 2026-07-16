@@ -167,10 +167,13 @@ const states = {
     next_high_tide: at(14, 20),
     next_low_tide: at(20, 35),
   }),
-  'sensor.pollen_graeser': entity('sensor.pollen_graeser', 3, { friendly_name: 'Gräser' }),
-  'sensor.pollen_birke': entity('sensor.pollen_birke', 2, { friendly_name: 'Birke' }),
-  'sensor.pollen_beifuss': entity('sensor.pollen_beifuss', 1, { friendly_name: 'Beifuß' }),
-  'sensor.pollen_ambrosia': entity('sensor.pollen_ambrosia', 4, { friendly_name: 'Ambrosia' }),
+  // DWD Pollenflug shape: index 0-3 in half steps + 3-day forecast attributes
+  'sensor.pollenflug_graeser_124': entity('sensor.pollenflug_graeser_124', 2, { friendly_name: 'Gräser', state_tomorrow: 2.5, state_in_2_days: 1.5 }),
+  'sensor.pollenflug_roggen_124': entity('sensor.pollenflug_roggen_124', 1.5, { friendly_name: 'Roggen', state_tomorrow: 2, state_in_2_days: 2 }),
+  'sensor.pollenflug_birke_124': entity('sensor.pollenflug_birke_124', 1, { friendly_name: 'Birke', state_tomorrow: 0.5, state_in_2_days: 0.5 }),
+  'sensor.pollenflug_beifuss_124': entity('sensor.pollenflug_beifuss_124', 0.5, { friendly_name: 'Beifuß', state_tomorrow: 1, state_in_2_days: 1 }),
+  'sensor.pollenflug_ambrosia_124': entity('sensor.pollenflug_ambrosia_124', 3, { friendly_name: 'Ambrosia', state_tomorrow: 2.5, state_in_2_days: 3 }),
+  'sensor.pollenflug_hasel_124': entity('sensor.pollenflug_hasel_124', 0, { friendly_name: 'Hasel', state_tomorrow: 0, state_in_2_days: 0.5 }),
   'camera.regenradar': entity('camera.regenradar', 'idle', { friendly_name: 'Regenradar', entity_picture: radarImg }),
 };
 
@@ -403,12 +406,13 @@ const config = {
     },
     {
       type: 'pollen',
-      max: 5,
       entities: [
-        { entity: 'sensor.pollen_graeser', name: 'Gräser' },
-        { entity: 'sensor.pollen_birke', name: 'Birke' },
-        { entity: 'sensor.pollen_beifuss', name: 'Beifuß' },
-        { entity: 'sensor.pollen_ambrosia', name: 'Ambrosia' },
+        'sensor.pollenflug_graeser_124',
+        'sensor.pollenflug_roggen_124',
+        'sensor.pollenflug_birke_124',
+        'sensor.pollenflug_beifuss_124',
+        'sensor.pollenflug_ambrosia_124',
+        'sensor.pollenflug_hasel_124',
       ],
     },
     { type: 'radar', entity: 'camera.regenradar' },

@@ -19,7 +19,7 @@ Vollständig Theme-kompatibel (Light & Dark).
 - 🌅 **Sonnen-Bogen** (`type: sun`): Sonnenauf- und -untergang als Tageslicht-Bogen mit Sonnen-Marker am aktuellen Stand, Tageslänge und „Untergang in X" — das Wetter-Pendant zum Zyklus-Ring.
 - 🌙 **Mondphase** (`type: moon`): Mondscheibe mit exakt berechnetem Terminator (Sichel/Halb/Voll, zu-/abnehmend), Phasenname und Beleuchtung in %.
 - 🌊 **Gezeiten** (`type: tides`): Tiden-Kurve über den Tag mit Jetzt-Marker (aus der Recorder-History oder synthetisch halbtägig), aktuellem Pegel und nächster Flut/Ebbe-Zeit.
-- 🤧 **Pollen** (`type: pollen`): Belastung je Allergen als Balken, nach Stufe eingefärbt (grün → gelb → rot); versteht Zahlen **und** Textstufen (`none`/`low`/`hoch` …).
+- 🤧 **Pollen** (`type: pollen`): gebaut für die **DWD-Pollenflug-Integration** — der DWD-Index (0–3 in Halbstufen) wird als Segmentbalken je Allergen gezeichnet (6 Segmente = Halbstufen, grün → gelb → orange → rot, DWD-Stufennamen wie „gering–mittel"). Die **3-Tage-Vorhersage** aus den Sensor-Attributen (`state_tomorrow`, `state_in_2_days`) gibt einen **Heute/Morgen/Übermorgen-Umschalter** und **Trend-Pfeile** (▲ morgen schlechter / ▼ besser). Sortiert nach Belastung (Schlimmste oben), Worst-Badge im Kopf. Andere Quellen funktionieren weiter: Zahlen und Textstufen (`none`/`low`/`hoch` …) auf beliebiger Skala (`max`).
 - 📡 **Wetterradar** (`type: radar`): Radarbild aus einer `camera.*`-Entität (`entity_picture`) oder einer festen `image_url`.
 - 💯 **Luftqualitäts-/Index-Ring** (`type: air_quality`): Fortschrittsring mit „34 von 100", Ampelfarbe nach Wert (niedrig = gut), **Sub-Indizes** (PM2.5 / PM10 / Ozon …) als Mini-Balken.
 - 🤖 **AI-Zusammenfassung** (`type: summary`): natürlich­sprachiger Wetter­text. Entweder aus einem Text-Sensor (`summary_entity`, z. B. ein LLM-/AI-Task-Sensor) — oder, wenn keiner gesetzt ist, **selbst erzeugt** aus Wetter­lage, Temperatur, Tages-Hoch/-Tief, Wind, Regen­wahrscheinlichkeit, UV und der Aussicht auf morgen (Deutsch & Englisch).
@@ -106,6 +106,12 @@ metrics:
       - { entity: sensor.ozon, name: Ozon, color: deep-orange }
   - type: sun
     sun_entity: sun.sun
+  - type: pollen             # DWD Pollenflug: Index + 3-Tage-Vorhersage
+    entities:
+      - sensor.pollenflug_graeser_124
+      - sensor.pollenflug_birke_124
+      - sensor.pollenflug_beifuss_124
+      - sensor.pollenflug_ambrosia_124
 ```
 
 Kompakt in einem Container, scrollbar und ohne eigenen Hintergrund:
@@ -152,7 +158,7 @@ metrics: [...]
 | `sun`          | `mdi:weather-sunset`        | amber       | Bogen    | Sonnenauf-/untergang, Tageslänge                   |
 | `moon`         | `mdi:moon-waning-crescent`  | blue-grey   | Scheibe  | Mondphase mit korrektem Terminator + Beleuchtung   |
 | `tides`        | `mdi:waves`                 | light-blue  | Welle    | Gezeiten-Kurve mit Jetzt-Marker, Flut/Ebbe-Zeiten  |
-| `pollen`       | `mdi:flower-pollen`         | green       | Balken   | Pollenbelastung je Allergen, nach Stufe eingefärbt |
+| `pollen`       | `mdi:flower-pollen`         | green       | Segmente | DWD-Pollenindex je Allergen mit 3-Tage-Umschalter  |
 | `radar`        | `mdi:radar`                 | blue        | Bild     | Wetterradar aus einer `camera.*`-Entität oder URL  |
 | `sky`          | `mdi:weather-partly-cloudy` | blue        | Szene    | Große animierte Himmel-Szene mit Vorhersage + Daten-Chips |
 | `summary`      | `mdi:creation`              | deep-purple | Text     | AI-/Text-Zusammenfassung                           |

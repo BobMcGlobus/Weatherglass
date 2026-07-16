@@ -1,6 +1,6 @@
 {
   "name": "weatherglass-card",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Weatherglass — a forecast-first, fully themeable weather dashboard card for Home Assistant with an animated sky scene, wind, precipitation, air quality, sun, moon, tides, pollen, radar and an AI summary.",
   "type": "module",
   "license": "MIT",
