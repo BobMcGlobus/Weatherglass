@@ -105,8 +105,14 @@ const LABELS: Record<string, Record<string, string>> = {
     illumination_entity: 'Illumination entity (0-1 or %)',
     high_tide_entity: 'Next high tide entity',
     low_tide_entity: 'Next low tide entity',
-    image_url: 'Radar image URL',
-    refresh: 'Refresh (seconds)',
+    provider: 'Radar provider',
+    rp_windy: 'Windy',
+    rp_rainviewer: 'RainViewer',
+    latitude: 'Latitude (default: home)',
+    longitude: 'Longitude (default: home)',
+    zoom: 'Zoom',
+    url: 'Custom iframe URL (overrides provider)',
+    image_url: 'Static image URL (legacy)',
     summary_entity: 'Summary text sensor (LLM/AI)',
     summary_sources: 'Source sensors (generated summary)',
     score_entity: 'Warning/index sensor (badge)',
@@ -210,8 +216,14 @@ const LABELS: Record<string, Record<string, string>> = {
     illumination_entity: 'Beleuchtungs-Entität (0-1 oder %)',
     high_tide_entity: 'Nächste-Flut-Entität',
     low_tide_entity: 'Nächste-Ebbe-Entität',
-    image_url: 'Radar-Bild-URL',
-    refresh: 'Aktualisierung (Sekunden)',
+    provider: 'Radar-Quelle',
+    rp_windy: 'Windy',
+    rp_rainviewer: 'RainViewer',
+    latitude: 'Breitengrad (Default: Zuhause)',
+    longitude: 'Längengrad (Default: Zuhause)',
+    zoom: 'Zoom',
+    url: 'Eigene iFrame-URL (überschreibt Quelle)',
+    image_url: 'Statische Bild-URL (Legacy)',
     summary_entity: 'Zusammenfassungs-Sensor (LLM/AI)',
     summary_sources: 'Quell-Sensoren (erzeugte Zusammenfassung)',
     score_entity: 'Warn-/Index-Sensor (Badge)',
@@ -546,8 +558,26 @@ export class WeatherCardEditor extends LitElement {
 
       case 'radar':
         return [
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              {
+                name: 'provider',
+                selector: {
+                  select: {
+                    mode: 'dropdown',
+                    options: opts(['windy', 'rainviewer'], 'rp'),
+                  },
+                },
+              },
+              { name: 'zoom', selector: { number: { min: 4, max: 12, mode: 'box' } } },
+              { name: 'latitude', selector: { number: { mode: 'box', step: 'any' } } },
+              { name: 'longitude', selector: { number: { mode: 'box', step: 'any' } } },
+            ],
+          },
+          { name: 'url', selector: { text: {} } },
           { name: 'image_url', selector: { text: {} } },
-          { name: 'refresh', selector: { number: { min: 5, mode: 'box' } } },
         ];
 
       case 'summary':

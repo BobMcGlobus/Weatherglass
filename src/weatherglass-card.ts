@@ -59,7 +59,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.5.0';
+const CARD_VERSION = '0.6.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -147,8 +147,8 @@ export class WeatherCard extends LitElement {
   @state() private _popup: number | null = null;
   @state() private _popupRange: string | null = null;
   @state() private _tileRanges: Record<number, string> = {};
-  /** sky tiles: chosen forecast resolution per metric index */
-  @state() private _skyRanges: Record<number, ForecastType> = {};
+  /** forecast tiles (sky included): chosen resolution per metric index */
+  @state() private _fcRanges: Record<number, ForecastType> = {};
   /** pollen tiles: selected forecast day (0 = today) per metric index */
   @state() private _pollenDays: Record<number, number> = {};
   @state() private _statsCache: Record<string, StatsMap> = {};
@@ -241,6 +241,15 @@ export class WeatherCard extends LitElement {
     return type === 'sky' || type === 'summary' ? 'daily' : 'hourly';
   }
 
+  /** Effective forecast resolution: tile toggle → config → type default. */
+  private _effFType(m: MetricConfig, type: MetricType, index?: number): ForecastType {
+    return (
+      (index !== undefined ? this._fcRanges[index] : undefined) ??
+      m.forecast_type ??
+      this._defaultForecastType(type)
+    );
+  }
+
   /** The weather entity a metric draws its forecast from, if any. */
   private _forecastId(m: MetricConfig): string | undefined {
     if (m.forecast) return m.forecast;
@@ -265,12 +274,10 @@ export class WeatherCard extends LitElement {
       const type = m.type ?? 'custom';
       const id = this._forecastId(m);
       if (!id || !this.hass.states[id]) return;
-      if (type === 'sky') {
-        // the sky tile can toggle between resolutions — keep both warm
+      if (FORECAST_TYPES.includes(type) || type === 'summary' || m.forecast) {
+        // every forecast tile can toggle between resolutions — keep both warm
         need.add(`${id}|hourly`);
         need.add(`${id}|daily`);
-      } else if (FORECAST_TYPES.includes(type) || type === 'summary' || m.forecast) {
-        need.add(`${id}|${m.forecast_type ?? this._defaultForecastType(type)}`);
       }
     });
     for (const key of need) {
@@ -621,7 +628,7 @@ export class WeatherCard extends LitElement {
           </div>
           <div class="exp-value">
             ${this._renderValue(m, ce)}
-            ${this._renderStatus(m, ce)}
+            ${this._renderStatus(m, ce, index)}
           </div>
           ${this._renderDetails(m, ce, activeKey, (k) => {
             this._tileRanges = { ...this._tileRanges, [index]: k };
@@ -634,7 +641,13 @@ export class WeatherCard extends LitElement {
     const showChips = c.multi && c.graph !== 'progress';
     const showStatus = !c.multi;
     const stack = c.multi && c.graph === 'progress';
-    const fc = this._metricForecast(m);
+    const fc = this._metricForecast(m, index);
+    const fcId = this._forecastId(m);
+    // offer the resolution toggle only when both forecasts actually exist
+    const bothRes =
+      !!fc &&
+      this._forecastFor(fcId, 'hourly').length > 0 &&
+      this._forecastFor(fcId, 'daily').length > 0;
 
     return html`
       <div
@@ -656,15 +669,23 @@ export class WeatherCard extends LitElement {
                   ? this._renderSeriesChips(c.data, c.precision, c.trendMode)
                   : nothing}
                 ${this._renderSecondary(m)}
-                ${showStatus ? this._renderStatus(m, c) : nothing}
+                ${showStatus ? this._renderStatus(m, c, index) : nothing}
               </div>`
             : nothing}
           <div class="chartcell">
-            ${this._renderChart(m, c.graph, c.data, c.unit, c.precision)}
+            ${this._renderChart(m, c.graph, c.data, c.unit, c.precision, index)}
           </div>
         </div>
         ${c.type === 'precipitation' && m.parts ? this._renderParts(m) : nothing}
-        ${fc ? this._renderForecast(fc.points, fc.type, m.forecast_count ?? 8) : nothing}
+        ${bothRes ? this._renderFcToggle(index, fc!.type) : nothing}
+        ${fc
+          ? this._renderForecast(
+              fc.points,
+              fc.type,
+              m.forecast_count ?? (fc.type === 'hourly' ? 8 : 7),
+              c.type
+            )
+          : nothing}
       </div>
     `;
   }
@@ -672,14 +693,19 @@ export class WeatherCard extends LitElement {
   /* ---- forecast strip ------------------------------------------------- */
 
   private _metricForecast(
-    m: MetricConfig
+    m: MetricConfig,
+    index?: number
   ): { points: ForecastPoint[]; type: ForecastType } | undefined {
     const type = m.type ?? 'custom';
     if (!FORECAST_TYPES.includes(type) && !m.forecast) return undefined;
     const id = this._forecastId(m);
-    const ftype = m.forecast_type ?? this._defaultForecastType(type);
+    const ftype = this._effFType(m, type, index);
     const points = this._forecastFor(id, ftype);
-    return points.length ? { points, type: ftype } : undefined;
+    if (points.length) return { points, type: ftype };
+    // fall back to the other resolution when the chosen one is unavailable
+    const other: ForecastType = ftype === 'hourly' ? 'daily' : 'hourly';
+    const alt = this._forecastFor(id, other);
+    return alt.length ? { points: alt, type: other } : undefined;
   }
 
   /**
@@ -689,12 +715,13 @@ export class WeatherCard extends LitElement {
    */
   private _forecastChartData(
     m: MetricConfig,
-    type: MetricType
+    type: MetricType,
+    index?: number
   ): { values: number[]; xMarks: AxisMark[] } | undefined {
     if ((m.chart_source ?? 'forecast') === 'history') return undefined;
     const key = FC_KEYS[type];
     if (!key) return undefined;
-    const fc = this._metricForecast(m);
+    const fc = this._metricForecast(m, index);
     if (!fc) return undefined;
     const hourly = fc.type === 'hourly';
     const count = m.forecast_count ?? (hourly ? 18 : 7);
@@ -730,36 +757,100 @@ export class WeatherCard extends LitElement {
     return d.toLocaleDateString(locale(this.hass), { weekday: 'short' });
   }
 
+  /** The metric-specific main value of one forecast step. */
+  private _fcStepValue(
+    p: ForecastPoint,
+    type: MetricType,
+    ftype: ForecastType
+  ): TemplateResult {
+    const n = (v: unknown, prec = 0) =>
+      typeof v === 'number' && Number.isFinite(v)
+        ? fmtNumber(this.hass, v, prec)
+        : undefined;
+    switch (type) {
+      case 'precipitation': {
+        const v = n(p.precipitation, (p.precipitation ?? 0) >= 10 ? 0 : 1);
+        return html`<span class="fc-temp">${v ?? '–'}<span class="fc-lo">mm</span></span>`;
+      }
+      case 'wind': {
+        const v = n(p.wind_speed);
+        const g = n(p.wind_gust_speed);
+        return html`<span class="fc-temp">
+          ${v ?? '–'}${g ? html`<span class="fc-lo">${g}</span>` : nothing}
+        </span>`;
+      }
+      case 'humidity':
+        return html`<span class="fc-temp">${n(p.humidity) ?? '–'}%</span>`;
+      case 'cloud':
+        return html`<span class="fc-temp">${n(p.cloud_coverage) ?? '–'}%</span>`;
+      case 'pressure':
+        return html`<span class="fc-temp">${n(p.pressure) ?? '–'}</span>`;
+      case 'uv':
+        return html`<span class="fc-temp">${n(p.uv_index) ?? '–'}</span>`;
+      default:
+        // temperature, feels_like, sky: temp (+ low on daily steps)
+        return html`<span class="fc-temp">
+          ${typeof p.temperature === 'number'
+            ? html`${fmtNumber(this.hass, p.temperature, 0)}°`
+            : '–'}
+          ${ftype !== 'hourly' && typeof p.templow === 'number'
+            ? html`<span class="fc-lo">${fmtNumber(this.hass, p.templow, 0)}°</span>`
+            : nothing}
+        </span>`;
+    }
+  }
+
   private _renderForecast(
     points: ForecastPoint[],
     ftype: ForecastType,
-    count: number
+    count: number,
+    type: MetricType = 'sky'
   ): TemplateResult {
     const steps = points.slice(0, count);
+    // the rain-chance chip only where it belongs (not next to humidity %)
+    const showPop = ['sky', 'temperature', 'feels_like', 'precipitation'].includes(type);
     return html`<div class="forecast">
       ${steps.map((p, i) => {
         const isDay = p.is_daytime ?? true;
         const prob = p.precipitation_probability;
-        const chip =
-          typeof prob === 'number' && prob >= 5
+        const chip = !showPop
+          ? html`<span class="fc-pop empty"></span>`
+          : typeof prob === 'number' && prob >= 5
             ? html`<span class="fc-pop">${fmtNumber(this.hass, prob, 0)}%</span>`
             : typeof p.precipitation === 'number' && p.precipitation >= 0.2
               ? html`<span class="fc-pop">${fmtNumber(this.hass, p.precipitation, 1)}</span>`
               : html`<span class="fc-pop empty"></span>`;
+        // wind strips point an arrow where the wind blows to
+        const icon =
+          type === 'wind' && typeof p.wind_bearing === 'number'
+            ? html`<ha-icon
+                class="fc-ico"
+                icon="mdi:navigation"
+                style="transform:rotate(${(p.wind_bearing + 180) % 360}deg)"
+              ></ha-icon>`
+            : html`<ha-icon class="fc-ico" .icon=${conditionIcon(p.condition, isDay)}></ha-icon>`;
         return html`<div class="fc-step">
           <span class="fc-when">${this._fcLabel(p, ftype, i === 0)}</span>
-          <ha-icon class="fc-ico" .icon=${conditionIcon(p.condition, isDay)}></ha-icon>
-          ${chip}
-          <span class="fc-temp">
-            ${typeof p.temperature === 'number'
-              ? html`${fmtNumber(this.hass, p.temperature, 0)}°`
-              : '–'}
-            ${ftype !== 'hourly' && typeof p.templow === 'number'
-              ? html`<span class="fc-lo">${fmtNumber(this.hass, p.templow, 0)}°</span>`
-              : nothing}
-          </span>
+          ${icon} ${chip} ${this._fcStepValue(p, type, ftype)}
         </div>`;
       })}
+    </div>`;
+  }
+
+  /** Hourly/daily pill toggle for a forecast tile's strip + chart. */
+  private _renderFcToggle(index: number, ftype: ForecastType): TemplateResult {
+    return html`<div class="periods sky-periods">
+      ${(['hourly', 'daily'] as ForecastType[]).map(
+        (ft) => html`<button
+          class="period ${ftype === ft ? 'active' : ''}"
+          @click=${(e: Event) => {
+            e.stopPropagation();
+            this._fcRanges = { ...this._fcRanges, [index]: ft };
+          }}
+        >
+          ${t(this.hass, ft === 'hourly' ? 'forecast_hourly' : 'forecast_daily')}
+        </button>`
+      )}
     </div>`;
   }
 
@@ -842,7 +933,7 @@ export class WeatherCard extends LitElement {
               })}
             </div>`
           : nothing}
-        <div class="score-status">${this._renderStatus(m, c)}</div>
+        <div class="score-status">${this._renderStatus(m, c, index)}</div>
       </div>
     `;
   }
@@ -1216,28 +1307,64 @@ export class WeatherCard extends LitElement {
 
   /* ---- radar ---------------------------------------------------------- */
 
+  /** iframe URL for the embedded live radar map. */
+  private _radarUrl(m: MetricConfig): string {
+    if (m.url) return m.url;
+    const lat = m.latitude ?? this.hass.config?.latitude ?? 51.163;
+    const lon = m.longitude ?? this.hass.config?.longitude ?? 10.447;
+    const zoom = m.zoom ?? 8;
+    if (m.provider === 'rainviewer') {
+      return (
+        `https://www.rainviewer.com/map.html?loc=${lat},${lon},${zoom}` +
+        '&oCS=1&c=3&o=83&lm=0&layer=radar&sm=1&sn=1&hu=0'
+      );
+    }
+    return (
+      `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}` +
+      `&detailLat=${lat}&detailLon=${lon}&zoom=${zoom}` +
+      '&level=surface&overlay=radar&product=radar&menu=&message=&marker=true' +
+      '&calendar=now&type=map&location=coordinates' +
+      '&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1'
+    );
+  }
+
+  /**
+   * Live radar tile: embeds a real online radar map (Windy by default,
+   * RainViewer as alternative, any URL via `url`) centered on the HA home
+   * coordinates. A configured `image_url` or camera entity falls back to the
+   * legacy static-image mode.
+   */
   private _renderRadar(c: MetricCtx, index: number): TemplateResult {
     const m = c.m;
     const st = c.primaryState;
-    let src = m.image_url;
-    if (!src && st) src = st.attributes.entity_picture;
+    const legacySrc = m.image_url ?? (m.entity ? st?.attributes.entity_picture : undefined);
     const tapId = m.entity;
     return html`
       <div
-        class="metric radar-metric ${(m.tap_action ?? (m.entity ? 'more-info' : 'none')) === 'none' ? 'noclick' : ''}"
+        class="metric radar-metric noclick"
         style="--wc-accent:${c.accent}"
-        @click=${() => tapId && this._handleTap({ tap_action: 'more-info', ...m }, index, tapId)}
+        @click=${() =>
+          legacySrc && tapId && this._handleTap({ tap_action: 'more-info', ...m }, index, tapId)}
       >
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${c.icon}></ha-icon></div>
           <div class="name">${c.name}</div>
-          ${st ? html`<div class="time">${fmtLastUpdated(this.hass, st.last_updated)}</div>` : nothing}
+          ${legacySrc && st
+            ? html`<div class="time">${fmtLastUpdated(this.hass, st.last_updated)}</div>`
+            : nothing}
         </div>
-        ${src
+        ${legacySrc
           ? html`<div class="radarframe">
-              <img class="radar-img" src=${src} alt="" />
+              <img class="radar-img" src=${legacySrc} alt="" />
             </div>`
-          : html`<div class="missing">${t(this.hass, 'no_data')}</div>`}
+          : html`<div class="radarframe live">
+              <iframe
+                src=${this._radarUrl(m)}
+                title=${c.name}
+                loading="lazy"
+                allow="fullscreen"
+              ></iframe>
+            </div>`}
       </div>
     `;
   }
@@ -1288,7 +1415,7 @@ export class WeatherCard extends LitElement {
     const hi = today?.temperature;
     const lo = today?.templow;
 
-    const ftype: ForecastType = this._skyRanges[index] ?? m.forecast_type ?? 'daily';
+    const ftype = this._effFType(m, 'sky', index);
 
     return html`
       <div
@@ -1323,19 +1450,7 @@ export class WeatherCard extends LitElement {
               : nothing}
           </div>
         </div>
-        <div class="periods sky-periods">
-          ${(['hourly', 'daily'] as ForecastType[]).map(
-            (ft) => html`<button
-              class="period ${ftype === ft ? 'active' : ''}"
-              @click=${(e: Event) => {
-                e.stopPropagation();
-                this._skyRanges = { ...this._skyRanges, [index]: ft };
-              }}
-            >
-              ${t(this.hass, ft === 'hourly' ? 'forecast_hourly' : 'forecast_daily')}
-            </button>`
-          )}
-        </div>
+        ${this._renderFcToggle(index, ftype)}
         ${this._renderForecast(
           this._forecastFor(this._forecastId(m), ftype),
           ftype,
@@ -1724,7 +1839,7 @@ export class WeatherCard extends LitElement {
     if (!c.primaryState) return nothing;
     const primaryState = c.primaryState;
     const activeKey = this._popupRange ?? (c.days === 7 && c.kind === 'day' ? 'week' : '');
-    const fc = this._metricForecast(m);
+    const fc = this._metricForecast(m, this._popup);
 
     return html`
       <div class="backdrop s-${this._cardStyle()}" @click=${() => (this._popup = null)}>
@@ -1751,10 +1866,10 @@ export class WeatherCard extends LitElement {
             ${this._renderValue(m, c)}
             <div class="time">${fmtLastUpdated(this.hass, primaryState.last_updated)}</div>
           </div>
-          ${this._renderStatus(m, c)}
+          ${this._renderStatus(m, c, this._popup)}
           ${fc
             ? html`<div class="forecast-title">${t(this.hass, 'forecast')}</div>
-                ${this._renderForecast(fc.points, fc.type, m.forecast_count ?? 12)}`
+                ${this._renderForecast(fc.points, fc.type, m.forecast_count ?? 12, c.type)}`
             : nothing}
           ${this._renderDetails(m, c, activeKey, (k) => {
             this._popupRange = k;
@@ -1894,7 +2009,11 @@ export class WeatherCard extends LitElement {
     return html`<div class="secondary">${parts.join(' • ')}</div>`;
   }
 
-  private _renderStatus(m: MetricConfig, c: MetricCtx): TemplateResult | typeof nothing {
+  private _renderStatus(
+    m: MetricConfig,
+    c: MetricCtx,
+    index?: number
+  ): TemplateResult | typeof nothing {
     const { primaryState, unit, precision, trendMode, goalType, data, valueOverride } = c;
     const primary = data[0];
     const v = valueOverride ?? this._numeric(primaryState!, m.attribute);
@@ -1920,7 +2039,7 @@ export class WeatherCard extends LitElement {
 
     if (trendMode === 'none') return nothing;
     // forecast-sourced tiles show the upcoming change, not the past one
-    const seriesVals = this._forecastChartData(m, c.type)?.values ?? primary.filled;
+    const seriesVals = this._forecastChartData(m, c.type, index)?.values ?? primary.filled;
     const delta = trendDelta(seriesVals);
     if (!Number.isFinite(delta)) return nothing;
 
@@ -1955,11 +2074,15 @@ export class WeatherCard extends LitElement {
     graph: string,
     data: SeriesData[],
     unit: string,
-    precision: number | undefined
+    precision: number | undefined,
+    index?: number
   ): TemplateResult | typeof nothing {
     const type = (m.type && PRESETS[m.type] ? m.type : 'custom') as MetricType;
     // forecast first: the tile plots what is coming, history lives in the popup
-    const fcd = graph === 'line' || graph === 'bar' ? this._forecastChartData(m, type) : undefined;
+    const fcd =
+      graph === 'line' || graph === 'bar'
+        ? this._forecastChartData(m, type, index)
+        : undefined;
     if (graph === 'line') {
       if (fcd) {
         return html`${lineChart([{ values: fcd.values, color: data[0].colorResolved }], {
@@ -2841,6 +2964,15 @@ export class WeatherCard extends LitElement {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
+    }
+    .radarframe.live {
+      aspect-ratio: 4 / 3;
+    }
+    .radarframe iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
       display: block;
     }
     .windrose-wrap {

@@ -20,10 +20,10 @@ Vollständig Theme-kompatibel (Light & Dark).
 - 🌙 **Mondphase** (`type: moon`): Mondscheibe mit exakt berechnetem Terminator (Sichel/Halb/Voll, zu-/abnehmend), Phasenname und Beleuchtung in %.
 - 🌊 **Gezeiten** (`type: tides`): Tiden-Kurve über den Tag mit Jetzt-Marker (aus der Recorder-History oder synthetisch halbtägig), aktuellem Pegel und nächster Flut/Ebbe-Zeit.
 - 🤧 **Pollen** (`type: pollen`): gebaut für die **DWD-Pollenflug-Integration** — der DWD-Index (0–3 in Halbstufen) wird als Segmentbalken je Allergen gezeichnet (6 Segmente = Halbstufen, grün → gelb → orange → rot, DWD-Stufennamen wie „gering–mittel"). Die **3-Tage-Vorhersage** aus den Sensor-Attributen (`state_tomorrow`, `state_in_2_days`) gibt einen **Heute/Morgen/Übermorgen-Umschalter** und **Trend-Pfeile** (▲ morgen schlechter / ▼ besser). Sortiert nach Belastung (Schlimmste oben), Worst-Badge im Kopf. Andere Quellen funktionieren weiter: Zahlen und Textstufen (`none`/`low`/`hoch` …) auf beliebiger Skala (`max`).
-- 📡 **Wetterradar** (`type: radar`): Radarbild aus einer `camera.*`-Entität (`entity_picture`) oder einer festen `image_url`.
+- 📡 **Wetterradar** (`type: radar`): bettet ein **echtes Live-Radar** ein — Windy (Default) oder RainViewer als interaktive Karte (Loop abspielbar), zentriert auf die Home-Assistant-Koordinaten (`latitude`/`longitude`/`zoom` überschreibbar), beliebige Karten per `url`. Legacy: `camera.*`-Entität oder `image_url` zeigen weiter ein statisches Bild.
 - 💯 **Luftqualitäts-/Index-Ring** (`type: air_quality`): Fortschrittsring mit „34 von 100", Ampelfarbe nach Wert (niedrig = gut), **Sub-Indizes** (PM2.5 / PM10 / Ozon …) als Mini-Balken.
 - 🤖 **AI-Zusammenfassung** (`type: summary`): natürlich­sprachiger Wetter­text. Entweder aus einem Text-Sensor (`summary_entity`, z. B. ein LLM-/AI-Task-Sensor) — oder, wenn keiner gesetzt ist, **selbst erzeugt** aus Wetter­lage, Temperatur, Tages-Hoch/-Tief, Wind, Regen­wahrscheinlichkeit, UV und der Aussicht auf morgen (Deutsch & Englisch).
-- 📅 **Vorhersage** (`Vorhersage`-Streifen): stündlich oder täglich, aus der HA-Wetter-Entität (`weather.get_forecasts` → Live-Abo → Legacy-Attribut). Pro Schritt Zeit/Tag, Wetter-Icon, Regen­wahrscheinlichkeit und Temperatur (bzw. Hoch/Tief). Die Temperatur-Kurve wird um eine gestrichelte Vorhersage-Verlängerung ergänzt.
+- 📅 **Vorhersage-Streifen, metrik-spezifisch**: Jede Vorhersage-Kachel trägt einen **Stündlich/Täglich-Umschalter**, der Streifen **und** Kachel-Diagramm gemeinsam umschaltet. Der Streifen zeigt die Werte der jeweiligen Metrik: Niederschlag → **mm + Regenwahrscheinlichkeit**, Wind → **Geschwindigkeit + Böe mit gedrehtem Richtungspfeil**, Luftfeuchte/Bewölkung → %, Luftdruck → hPa, UV → Index, Temperatur → °C (täglich mit Hoch/Tief). Daten aus der HA-Wetter-Entität (`weather.get_forecasts` → Live-Abo → Legacy-Attribut).
 - 📈 **Diagramme pro Metrik**: Linie, Balken, Fortschrittsbalken oder keins
 - 🌧️ **Niederschlag nach Tageszeit** (`parts`): Segmentbalken + Aufschlüsselung (Morgen/Mittag/Abend/Nacht), plus eine Regen-Ereignis-Timeline im Popup
 - 💨 **Wind** mit Böen (`entity2`) und einer **Kompass-Rose** im Popup (Windrichtung + Geschwindigkeit)
@@ -159,7 +159,7 @@ metrics: [...]
 | `moon`         | `mdi:moon-waning-crescent`  | blue-grey   | Scheibe  | Mondphase mit korrektem Terminator + Beleuchtung   |
 | `tides`        | `mdi:waves`                 | light-blue  | Welle    | Gezeiten-Kurve mit Jetzt-Marker, Flut/Ebbe-Zeiten  |
 | `pollen`       | `mdi:flower-pollen`         | green       | Segmente | DWD-Pollenindex je Allergen mit 3-Tage-Umschalter  |
-| `radar`        | `mdi:radar`                 | blue        | Bild     | Wetterradar aus einer `camera.*`-Entität oder URL  |
+| `radar`        | `mdi:radar`                 | blue        | Karte    | Live-Radar-iframe (Windy/RainViewer) auf Home-Koordinaten |
 | `sky`          | `mdi:weather-partly-cloudy` | blue        | Szene    | Große animierte Himmel-Szene mit Vorhersage + Daten-Chips |
 | `summary`      | `mdi:creation`              | deep-purple | Text     | AI-/Text-Zusammenfassung                           |
 | `custom`       | `mdi:chart-line`            | primary     | line     | Beliebiger Sensor                                  |
@@ -202,7 +202,10 @@ metrics: [...]
 | **Gezeiten (`tides`)** |         |                                                                        |
 | `high_tide_entity` / `low_tide_entity` | – | Zeit-Entitäten für nächste Flut/Ebbe (sonst aus den Attributen) |
 | **Radar (`radar`)** |            |                                                                        |
-| `image_url` / `refresh`  | –      | Feste Bild-URL (statt Kamera) · Auto-Aktualisierung in Sekunden        |
+| `provider`       | string        | `windy` (Default) oder `rainviewer`                                    |
+| `latitude` / `longitude` / `zoom` | – | Kartenzentrum (Default: HA-Home) und Zoom (Default 8)          |
+| `url`            | string        | Eigene iFrame-URL (überschreibt die Quelle)                            |
+| `image_url`      | string        | Legacy: statisches Radarbild statt der Live-Karte                      |
 | **Zusammenfassung (`summary`)** |               |                                                          |
 | `summary_entity` | string        | Text-Sensor mit fertiger Zusammenfassung (z. B. LLM/AI Task)         |
 | `summary_sources`| list          | Quell-Sensoren für die selbst erzeugte Zusammenfassung               |

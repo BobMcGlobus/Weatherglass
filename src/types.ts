@@ -10,6 +10,8 @@ export interface HomeAssistant {
   states: Record<string, HassEntity>;
   language: string;
   locale?: { language: string };
+  /** home coordinates — default center for the radar map */
+  config?: { latitude?: number; longitude?: number };
   callWS<T>(msg: Record<string, unknown>): Promise<T>;
   /** Optional: modern forecast subscriptions when the connection exposes it */
   connection?: {
@@ -192,7 +194,16 @@ export interface MetricConfig {
   low_tide_entity?: string;
 
   /** ---- radar ---------------------------------------------------------- */
-  /** Static radar image URL (alternative to a camera.* entity) */
+  /** Embedded online radar to use (default windy) */
+  provider?: 'windy' | 'rainviewer';
+  /** Map center (default: Home Assistant home coordinates) */
+  latitude?: number;
+  longitude?: number;
+  /** Map zoom level (default 8) */
+  zoom?: number;
+  /** Custom iframe URL (overrides the provider) */
+  url?: string;
+  /** Legacy: static radar image URL instead of the embedded map */
   image_url?: string;
   /** Auto-refresh interval in seconds for the radar image/camera */
   refresh?: number;

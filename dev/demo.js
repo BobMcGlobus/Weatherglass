@@ -284,6 +284,7 @@ function forecastFor(type) {
         precipitation: i % 5 === 0 ? +(rand() * 2).toFixed(1) : 0,
         precipitation_probability: (i * 13) % 100,
         wind_speed: 10 + (i % 5) * 3 + Math.round(4 * Math.sin(i / 3)),
+        wind_gust_speed: 18 + (i % 5) * 4 + Math.round(5 * Math.sin(i / 3)),
         wind_bearing: (200 + i * 6) % 360,
         humidity: Math.round(60 + 14 * Math.sin((i - 4) / 5)),
         pressure: Math.round(1012 + 4 * Math.sin(i / 7) + i * 0.15),
@@ -317,6 +318,7 @@ const hass = {
   states,
   language: 'de',
   locale: { language: 'de' },
+  config: { latitude: 52.52, longitude: 13.405 },
   callWS: async (msg) => {
     if (msg.type === 'history/history_during_period') {
       const start = new Date(msg.start_time).getTime();
@@ -415,7 +417,7 @@ const config = {
         'sensor.pollenflug_hasel_124',
       ],
     },
-    { type: 'radar', entity: 'camera.regenradar' },
+    { type: 'radar', zoom: 7 },
   ],
 };
 
