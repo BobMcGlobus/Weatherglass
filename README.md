@@ -15,7 +15,7 @@ Vollständig Theme-kompatibel (Light & Dark).
 - 📅 **Vorhersage zuerst**: Kachel-Diagramme zeigen, was **kommt** — stündliche Prognose-Kurven/-Balken mit Stunden-Achse und „Jetzt"-Punkt; auch der Trend-Pfeil beschreibt die kommende Entwicklung. Der Verlauf (historische Daten) wohnt im Detail-Popup (Zeiträume: Tag stündlich / Woche / Monat / 3M / Jahr / Max). Umschaltbar je Kachel per `chart_source: history`.
 - 🎨 **Cleaner Look**: Kacheln mit großen Werten, Icon-Chips und weichen Kurven
 - 🌗 **100 % Theme-Support**: nutzt ausschließlich HA-Theme-Variablen (`--primary-text-color`, `--ha-card-background`, `--red-color`, …)
-- 🌤️ **Himmel-Szene** (`type: sky`): das animierte Herzstück. Der Himmelsverlauf folgt der **echten Sonnen-Elevation** (Nacht → Dämmerungsrosa → goldene Stunde → Tag), die Sonne steht auf ihrer wahren Höhe (pulsierender Glow, drehende Strahlen), nachts funkeln Sterne (mit gelegentlicher Sternschnuppe) um den Mond. Wolken driften auf **drei Parallax-Ebenen** (die hinterste unscharf) in Windgeschwindigkeit, Regen fällt **windschräg** in zwei Tiefen (bei Starkregen mit Boden-Splashes), Schnee taumelt, Blitze erhellen die ganze Szene, Nebelbänke ziehen, bei klarem Tag kreuzen Vögel. Eine **Hügel-Silhouette mit Tannen** erdet die Szene und dunkelt nachts ab. Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, frei platzierbare **Wert-Anker** sitzen auf der Szene, ein `score_entity` legt eine pulsierende Warn-Vignette darüber.
+- 🌤️ **Himmel-Szene** (`type: sky`): das animierte Herzstück. Der Himmelsverlauf folgt der **echten Sonnen-Elevation** (Nacht → Dämmerungsrosa → goldene Stunde → Tag), die Sonne steht auf ihrer wahren Höhe (pulsierender Glow, drehende Strahlen), nachts funkeln Sterne (mit gelegentlicher Sternschnuppe) um den Mond. Wolken driften auf **drei Parallax-Ebenen** (die hinterste unscharf) in Windgeschwindigkeit, Regen fällt **windschräg** in zwei Tiefen (bei Starkregen mit Boden-Splashes), Schnee taumelt, Blitze erhellen die ganze Szene, Nebelbänke ziehen, bei klarem Tag kreuzen Vögel. **Grüne Hügel mit Tannen** erden die Szene — saftig bei schönem Wetter, schneebedeckt bei Schnee, entsättigt bei Sturm, Silhouetten bei Nacht. Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, ein `score_entity` legt eine pulsierende Warn-Vignette darüber. Unter der Szene: ein **Stündlich/Täglich-Umschalter** für den Vorhersagestreifen und eine **Datenzeile mit beschrifteten Chips** (`details`; ohne Konfiguration automatisch Wind/Luftfeuchte/Luftdruck/UV aus der Wetter-Entität).
 - 🌅 **Sonnen-Bogen** (`type: sun`): Sonnenauf- und -untergang als Tageslicht-Bogen mit Sonnen-Marker am aktuellen Stand, Tageslänge und „Untergang in X" — das Wetter-Pendant zum Zyklus-Ring.
 - 🌙 **Mondphase** (`type: moon`): Mondscheibe mit exakt berechnetem Terminator (Sichel/Halb/Voll, zu-/abnehmend), Phasenname und Beleuchtung in %.
 - 🌊 **Gezeiten** (`type: tides`): Tiden-Kurve über den Tag mit Jetzt-Marker (aus der Recorder-History oder synthetisch halbtägig), aktuellem Pegel und nächster Flut/Ebbe-Zeit.
@@ -63,17 +63,12 @@ metrics:
   - type: sky                # große animierte Himmel-Szene
     entity: weather.home
     score_entity: sensor.warnstufe
-    anchors:
-      - entity: sensor.wind
-        name: Wind
-        x: 78
-        y: 20
-        dot: left
-      - entity: sensor.luftfeuchte
-        name: Feuchte
-        x: 24
-        y: 74
-        dot: right
+    # Daten-Chips unter der Vorhersage (weglassen = automatisch aus weather.home)
+    details:
+      - sensor.wind
+      - sensor.luftfeuchte
+      - sensor.luftdruck
+      - sensor.uv
   - type: summary            # AI-/Text-Zusammenfassung
     # summary_entity: sensor.wetter_text_ki   # optional: fertiger LLM-Text
   - type: temperature
@@ -159,7 +154,7 @@ metrics: [...]
 | `tides`        | `mdi:waves`                 | light-blue  | Welle    | Gezeiten-Kurve mit Jetzt-Marker, Flut/Ebbe-Zeiten  |
 | `pollen`       | `mdi:flower-pollen`         | green       | Balken   | Pollenbelastung je Allergen, nach Stufe eingefärbt |
 | `radar`        | `mdi:radar`                 | blue        | Bild     | Wetterradar aus einer `camera.*`-Entität oder URL  |
-| `sky`          | `mdi:weather-partly-cloudy` | blue        | Szene    | Große animierte Himmel-Szene mit Ankern            |
+| `sky`          | `mdi:weather-partly-cloudy` | blue        | Szene    | Große animierte Himmel-Szene mit Vorhersage + Daten-Chips |
 | `summary`      | `mdi:creation`              | deep-purple | Text     | AI-/Text-Zusammenfassung                           |
 | `custom`       | `mdi:chart-line`            | primary     | line     | Beliebiger Sensor                                  |
 
@@ -192,8 +187,8 @@ metrics: [...]
 | `sun_entity`     | string        | `sun.sun` für Tag/Nacht                                               |
 | `wind_entity`    | string        | stärkerer Wind → schnellere Wolken                                    |
 | `night`          | bool          | Nachtmodus erzwingen                                                   |
-| `anchors`        | list          | Wert-Labels auf der Szene (`{entity, name, x, y, dot}`)               |
-| `label_opacity` / `scene_offset_y` | – | Feinjustierung                                            |
+| `details`        | list          | Beschriftete Wert-Chips unter der Vorhersage (Entity-IDs oder `{entity, name, attribute, unit}`); Default: Wind/Feuchte/Druck/UV aus der Wetter-Entität |
+| `scene_offset_y` | number        | Feinjustierung (vertikaler Versatz %)                                  |
 | **Sonne (`sun`)** |              |                                                                        |
 | `sun_entity` / `sunrise_entity` / `sunset_entity` / `moon_entity` | – | Sonnen-/Zeit-Quellen                    |
 | **Mond (`moon`)** |              |                                                                        |

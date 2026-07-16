@@ -2,7 +2,6 @@ import { LitElement, html, css, nothing } from 'lit';
 import type { TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type {
-  SkyAnchor,
   HomeAssistant,
   MetricConfig,
   MetricType,
@@ -99,16 +98,7 @@ const LABELS: Record<string, Record<string, string>> = {
     wind_entity: 'Wind entity (cloud drift)',
     night: 'Force night mode',
     scene_offset_y: 'Scene vertical offset %',
-    label_opacity: 'Label opacity',
-    anchors: 'Value labels on the scene',
-    add_anchor: 'Add label',
-    anchor_x: 'X %',
-    anchor_y: 'Y %',
-    dot: 'Dot position',
-    dot_left: 'left',
-    dot_right: 'right',
-    dot_top: 'top',
-    dot_bottom: 'bottom',
+    details: 'Values below the forecast (labeled chips)',
     sunrise_entity: 'Sunrise entity (optional)',
     sunset_entity: 'Sunset entity (optional)',
     moon_entity: 'Moon phase entity (optional)',
@@ -213,16 +203,7 @@ const LABELS: Record<string, Record<string, string>> = {
     wind_entity: 'Wind-Entität (Wolken-Drift)',
     night: 'Nachtmodus erzwingen',
     scene_offset_y: 'Vertikaler Versatz %',
-    label_opacity: 'Label-Deckkraft',
-    anchors: 'Wert-Labels auf der Szene',
-    add_anchor: 'Label hinzufügen',
-    anchor_x: 'X %',
-    anchor_y: 'Y %',
-    dot: 'Punkt-Position',
-    dot_left: 'links',
-    dot_right: 'rechts',
-    dot_top: 'oben',
-    dot_bottom: 'unten',
+    details: 'Werte unter der Vorhersage (Chips)',
     sunrise_entity: 'Sonnenaufgang-Entität (optional)',
     sunset_entity: 'Sonnenuntergang-Entität (optional)',
     moon_entity: 'Mondphasen-Entität (optional)',
@@ -530,10 +511,7 @@ export class WeatherCardEditor extends LitElement {
               },
             ],
           },
-          {
-            name: 'label_opacity',
-            selector: { number: { min: 0, max: 1, step: 0.05, mode: 'slider' } },
-          },
+          { name: 'details', selector: { entity: { multiple: true } } },
           { name: 'night', selector: { boolean: {} } },
         ];
 
@@ -721,116 +699,7 @@ export class WeatherCardEditor extends LitElement {
         .computeLabel=${(s: { name: string }) => this._label(s.name)}
         @value-changed=${(ev: CustomEvent) => this._metricChanged(ev, i)}
       ></ha-form>
-      ${active === 'sky' ? this._renderAnchorEditor(m, i) : nothing}
     </div>`;
-  }
-
-  private _anchorSchema(): unknown[] {
-    return [
-      { name: 'entity', selector: { entity: {} } },
-      {
-        type: 'grid',
-        name: '',
-        schema: [
-          { name: 'name', selector: { text: {} } },
-          {
-            name: 'color',
-            selector: {
-              select: {
-                mode: 'dropdown',
-                custom_value: true,
-                options: COLOR_NAMES.map((c) => ({ value: c, label: c })),
-              },
-            },
-          },
-          { name: 'anchor_x', selector: { number: { min: 0, max: 100, mode: 'box' } } },
-          { name: 'anchor_y', selector: { number: { min: 0, max: 100, mode: 'box' } } },
-          {
-            name: 'dot',
-            selector: {
-              select: {
-                mode: 'dropdown',
-                options: [
-                  { value: 'left', label: '← ' + this._label('dot_left') },
-                  { value: 'right', label: '→ ' + this._label('dot_right') },
-                  { value: 'top', label: '↑ ' + this._label('dot_top') },
-                  { value: 'bottom', label: '↓ ' + this._label('dot_bottom') },
-                  { value: 'top-left', label: '↖' },
-                  { value: 'top-right', label: '↗' },
-                  { value: 'bottom-left', label: '↙' },
-                  { value: 'bottom-right', label: '↘' },
-                ],
-              },
-            },
-          },
-        ],
-      },
-      { name: 'entity2', selector: { entity: {} } },
-    ];
-  }
-
-  private _renderAnchorEditor(m: MetricConfig, mi: number): TemplateResult {
-    const anchors = m.anchors ?? [];
-    return html`
-      <div class="anchor-editor">
-        <div class="anchor-editor-title">${this._label('anchors')}</div>
-        ${anchors.map(
-          (a, ai) => html`
-            <div class="anchor-row">
-              <ha-form
-                .hass=${this.hass}
-                .data=${{ ...a, anchor_x: a.x, anchor_y: a.y }}
-                .schema=${this._anchorSchema()}
-                .computeLabel=${(s: { name: string }) => this._label(s.name)}
-                @value-changed=${(ev: CustomEvent) => this._anchorChanged(ev, mi, ai)}
-              ></ha-form>
-              <button class="icon-btn danger" title="✕" @click=${() => this._removeAnchor(mi, ai)}>
-                <ha-icon icon="mdi:delete-outline"></ha-icon>
-              </button>
-            </div>
-          `
-        )}
-        <button class="add small" @click=${() => this._addAnchor(mi)}>
-          <ha-icon icon="mdi:plus"></ha-icon>
-          ${this._label('add_anchor')}
-        </button>
-      </div>
-    `;
-  }
-
-  private _anchorChanged(ev: CustomEvent, mi: number, ai: number): void {
-    ev.stopPropagation();
-    if (!this._config) return;
-    const v = { ...(ev.detail.value as Record<string, unknown>) };
-    const anchor: Record<string, unknown> = {};
-    if (v.entity) anchor.entity = v.entity;
-    if (v.entity2) anchor.entity2 = v.entity2;
-    if (v.name) anchor.name = v.name;
-    if (v.color) anchor.color = v.color;
-    if (v.anchor_x !== undefined && v.anchor_x !== null) anchor.x = v.anchor_x;
-    if (v.anchor_y !== undefined && v.anchor_y !== null) anchor.y = v.anchor_y;
-    if (v.dot) anchor.dot = v.dot;
-    const metrics = [...this._config.metrics];
-    const anchors = [...(metrics[mi].anchors ?? [])];
-    anchors[ai] = anchor as unknown as SkyAnchor;
-    metrics[mi] = { ...metrics[mi], anchors };
-    this._emit({ ...this._config, metrics });
-  }
-
-  private _addAnchor(mi: number): void {
-    if (!this._config) return;
-    const metrics = [...this._config.metrics];
-    const anchors = [...(metrics[mi].anchors ?? []), { entity: '', x: 50, y: 20 }];
-    metrics[mi] = { ...metrics[mi], anchors };
-    this._emit({ ...this._config, metrics });
-  }
-
-  private _removeAnchor(mi: number, ai: number): void {
-    if (!this._config) return;
-    const metrics = [...this._config.metrics];
-    const anchors = (metrics[mi].anchors ?? []).filter((_, i) => i !== ai);
-    metrics[mi] = { ...metrics[mi], anchors };
-    this._emit({ ...this._config, metrics });
   }
 
   private _emit(config: WeatherCardConfig): void {
@@ -1043,30 +912,6 @@ export class WeatherCardEditor extends LitElement {
       margin-top: 8px;
       padding: 6px 12px;
       font-size: 13px;
-    }
-    .anchor-editor {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid var(--divider-color);
-    }
-    .anchor-editor-title {
-      font-weight: 500;
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: var(--primary-text-color);
-    }
-    .anchor-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
-      padding: 8px;
-      margin-bottom: 8px;
-      border: 1px solid var(--divider-color);
-      border-radius: 10px;
-    }
-    .anchor-row ha-form {
-      flex: 1;
-      min-width: 0;
     }
   `;
 }

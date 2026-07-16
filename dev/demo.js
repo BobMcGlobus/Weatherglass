@@ -361,10 +361,8 @@ const config = {
       type: 'sky',
       entity: 'weather.home',
       score_entity: 'sensor.warnstufe',
-      anchors: [
-        { entity: 'sensor.wind', name: 'Wind', x: 78, y: 20, dot: 'left' },
-        { entity: 'sensor.luftfeuchte', name: 'Feuchte', x: 24, y: 74, dot: 'right' },
-      ],
+      // labeled chips under the forecast; omit to auto-fill from the weather entity
+      details: ['sensor.wind', 'sensor.luftfeuchte', 'sensor.luftdruck', 'sensor.uv'],
     },
     { type: 'summary' },
     { type: 'temperature', entity: 'sensor.aussentemperatur', expanded: true },

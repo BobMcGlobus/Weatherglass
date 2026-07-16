@@ -12,7 +12,6 @@ import type {
   MetricConfig,
   MetricType,
   SeriesConfig,
-  SkyAnchor,
   TrendMode,
   WeatherCardConfig,
 } from './types';
@@ -60,7 +59,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.3.1';
+const CARD_VERSION = '0.4.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -148,6 +147,8 @@ export class WeatherCard extends LitElement {
   @state() private _popup: number | null = null;
   @state() private _popupRange: string | null = null;
   @state() private _tileRanges: Record<number, string> = {};
+  /** sky tiles: chosen forecast resolution per metric index */
+  @state() private _skyRanges: Record<number, ForecastType> = {};
   @state() private _statsCache: Record<string, StatsMap> = {};
   @state() private _forecasts: Record<string, ForecastPoint[]> = {};
   private _statsCacheTime: Record<string, number> = {};
@@ -262,7 +263,11 @@ export class WeatherCard extends LitElement {
       const type = m.type ?? 'custom';
       const id = this._forecastId(m);
       if (!id || !this.hass.states[id]) return;
-      if (FORECAST_TYPES.includes(type) || type === 'summary' || m.forecast) {
+      if (type === 'sky') {
+        // the sky tile can toggle between resolutions — keep both warm
+        need.add(`${id}|hourly`);
+        need.add(`${id}|daily`);
+      } else if (FORECAST_TYPES.includes(type) || type === 'summary' || m.forecast) {
         need.add(`${id}|${m.forecast_type ?? this._defaultForecastType(type)}`);
       }
     });
@@ -355,10 +360,6 @@ export class WeatherCard extends LitElement {
       for (const id of Object.values(m.parts ?? {})) if (id) ids.add(id);
       if (m.score_entity) ids.add(m.score_entity);
       if (m.wind_entity) ids.add(m.wind_entity);
-      for (const a of m.anchors ?? []) {
-        ids.add(a.entity);
-        if (a.entity2) ids.add(a.entity2);
-      }
       for (const b of m.breakdown ?? []) ids.add(typeof b === 'string' ? b : b.entity);
     }
     // weather.* entities have non-numeric states; exclude from history
@@ -1150,19 +1151,6 @@ export class WeatherCard extends LitElement {
     return typeof v === 'number' ? v : parseFloat(v);
   }
 
-  private static readonly SKY_ANCHOR_POS: Record<
-    string,
-    { x: number; y: number; dir: string }
-  > = {
-    top: { x: 50, y: 12, dir: 'bottom' },
-    'top-left': { x: 22, y: 16, dir: 'right' },
-    'top-right': { x: 78, y: 16, dir: 'left' },
-    center: { x: 50, y: 48, dir: 'top' },
-    'bottom-left': { x: 24, y: 78, dir: 'right' },
-    'bottom-right': { x: 76, y: 78, dir: 'left' },
-    bottom: { x: 50, y: 84, dir: 'top' },
-  };
-
   private _renderSky(c: MetricCtx, index: number): TemplateResult {
     const m = c.m;
     const weatherState = c.primaryState!;
@@ -1200,7 +1188,7 @@ export class WeatherCard extends LitElement {
     const hi = today?.temperature;
     const lo = today?.templow;
 
-    const anchors = (m.anchors ?? []).filter((a) => this.hass.states[a.entity]);
+    const ftype: ForecastType = this._skyRanges[index] ?? m.forecast_type ?? 'daily';
 
     return html`
       <div
@@ -1234,52 +1222,90 @@ export class WeatherCard extends LitElement {
                 </div>`
               : nothing}
           </div>
-          ${anchors.map((a, i) => this._renderAnchor(a, i, m))}
+        </div>
+        <div class="periods sky-periods">
+          ${(['hourly', 'daily'] as ForecastType[]).map(
+            (ft) => html`<button
+              class="period ${ftype === ft ? 'active' : ''}"
+              @click=${(e: Event) => {
+                e.stopPropagation();
+                this._skyRanges = { ...this._skyRanges, [index]: ft };
+              }}
+            >
+              ${t(this.hass, ft === 'hourly' ? 'forecast_hourly' : 'forecast_daily')}
+            </button>`
+          )}
         </div>
         ${this._renderForecast(
-          this._forecastFor(this._forecastId(m), m.forecast_type ?? 'daily'),
-          m.forecast_type ?? 'daily',
-          m.forecast_count ?? 7
+          this._forecastFor(this._forecastId(m), ftype),
+          ftype,
+          m.forecast_count ?? (ftype === 'hourly' ? 8 : 7)
         )}
+        ${this._renderSkyDetails(m, weatherState)}
       </div>
     `;
   }
 
-  private _renderAnchor(a: SkyAnchor, i: number, m: MetricConfig): TemplateResult | typeof nothing {
-    const base = WeatherCard.SKY_ANCHOR_POS[a.position ?? 'top-right'];
-    const st = this.hass.states[a.entity];
-    if (!base || !st) return nothing;
-    let dir: string;
-    if (a.dot) dir = a.dot;
-    else {
-      let side = base.dir;
-      if (a.flip) side = side === 'right' ? 'left' : side === 'left' ? 'right' : side;
-      dir = side;
+  /**
+   * Labeled value chips under the sky forecast. Configured via `details`;
+   * without config they fall back to wind / humidity / pressure / UV read
+   * from the weather entity's attributes.
+   */
+  private _renderSkyDetails(
+    m: MetricConfig,
+    weatherState: HassEntity
+  ): TemplateResult | typeof nothing {
+    const items: Array<{ label: string; value: string }> = [];
+    if (m.details?.length) {
+      for (const d of m.details) {
+        const cfg = typeof d === 'string' ? { entity: d } : d;
+        const st = this.hass.states[cfg.entity];
+        if (!st) continue;
+        const v = this._numeric(st, cfg.attribute);
+        const unit = cfg.unit ?? st.attributes.unit_of_measurement ?? '';
+        items.push({
+          label: cfg.name ?? st.attributes.friendly_name ?? cfg.entity,
+          value: Number.isFinite(v) ? joinUnit(fmtNumber(this.hass, v), unit) : st.state,
+        });
+      }
+    } else if (weatherState.entity_id.startsWith('weather.')) {
+      const a = weatherState.attributes;
+      const num = (x: unknown) => (typeof x === 'number' && Number.isFinite(x) ? x : NaN);
+      const windV = num(a.wind_speed);
+      if (Number.isFinite(windV)) {
+        const dir = windDir(this.hass, num(a.wind_bearing));
+        items.push({
+          label: t(this.hass, 'wind'),
+          value: `${joinUnit(fmtNumber(this.hass, windV, 0), a.wind_speed_unit ?? 'km/h')}${dir ? ` ${dir}` : ''}`,
+        });
+      }
+      const hum = num(a.humidity);
+      if (Number.isFinite(hum)) {
+        items.push({
+          label: t(this.hass, 'humidity'),
+          value: joinUnit(fmtNumber(this.hass, hum, 0), '%'),
+        });
+      }
+      const pres = num(a.pressure);
+      if (Number.isFinite(pres)) {
+        items.push({
+          label: t(this.hass, 'pressure'),
+          value: joinUnit(fmtNumber(this.hass, pres, 0), a.pressure_unit ?? 'hPa'),
+        });
+      }
+      const uv = num(a.uv_index);
+      if (Number.isFinite(uv)) {
+        items.push({ label: t(this.hass, 'uv'), value: fmtNumber(this.hass, uv, 0) });
+      }
     }
-    const x = a.x ?? base.x;
-    const y = a.y ?? base.y;
-    const color =
-      resolveColor(a.color) ?? resolveColor(SERIES_PALETTE[i % SERIES_PALETTE.length])!;
-    const v = this._numeric(st);
-    let value: string;
-    if (a.entity2) {
-      const v2 = this._numeric(this.hass.states[a.entity2]);
-      value = `${fmtNumber(this.hass, v, 0)}/${fmtNumber(this.hass, v2, 0)}`;
-    } else {
-      value = Number.isFinite(v)
-        ? joinUnit(fmtNumber(this.hass, v), st.attributes.unit_of_measurement ?? '')
-        : st.state;
-    }
-    const op = m.label_opacity ?? 1;
-    return html`<div
-      class="anchor dot-${dir}"
-      style="left:${x}%;top:${y}%;--ac:${color};--wc-label-op:${op}"
-    >
-      <span class="anchor-dot"></span>
-      <div class="anchor-chip">
-        <span class="anchor-name">${a.name ?? st.attributes.friendly_name ?? ''}</span>
-        <span class="anchor-val">${value}</span>
-      </div>
+    if (!items.length) return nothing;
+    return html`<div class="sky-details">
+      ${items.map(
+        (it) => html`<div class="skd">
+          <div class="skd-label">${it.label}</div>
+          <div class="skd-value">${it.value}</div>
+        </div>`
+      )}
     </div>`;
   }
 
@@ -2752,76 +2778,50 @@ export class WeatherCard extends LitElement {
       color: var(--wc-accent);
     }
 
-    /* ---- anchors (pinned values on the sky) ---------------------------- */
-    .anchor {
-      position: absolute;
-      pointer-events: none;
-      --gap: 9px;
-      --dg: 2px;
+    /* ---- sky forecast toggle + detail chips ---------------------------- */
+    .sky-periods {
+      justify-content: flex-end;
+      margin-top: 2px;
     }
-    .anchor-dot {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--ac);
-      border: 2px solid var(--wc-card-bg);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    .sky-periods .period {
+      padding: 4px 12px;
+      font-size: 11px;
     }
-    .anchor-chip {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: color-mix(
-        in srgb,
-        var(--wc-card-bg) calc(var(--wc-label-op, 1) * 100%),
-        transparent
-      );
-      border-radius: 10px;
-      padding: 4px 9px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, calc(var(--wc-label-op, 1) * 0.16));
-      display: flex;
-      flex-direction: column;
-      line-height: 1.25;
-      white-space: nowrap;
+    .sky-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+      gap: 6px;
     }
-    .anchor.dot-right .anchor-chip { transform: translate(calc(-100% - var(--gap)), -50%); }
-    .anchor.dot-left .anchor-chip { transform: translate(var(--gap), -50%); }
-    .anchor.dot-bottom .anchor-chip { transform: translate(-50%, calc(-100% - var(--gap))); }
-    .anchor.dot-top .anchor-chip { transform: translate(-50%, var(--gap)); }
-    .anchor.dot-bottom-right .anchor-chip { transform: translate(calc(-100% - var(--dg)), calc(-100% - var(--dg))); }
-    .anchor.dot-bottom-left .anchor-chip { transform: translate(var(--dg), calc(-100% - var(--dg))); }
-    .anchor.dot-top-right .anchor-chip { transform: translate(calc(-100% - var(--dg)), var(--dg)); }
-    .anchor.dot-top-left .anchor-chip { transform: translate(var(--dg), var(--dg)); }
-    .s-glass .anchor-chip {
-      border: 1px solid color-mix(in srgb, #fff 30%, transparent);
-      -webkit-backdrop-filter: blur(8px) saturate(1.4);
-      backdrop-filter: blur(8px) saturate(1.4);
-      box-shadow:
-        inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent),
-        0 4px 14px rgba(0, 0, 0, 0.16);
+    .skd {
+      background: color-mix(in srgb, var(--primary-text-color) 4%, transparent);
+      border-radius: 12px;
+      padding: 6px 8px;
+      text-align: center;
+      min-width: 0;
     }
-    .s-material .anchor-chip { border-radius: 14px; }
-    .s-bubble .anchor-chip { border-radius: 14px; }
-    .anchor-name {
-      font-size: 10px;
-      font-weight: 600;
+    .skd-label {
+      font-size: 11px;
       color: var(--secondary-text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .anchor-val {
-      font-size: 12px;
+    .skd-value {
+      font-size: 14px;
       font-weight: 700;
       color: var(--primary-text-color);
+      white-space: nowrap;
     }
-    .s-mirror .anchor-chip {
+    .s-glass .skd {
+      border: 1px solid color-mix(in srgb, #fff 22%, transparent);
+    }
+    .s-mirror .skd {
       background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
-    .s-mirror .anchor-dot { border-color: #000; }
+    .s-mirror .skd-value {
+      color: #fff;
+    }
 
     /* ---- detail popup -------------------------------------------------- */
     .backdrop {

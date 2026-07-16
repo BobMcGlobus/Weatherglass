@@ -103,11 +103,19 @@ function derive(o: SkyOpts): Scene {
   const horizon = Math.max(0, 1 - Math.abs(e - 1) / 13) * (1 - gloom * 0.8);
   const horizonColor = e <= 2 ? '#ff7d4a' : mix('#ff9d5c', '#ffd28a', Math.min((e - 2) / 12, 1));
 
+  // lush green meadows in fair weather — dulled by gloom, snow-covered when
+  // it snows, washed warm at golden hour, darkening into silhouettes at night
+  const snowGround = c === 'snowy' || c === 'snowy-rainy' || c === 'hail';
+  const nightF = e >= 10 ? 0 : e <= -8 ? 1 : (10 - e) / 18;
+  let backBase = snowGround ? '#dfe7f0' : mix('#69a86b', '#7c8794', gloom * 0.5);
+  let frontBase = snowGround ? '#cdd8e4' : mix('#4a8a54', '#5c6875', gloom * 0.5);
+  backBase = mix(backBase, horizonColor, horizon * 0.18);
+  frontBase = mix(frontBase, horizonColor, horizon * 0.12);
   // atmospheric perspective: the farther the ridge, the closer to the sky
-  const ridgeFar = mix(sky[2], sky[1], 0.45);
-  const hillBack = mix(mix(sky[2], '#0a0f18', isNight ? 0.62 : 0.34), sky[1], 0.12);
-  const hillFront = mix(sky[2], '#0a0f18', isNight ? 0.84 : 0.58);
-  const tree = mix(sky[2], '#060a12', isNight ? 0.92 : 0.72);
+  const ridgeFar = mix(mix(backBase, sky[1], 0.62), '#0b1220', nightF * 0.6);
+  const hillBack = mix(mix(backBase, sky[2], 0.26), '#0b1220', nightF * 0.75);
+  const hillFront = mix(mix(frontBase, sky[2], 0.1), '#080d18', nightF * 0.85);
+  const tree = mix(snowGround ? '#2a4d36' : '#2f5f3a', '#050a10', nightF * 0.85 + gloom * 0.08);
 
   const cloudFill = isNight
     ? mix('#93a3c0', '#4f5c74', gloom)

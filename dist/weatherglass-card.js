@@ -3,18 +3,18 @@
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const yt = globalThis, Pt = yt.ShadowRoot && (yt.ShadyCSS === void 0 || yt.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, Lt = Symbol(), Ut = /* @__PURE__ */ new WeakMap();
-let ye = class {
-  constructor(t, i, r) {
-    if (this._$cssResult$ = !0, r !== Lt) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+const gt = globalThis, Pt = gt.ShadowRoot && (gt.ShadyCSS === void 0 || gt.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, Lt = Symbol(), Bt = /* @__PURE__ */ new WeakMap();
+let ge = class {
+  constructor(t, i, s) {
+    if (this._$cssResult$ = !0, s !== Lt) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
     this.cssText = t, this.t = i;
   }
   get styleSheet() {
     let t = this.o;
     const i = this.t;
     if (Pt && t === void 0) {
-      const r = i !== void 0 && i.length === 1;
-      r && (t = Ut.get(i)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), r && Ut.set(i, t));
+      const s = i !== void 0 && i.length === 1;
+      s && (t = Bt.get(i)), t === void 0 && ((this.o = t = new CSSStyleSheet()).replaceSync(this.cssText), s && Bt.set(i, t));
     }
     return t;
   }
@@ -22,33 +22,33 @@ let ye = class {
     return this.cssText;
   }
 };
-const Fe = (e) => new ye(typeof e == "string" ? e : e + "", void 0, Lt), _e = (e, ...t) => {
-  const i = e.length === 1 ? e[0] : t.reduce((r, s, n) => r + ((o) => {
+const Ee = (e) => new ge(typeof e == "string" ? e : e + "", void 0, Lt), ye = (e, ...t) => {
+  const i = e.length === 1 ? e[0] : t.reduce((s, r, n) => s + ((o) => {
     if (o._$cssResult$ === !0) return o.cssText;
     if (typeof o == "number") return o;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + o + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-  })(s) + e[n + 1], e[0]);
-  return new ye(i, e, Lt);
-}, Ce = (e, t) => {
+  })(r) + e[n + 1], e[0]);
+  return new ge(i, e, Lt);
+}, Fe = (e, t) => {
   if (Pt) e.adoptedStyleSheets = t.map((i) => i instanceof CSSStyleSheet ? i : i.styleSheet);
   else for (const i of t) {
-    const r = document.createElement("style"), s = yt.litNonce;
-    s !== void 0 && r.setAttribute("nonce", s), r.textContent = i.cssText, e.appendChild(r);
+    const s = document.createElement("style"), r = gt.litNonce;
+    r !== void 0 && s.setAttribute("nonce", r), s.textContent = i.cssText, e.appendChild(s);
   }
-}, Bt = Pt ? (e) => e : (e) => e instanceof CSSStyleSheet ? ((t) => {
+}, Ut = Pt ? (e) => e : (e) => e instanceof CSSStyleSheet ? ((t) => {
   let i = "";
-  for (const r of t.cssRules) i += r.cssText;
-  return Fe(i);
+  for (const s of t.cssRules) i += s.cssText;
+  return Ee(i);
 })(e) : e;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Te, defineProperty: Re, getOwnPropertyDescriptor: De, getOwnPropertyNames: ze, getOwnPropertySymbols: Pe, getPrototypeOf: Le } = Object, U = globalThis, Gt = U.trustedTypes, Oe = Gt ? Gt.emptyScript : "", $t = U.reactiveElementPolyfillSupport, st = (e, t) => e, _t = { toAttribute(e, t) {
+const { is: Ce, defineProperty: Te, getOwnPropertyDescriptor: Re, getOwnPropertyNames: De, getOwnPropertySymbols: ze, getPrototypeOf: Pe } = Object, U = globalThis, Gt = U.trustedTypes, Le = Gt ? Gt.emptyScript : "", vt = U.reactiveElementPolyfillSupport, rt = (e, t) => e, yt = { toAttribute(e, t) {
   switch (t) {
     case Boolean:
-      e = e ? Oe : null;
+      e = e ? Le : null;
       break;
     case Object:
     case Array:
@@ -73,9 +73,9 @@ const { is: Te, defineProperty: Re, getOwnPropertyDescriptor: De, getOwnProperty
       }
   }
   return i;
-} }, Ot = (e, t) => !Te(e, t), Vt = { attribute: !0, type: String, converter: _t, reflect: !1, useDefault: !1, hasChanged: Ot };
+} }, Ot = (e, t) => !Ce(e, t), Vt = { attribute: !0, type: String, converter: yt, reflect: !1, useDefault: !1, hasChanged: Ot };
 Symbol.metadata ?? (Symbol.metadata = Symbol("metadata")), U.litPropertyMetadata ?? (U.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
-let Z = class extends HTMLElement {
+let K = class extends HTMLElement {
   static addInitializer(t) {
     this._$Ei(), (this.l ?? (this.l = [])).push(t);
   }
@@ -84,58 +84,58 @@ let Z = class extends HTMLElement {
   }
   static createProperty(t, i = Vt) {
     if (i.state && (i.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(t) && ((i = Object.create(i)).wrapped = !0), this.elementProperties.set(t, i), !i.noAccessor) {
-      const r = Symbol(), s = this.getPropertyDescriptor(t, r, i);
-      s !== void 0 && Re(this.prototype, t, s);
+      const s = Symbol(), r = this.getPropertyDescriptor(t, s, i);
+      r !== void 0 && Te(this.prototype, t, r);
     }
   }
-  static getPropertyDescriptor(t, i, r) {
-    const { get: s, set: n } = De(this.prototype, t) ?? { get() {
+  static getPropertyDescriptor(t, i, s) {
+    const { get: r, set: n } = Re(this.prototype, t) ?? { get() {
       return this[i];
     }, set(o) {
       this[i] = o;
     } };
-    return { get: s, set(o) {
-      const a = s == null ? void 0 : s.call(this);
-      n == null || n.call(this, o), this.requestUpdate(t, a, r);
+    return { get: r, set(o) {
+      const a = r == null ? void 0 : r.call(this);
+      n == null || n.call(this, o), this.requestUpdate(t, a, s);
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(t) {
     return this.elementProperties.get(t) ?? Vt;
   }
   static _$Ei() {
-    if (this.hasOwnProperty(st("elementProperties"))) return;
-    const t = Le(this);
+    if (this.hasOwnProperty(rt("elementProperties"))) return;
+    const t = Pe(this);
     t.finalize(), t.l !== void 0 && (this.l = [...t.l]), this.elementProperties = new Map(t.elementProperties);
   }
   static finalize() {
-    if (this.hasOwnProperty(st("finalized"))) return;
-    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(st("properties"))) {
-      const i = this.properties, r = [...ze(i), ...Pe(i)];
-      for (const s of r) this.createProperty(s, i[s]);
+    if (this.hasOwnProperty(rt("finalized"))) return;
+    if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(rt("properties"))) {
+      const i = this.properties, s = [...De(i), ...ze(i)];
+      for (const r of s) this.createProperty(r, i[r]);
     }
     const t = this[Symbol.metadata];
     if (t !== null) {
       const i = litPropertyMetadata.get(t);
-      if (i !== void 0) for (const [r, s] of i) this.elementProperties.set(r, s);
+      if (i !== void 0) for (const [s, r] of i) this.elementProperties.set(s, r);
     }
     this._$Eh = /* @__PURE__ */ new Map();
-    for (const [i, r] of this.elementProperties) {
-      const s = this._$Eu(i, r);
-      s !== void 0 && this._$Eh.set(s, i);
+    for (const [i, s] of this.elementProperties) {
+      const r = this._$Eu(i, s);
+      r !== void 0 && this._$Eh.set(r, i);
     }
     this.elementStyles = this.finalizeStyles(this.styles);
   }
   static finalizeStyles(t) {
     const i = [];
     if (Array.isArray(t)) {
-      const r = new Set(t.flat(1 / 0).reverse());
-      for (const s of r) i.unshift(Bt(s));
-    } else t !== void 0 && i.push(Bt(t));
+      const s = new Set(t.flat(1 / 0).reverse());
+      for (const r of s) i.unshift(Ut(r));
+    } else t !== void 0 && i.push(Ut(t));
     return i;
   }
   static _$Eu(t, i) {
-    const r = i.attribute;
-    return r === !1 ? void 0 : typeof r == "string" ? r : typeof t == "string" ? t.toLowerCase() : void 0;
+    const s = i.attribute;
+    return s === !1 ? void 0 : typeof s == "string" ? s : typeof t == "string" ? t.toLowerCase() : void 0;
   }
   constructor() {
     super(), this._$Ep = void 0, this.isUpdatePending = !1, this.hasUpdated = !1, this._$Em = null, this._$Ev();
@@ -154,18 +154,18 @@ let Z = class extends HTMLElement {
   }
   _$E_() {
     const t = /* @__PURE__ */ new Map(), i = this.constructor.elementProperties;
-    for (const r of i.keys()) this.hasOwnProperty(r) && (t.set(r, this[r]), delete this[r]);
+    for (const s of i.keys()) this.hasOwnProperty(s) && (t.set(s, this[s]), delete this[s]);
     t.size > 0 && (this._$Ep = t);
   }
   createRenderRoot() {
     const t = this.shadowRoot ?? this.attachShadow(this.constructor.shadowRootOptions);
-    return Ce(t, this.constructor.elementStyles), t;
+    return Fe(t, this.constructor.elementStyles), t;
   }
   connectedCallback() {
     var t;
     this.renderRoot ?? (this.renderRoot = this.createRenderRoot()), this.enableUpdating(!0), (t = this._$EO) == null || t.forEach((i) => {
-      var r;
-      return (r = i.hostConnected) == null ? void 0 : r.call(i);
+      var s;
+      return (s = i.hostConnected) == null ? void 0 : s.call(i);
     });
   }
   enableUpdating(t) {
@@ -173,42 +173,42 @@ let Z = class extends HTMLElement {
   disconnectedCallback() {
     var t;
     (t = this._$EO) == null || t.forEach((i) => {
-      var r;
-      return (r = i.hostDisconnected) == null ? void 0 : r.call(i);
+      var s;
+      return (s = i.hostDisconnected) == null ? void 0 : s.call(i);
     });
   }
-  attributeChangedCallback(t, i, r) {
-    this._$AK(t, r);
+  attributeChangedCallback(t, i, s) {
+    this._$AK(t, s);
   }
   _$ET(t, i) {
     var n;
-    const r = this.constructor.elementProperties.get(t), s = this.constructor._$Eu(t, r);
-    if (s !== void 0 && r.reflect === !0) {
-      const o = (((n = r.converter) == null ? void 0 : n.toAttribute) !== void 0 ? r.converter : _t).toAttribute(i, r.type);
-      this._$Em = t, o == null ? this.removeAttribute(s) : this.setAttribute(s, o), this._$Em = null;
+    const s = this.constructor.elementProperties.get(t), r = this.constructor._$Eu(t, s);
+    if (r !== void 0 && s.reflect === !0) {
+      const o = (((n = s.converter) == null ? void 0 : n.toAttribute) !== void 0 ? s.converter : yt).toAttribute(i, s.type);
+      this._$Em = t, o == null ? this.removeAttribute(r) : this.setAttribute(r, o), this._$Em = null;
     }
   }
   _$AK(t, i) {
     var n, o;
-    const r = this.constructor, s = r._$Eh.get(t);
-    if (s !== void 0 && this._$Em !== s) {
-      const a = r.getPropertyOptions(s), c = typeof a.converter == "function" ? { fromAttribute: a.converter } : ((n = a.converter) == null ? void 0 : n.fromAttribute) !== void 0 ? a.converter : _t;
-      this._$Em = s;
+    const s = this.constructor, r = s._$Eh.get(t);
+    if (r !== void 0 && this._$Em !== r) {
+      const a = s.getPropertyOptions(r), c = typeof a.converter == "function" ? { fromAttribute: a.converter } : ((n = a.converter) == null ? void 0 : n.fromAttribute) !== void 0 ? a.converter : yt;
+      this._$Em = r;
       const l = c.fromAttribute(i, a.type);
-      this[s] = l ?? ((o = this._$Ej) == null ? void 0 : o.get(s)) ?? l, this._$Em = null;
+      this[r] = l ?? ((o = this._$Ej) == null ? void 0 : o.get(r)) ?? l, this._$Em = null;
     }
   }
-  requestUpdate(t, i, r, s = !1, n) {
+  requestUpdate(t, i, s, r = !1, n) {
     var o;
     if (t !== void 0) {
       const a = this.constructor;
-      if (s === !1 && (n = this[t]), r ?? (r = a.getPropertyOptions(t)), !((r.hasChanged ?? Ot)(n, i) || r.useDefault && r.reflect && n === ((o = this._$Ej) == null ? void 0 : o.get(t)) && !this.hasAttribute(a._$Eu(t, r)))) return;
-      this.C(t, i, r);
+      if (r === !1 && (n = this[t]), s ?? (s = a.getPropertyOptions(t)), !((s.hasChanged ?? Ot)(n, i) || s.useDefault && s.reflect && n === ((o = this._$Ej) == null ? void 0 : o.get(t)) && !this.hasAttribute(a._$Eu(t, s)))) return;
+      this.C(t, i, s);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
   }
-  C(t, i, { useDefault: r, reflect: s, wrapped: n }, o) {
-    r && !(this._$Ej ?? (this._$Ej = /* @__PURE__ */ new Map())).has(t) && (this._$Ej.set(t, o ?? i ?? this[t]), n !== !0 || o !== void 0) || (this._$AL.has(t) || (this.hasUpdated || r || (i = void 0), this._$AL.set(t, i)), s === !0 && this._$Em !== t && (this._$Eq ?? (this._$Eq = /* @__PURE__ */ new Set())).add(t));
+  C(t, i, { useDefault: s, reflect: r, wrapped: n }, o) {
+    s && !(this._$Ej ?? (this._$Ej = /* @__PURE__ */ new Map())).has(t) && (this._$Ej.set(t, o ?? i ?? this[t]), n !== !0 || o !== void 0) || (this._$AL.has(t) || (this.hasUpdated || s || (i = void 0), this._$AL.set(t, i)), r === !0 && this._$Em !== t && (this._$Eq ?? (this._$Eq = /* @__PURE__ */ new Set())).add(t));
   }
   async _$EP() {
     this.isUpdatePending = !0;
@@ -224,15 +224,15 @@ let Z = class extends HTMLElement {
     return this.performUpdate();
   }
   performUpdate() {
-    var r;
+    var s;
     if (!this.isUpdatePending) return;
     if (!this.hasUpdated) {
       if (this.renderRoot ?? (this.renderRoot = this.createRenderRoot()), this._$Ep) {
         for (const [n, o] of this._$Ep) this[n] = o;
         this._$Ep = void 0;
       }
-      const s = this.constructor.elementProperties;
-      if (s.size > 0) for (const [n, o] of s) {
+      const r = this.constructor.elementProperties;
+      if (r.size > 0) for (const [n, o] of r) {
         const { wrapped: a } = o, c = this[n];
         a !== !0 || this._$AL.has(n) || c === void 0 || this.C(n, void 0, o, c);
       }
@@ -240,12 +240,12 @@ let Z = class extends HTMLElement {
     let t = !1;
     const i = this._$AL;
     try {
-      t = this.shouldUpdate(i), t ? (this.willUpdate(i), (r = this._$EO) == null || r.forEach((s) => {
+      t = this.shouldUpdate(i), t ? (this.willUpdate(i), (s = this._$EO) == null || s.forEach((r) => {
         var n;
-        return (n = s.hostUpdate) == null ? void 0 : n.call(s);
+        return (n = r.hostUpdate) == null ? void 0 : n.call(r);
       }), this.update(i)) : this._$EM();
-    } catch (s) {
-      throw t = !1, this._$EM(), s;
+    } catch (r) {
+      throw t = !1, this._$EM(), r;
     }
     t && this._$AE(i);
   }
@@ -253,9 +253,9 @@ let Z = class extends HTMLElement {
   }
   _$AE(t) {
     var i;
-    (i = this._$EO) == null || i.forEach((r) => {
-      var s;
-      return (s = r.hostUpdated) == null ? void 0 : s.call(r);
+    (i = this._$EO) == null || i.forEach((s) => {
+      var r;
+      return (r = s.hostUpdated) == null ? void 0 : r.call(s);
     }), this.hasUpdated || (this.hasUpdated = !0, this.firstUpdated(t)), this.updated(t);
   }
   _$EM() {
@@ -278,76 +278,76 @@ let Z = class extends HTMLElement {
   firstUpdated(t) {
   }
 };
-Z.elementStyles = [], Z.shadowRootOptions = { mode: "open" }, Z[st("elementProperties")] = /* @__PURE__ */ new Map(), Z[st("finalized")] = /* @__PURE__ */ new Map(), $t == null || $t({ ReactiveElement: Z }), (U.reactiveElementVersions ?? (U.reactiveElementVersions = [])).push("2.1.2");
+K.elementStyles = [], K.shadowRootOptions = { mode: "open" }, K[rt("elementProperties")] = /* @__PURE__ */ new Map(), K[rt("finalized")] = /* @__PURE__ */ new Map(), vt == null || vt({ ReactiveElement: K }), (U.reactiveElementVersions ?? (U.reactiveElementVersions = [])).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const nt = globalThis, jt = (e) => e, bt = nt.trustedTypes, qt = bt ? bt.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, be = "$lit$", I = `lit$${Math.random().toFixed(9).slice(2)}$`, xe = "?" + I, He = `<${xe}>`, q = document, ot = () => q.createComment(""), at = (e) => e === null || typeof e != "object" && typeof e != "function", Ht = Array.isArray, We = (e) => Ht(e) || typeof (e == null ? void 0 : e[Symbol.iterator]) == "function", kt = `[ 	
-\f\r]`, et = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, Yt = /-->/g, Zt = />/g, G = RegExp(`>|${kt}(?:([^\\s"'>=/]+)(${kt}*=${kt}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), Kt = /'/g, Qt = /"/g, we = /^(?:script|style|textarea|title)$/i, ve = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), u = ve(1), w = ve(2), X = Symbol.for("lit-noChange"), p = Symbol.for("lit-nothing"), Xt = /* @__PURE__ */ new WeakMap(), V = q.createTreeWalker(q, 129);
-function $e(e, t) {
-  if (!Ht(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+const nt = globalThis, jt = (e) => e, _t = nt.trustedTypes, qt = _t ? _t.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, _e = "$lit$", B = `lit$${Math.random().toFixed(9).slice(2)}$`, be = "?" + B, Oe = `<${be}>`, Y = document, ot = () => Y.createComment(""), at = (e) => e === null || typeof e != "object" && typeof e != "function", Wt = Array.isArray, We = (e) => Wt(e) || typeof (e == null ? void 0 : e[Symbol.iterator]) == "function", $t = `[ 	
+\f\r]`, et = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, Yt = /-->/g, Zt = />/g, V = RegExp(`>|${$t}(?:([^\\s"'>=/]+)(${$t}*=${$t}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), Kt = /'/g, Qt = /"/g, xe = /^(?:script|style|textarea|title)$/i, we = (e) => (t, ...i) => ({ _$litType$: e, strings: t, values: i }), u = we(1), v = we(2), J = Symbol.for("lit-noChange"), p = Symbol.for("lit-nothing"), Xt = /* @__PURE__ */ new WeakMap(), j = Y.createTreeWalker(Y, 129);
+function ve(e, t) {
+  if (!Wt(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return qt !== void 0 ? qt.createHTML(t) : t;
 }
-const Ie = (e, t) => {
-  const i = e.length - 1, r = [];
-  let s, n = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = et;
+const He = (e, t) => {
+  const i = e.length - 1, s = [];
+  let r, n = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = et;
   for (let a = 0; a < i; a++) {
     const c = e[a];
-    let l, h, d = -1, f = 0;
-    for (; f < c.length && (o.lastIndex = f, h = o.exec(c), h !== null); ) f = o.lastIndex, o === et ? h[1] === "!--" ? o = Yt : h[1] !== void 0 ? o = Zt : h[2] !== void 0 ? (we.test(h[2]) && (s = RegExp("</" + h[2], "g")), o = G) : h[3] !== void 0 && (o = G) : o === G ? h[0] === ">" ? (o = s ?? et, d = -1) : h[1] === void 0 ? d = -2 : (d = o.lastIndex - h[2].length, l = h[1], o = h[3] === void 0 ? G : h[3] === '"' ? Qt : Kt) : o === Qt || o === Kt ? o = G : o === Yt || o === Zt ? o = et : (o = G, s = void 0);
-    const y = o === G && e[a + 1].startsWith("/>") ? " " : "";
-    n += o === et ? c + He : d >= 0 ? (r.push(l), c.slice(0, d) + be + c.slice(d) + I + y) : c + I + (d === -2 ? a : y);
+    let l, h, d = -1, y = 0;
+    for (; y < c.length && (o.lastIndex = y, h = o.exec(c), h !== null); ) y = o.lastIndex, o === et ? h[1] === "!--" ? o = Yt : h[1] !== void 0 ? o = Zt : h[2] !== void 0 ? (xe.test(h[2]) && (r = RegExp("</" + h[2], "g")), o = V) : h[3] !== void 0 && (o = V) : o === V ? h[0] === ">" ? (o = r ?? et, d = -1) : h[1] === void 0 ? d = -2 : (d = o.lastIndex - h[2].length, l = h[1], o = h[3] === void 0 ? V : h[3] === '"' ? Qt : Kt) : o === Qt || o === Kt ? o = V : o === Yt || o === Zt ? o = et : (o = V, r = void 0);
+    const f = o === V && e[a + 1].startsWith("/>") ? " " : "";
+    n += o === et ? c + Oe : d >= 0 ? (s.push(l), c.slice(0, d) + _e + c.slice(d) + B + f) : c + B + (d === -2 ? a : f);
   }
-  return [$e(e, n + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+  return [ve(e, n + (e[i] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), s];
 };
 class ct {
-  constructor({ strings: t, _$litType$: i }, r) {
-    let s;
+  constructor({ strings: t, _$litType$: i }, s) {
+    let r;
     this.parts = [];
     let n = 0, o = 0;
-    const a = t.length - 1, c = this.parts, [l, h] = Ie(t, i);
-    if (this.el = ct.createElement(l, r), V.currentNode = this.el.content, i === 2 || i === 3) {
+    const a = t.length - 1, c = this.parts, [l, h] = He(t, i);
+    if (this.el = ct.createElement(l, s), j.currentNode = this.el.content, i === 2 || i === 3) {
       const d = this.el.content.firstChild;
       d.replaceWith(...d.childNodes);
     }
-    for (; (s = V.nextNode()) !== null && c.length < a; ) {
-      if (s.nodeType === 1) {
-        if (s.hasAttributes()) for (const d of s.getAttributeNames()) if (d.endsWith(be)) {
-          const f = h[o++], y = s.getAttribute(d).split(I), _ = /([.?@])?(.*)/.exec(f);
-          c.push({ type: 1, index: n, name: _[2], strings: y, ctor: _[1] === "." ? Be : _[1] === "?" ? Ge : _[1] === "@" ? Ve : wt }), s.removeAttribute(d);
-        } else d.startsWith(I) && (c.push({ type: 6, index: n }), s.removeAttribute(d));
-        if (we.test(s.tagName)) {
-          const d = s.textContent.split(I), f = d.length - 1;
-          if (f > 0) {
-            s.textContent = bt ? bt.emptyScript : "";
-            for (let y = 0; y < f; y++) s.append(d[y], ot()), V.nextNode(), c.push({ type: 2, index: ++n });
-            s.append(d[f], ot());
+    for (; (r = j.nextNode()) !== null && c.length < a; ) {
+      if (r.nodeType === 1) {
+        if (r.hasAttributes()) for (const d of r.getAttributeNames()) if (d.endsWith(_e)) {
+          const y = h[o++], f = r.getAttribute(d).split(B), _ = /([.?@])?(.*)/.exec(y);
+          c.push({ type: 1, index: n, name: _[2], strings: f, ctor: _[1] === "." ? Be : _[1] === "?" ? Ue : _[1] === "@" ? Ge : xt }), r.removeAttribute(d);
+        } else d.startsWith(B) && (c.push({ type: 6, index: n }), r.removeAttribute(d));
+        if (xe.test(r.tagName)) {
+          const d = r.textContent.split(B), y = d.length - 1;
+          if (y > 0) {
+            r.textContent = _t ? _t.emptyScript : "";
+            for (let f = 0; f < y; f++) r.append(d[f], ot()), j.nextNode(), c.push({ type: 2, index: ++n });
+            r.append(d[y], ot());
           }
         }
-      } else if (s.nodeType === 8) if (s.data === xe) c.push({ type: 2, index: n });
+      } else if (r.nodeType === 8) if (r.data === be) c.push({ type: 2, index: n });
       else {
         let d = -1;
-        for (; (d = s.data.indexOf(I, d + 1)) !== -1; ) c.push({ type: 7, index: n }), d += I.length - 1;
+        for (; (d = r.data.indexOf(B, d + 1)) !== -1; ) c.push({ type: 7, index: n }), d += B.length - 1;
       }
       n++;
     }
   }
   static createElement(t, i) {
-    const r = q.createElement("template");
-    return r.innerHTML = t, r;
+    const s = Y.createElement("template");
+    return s.innerHTML = t, s;
   }
 }
-function J(e, t, i = e, r) {
+function tt(e, t, i = e, s) {
   var o, a;
-  if (t === X) return t;
-  let s = r !== void 0 ? (o = i._$Co) == null ? void 0 : o[r] : i._$Cl;
+  if (t === J) return t;
+  let r = s !== void 0 ? (o = i._$Co) == null ? void 0 : o[s] : i._$Cl;
   const n = at(t) ? void 0 : t._$litDirective$;
-  return (s == null ? void 0 : s.constructor) !== n && ((a = s == null ? void 0 : s._$AO) == null || a.call(s, !1), n === void 0 ? s = void 0 : (s = new n(e), s._$AT(e, i, r)), r !== void 0 ? (i._$Co ?? (i._$Co = []))[r] = s : i._$Cl = s), s !== void 0 && (t = J(e, s._$AS(e, t.values), s, r)), t;
+  return (r == null ? void 0 : r.constructor) !== n && ((a = r == null ? void 0 : r._$AO) == null || a.call(r, !1), n === void 0 ? r = void 0 : (r = new n(e), r._$AT(e, i, s)), s !== void 0 ? (i._$Co ?? (i._$Co = []))[s] = r : i._$Cl = r), r !== void 0 && (t = tt(e, r._$AS(e, t.values), r, s)), t;
 }
-class Ue {
+class Ie {
   constructor(t, i) {
     this._$AV = [], this._$AN = void 0, this._$AD = t, this._$AM = i;
   }
@@ -358,21 +358,21 @@ class Ue {
     return this._$AM._$AU;
   }
   u(t) {
-    const { el: { content: i }, parts: r } = this._$AD, s = ((t == null ? void 0 : t.creationScope) ?? q).importNode(i, !0);
-    V.currentNode = s;
-    let n = V.nextNode(), o = 0, a = 0, c = r[0];
+    const { el: { content: i }, parts: s } = this._$AD, r = ((t == null ? void 0 : t.creationScope) ?? Y).importNode(i, !0);
+    j.currentNode = r;
+    let n = j.nextNode(), o = 0, a = 0, c = s[0];
     for (; c !== void 0; ) {
       if (o === c.index) {
         let l;
-        c.type === 2 ? l = new lt(n, n.nextSibling, this, t) : c.type === 1 ? l = new c.ctor(n, c.name, c.strings, this, t) : c.type === 6 && (l = new je(n, this, t)), this._$AV.push(l), c = r[++a];
+        c.type === 2 ? l = new lt(n, n.nextSibling, this, t) : c.type === 1 ? l = new c.ctor(n, c.name, c.strings, this, t) : c.type === 6 && (l = new Ve(n, this, t)), this._$AV.push(l), c = s[++a];
       }
-      o !== (c == null ? void 0 : c.index) && (n = V.nextNode(), o++);
+      o !== (c == null ? void 0 : c.index) && (n = j.nextNode(), o++);
     }
-    return V.currentNode = q, s;
+    return j.currentNode = Y, r;
   }
   p(t) {
     let i = 0;
-    for (const r of this._$AV) r !== void 0 && (r.strings !== void 0 ? (r._$AI(t, r, i), i += r.strings.length - 2) : r._$AI(t[i])), i++;
+    for (const s of this._$AV) s !== void 0 && (s.strings !== void 0 ? (s._$AI(t, s, i), i += s.strings.length - 2) : s._$AI(t[i])), i++;
   }
 }
 class lt {
@@ -380,8 +380,8 @@ class lt {
     var t;
     return ((t = this._$AM) == null ? void 0 : t._$AU) ?? this._$Cv;
   }
-  constructor(t, i, r, s) {
-    this.type = 2, this._$AH = p, this._$AN = void 0, this._$AA = t, this._$AB = i, this._$AM = r, this.options = s, this._$Cv = (s == null ? void 0 : s.isConnected) ?? !0;
+  constructor(t, i, s, r) {
+    this.type = 2, this._$AH = p, this._$AN = void 0, this._$AA = t, this._$AB = i, this._$AM = s, this.options = r, this._$Cv = (r == null ? void 0 : r.isConnected) ?? !0;
   }
   get parentNode() {
     let t = this._$AA.parentNode;
@@ -395,7 +395,7 @@ class lt {
     return this._$AB;
   }
   _$AI(t, i = this) {
-    t = J(this, t, i), at(t) ? t === p || t == null || t === "" ? (this._$AH !== p && this._$AR(), this._$AH = p) : t !== this._$AH && t !== X && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : We(t) ? this.k(t) : this._(t);
+    t = tt(this, t, i), at(t) ? t === p || t == null || t === "" ? (this._$AH !== p && this._$AR(), this._$AH = p) : t !== this._$AH && t !== J && this._(t) : t._$litType$ !== void 0 ? this.$(t) : t.nodeType !== void 0 ? this.T(t) : We(t) ? this.k(t) : this._(t);
   }
   O(t) {
     return this._$AA.parentNode.insertBefore(t, this._$AB);
@@ -404,14 +404,14 @@ class lt {
     this._$AH !== t && (this._$AR(), this._$AH = this.O(t));
   }
   _(t) {
-    this._$AH !== p && at(this._$AH) ? this._$AA.nextSibling.data = t : this.T(q.createTextNode(t)), this._$AH = t;
+    this._$AH !== p && at(this._$AH) ? this._$AA.nextSibling.data = t : this.T(Y.createTextNode(t)), this._$AH = t;
   }
   $(t) {
     var n;
-    const { values: i, _$litType$: r } = t, s = typeof r == "number" ? this._$AC(t) : (r.el === void 0 && (r.el = ct.createElement($e(r.h, r.h[0]), this.options)), r);
-    if (((n = this._$AH) == null ? void 0 : n._$AD) === s) this._$AH.p(i);
+    const { values: i, _$litType$: s } = t, r = typeof s == "number" ? this._$AC(t) : (s.el === void 0 && (s.el = ct.createElement(ve(s.h, s.h[0]), this.options)), s);
+    if (((n = this._$AH) == null ? void 0 : n._$AD) === r) this._$AH.p(i);
     else {
-      const o = new Ue(s, this), a = o.u(this.options);
+      const o = new Ie(r, this), a = o.u(this.options);
       o.p(i), this.T(a), this._$AH = o;
     }
   }
@@ -420,17 +420,17 @@ class lt {
     return i === void 0 && Xt.set(t.strings, i = new ct(t)), i;
   }
   k(t) {
-    Ht(this._$AH) || (this._$AH = [], this._$AR());
+    Wt(this._$AH) || (this._$AH = [], this._$AR());
     const i = this._$AH;
-    let r, s = 0;
-    for (const n of t) s === i.length ? i.push(r = new lt(this.O(ot()), this.O(ot()), this, this.options)) : r = i[s], r._$AI(n), s++;
-    s < i.length && (this._$AR(r && r._$AB.nextSibling, s), i.length = s);
+    let s, r = 0;
+    for (const n of t) r === i.length ? i.push(s = new lt(this.O(ot()), this.O(ot()), this, this.options)) : s = i[r], s._$AI(n), r++;
+    r < i.length && (this._$AR(s && s._$AB.nextSibling, r), i.length = r);
   }
   _$AR(t = this._$AA.nextSibling, i) {
-    var r;
-    for ((r = this._$AP) == null ? void 0 : r.call(this, !1, !0, i); t !== this._$AB; ) {
-      const s = jt(t).nextSibling;
-      jt(t).remove(), t = s;
+    var s;
+    for ((s = this._$AP) == null ? void 0 : s.call(this, !1, !0, i); t !== this._$AB; ) {
+      const r = jt(t).nextSibling;
+      jt(t).remove(), t = r;
     }
   }
   setConnected(t) {
@@ -438,32 +438,32 @@ class lt {
     this._$AM === void 0 && (this._$Cv = t, (i = this._$AP) == null || i.call(this, t));
   }
 }
-let wt = class {
+let xt = class {
   get tagName() {
     return this.element.tagName;
   }
   get _$AU() {
     return this._$AM._$AU;
   }
-  constructor(t, i, r, s, n) {
-    this.type = 1, this._$AH = p, this._$AN = void 0, this.element = t, this.name = i, this._$AM = s, this.options = n, r.length > 2 || r[0] !== "" || r[1] !== "" ? (this._$AH = Array(r.length - 1).fill(new String()), this.strings = r) : this._$AH = p;
+  constructor(t, i, s, r, n) {
+    this.type = 1, this._$AH = p, this._$AN = void 0, this.element = t, this.name = i, this._$AM = r, this.options = n, s.length > 2 || s[0] !== "" || s[1] !== "" ? (this._$AH = Array(s.length - 1).fill(new String()), this.strings = s) : this._$AH = p;
   }
-  _$AI(t, i = this, r, s) {
+  _$AI(t, i = this, s, r) {
     const n = this.strings;
     let o = !1;
-    if (n === void 0) t = J(this, t, i, 0), o = !at(t) || t !== this._$AH && t !== X, o && (this._$AH = t);
+    if (n === void 0) t = tt(this, t, i, 0), o = !at(t) || t !== this._$AH && t !== J, o && (this._$AH = t);
     else {
       const a = t;
       let c, l;
-      for (t = n[0], c = 0; c < n.length - 1; c++) l = J(this, a[r + c], i, c), l === X && (l = this._$AH[c]), o || (o = !at(l) || l !== this._$AH[c]), l === p ? t = p : t !== p && (t += (l ?? "") + n[c + 1]), this._$AH[c] = l;
+      for (t = n[0], c = 0; c < n.length - 1; c++) l = tt(this, a[s + c], i, c), l === J && (l = this._$AH[c]), o || (o = !at(l) || l !== this._$AH[c]), l === p ? t = p : t !== p && (t += (l ?? "") + n[c + 1]), this._$AH[c] = l;
     }
-    o && !s && this.j(t);
+    o && !r && this.j(t);
   }
   j(t) {
     t === p ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t ?? "");
   }
 };
-class Be extends wt {
+class Be extends xt {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -471,7 +471,7 @@ class Be extends wt {
     this.element[this.name] = t === p ? void 0 : t;
   }
 }
-class Ge extends wt {
+class Ue extends xt {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -479,49 +479,49 @@ class Ge extends wt {
     this.element.toggleAttribute(this.name, !!t && t !== p);
   }
 }
-class Ve extends wt {
-  constructor(t, i, r, s, n) {
-    super(t, i, r, s, n), this.type = 5;
+class Ge extends xt {
+  constructor(t, i, s, r, n) {
+    super(t, i, s, r, n), this.type = 5;
   }
   _$AI(t, i = this) {
-    if ((t = J(this, t, i, 0) ?? p) === X) return;
-    const r = this._$AH, s = t === p && r !== p || t.capture !== r.capture || t.once !== r.once || t.passive !== r.passive, n = t !== p && (r === p || s);
-    s && this.element.removeEventListener(this.name, this, r), n && this.element.addEventListener(this.name, this, t), this._$AH = t;
+    if ((t = tt(this, t, i, 0) ?? p) === J) return;
+    const s = this._$AH, r = t === p && s !== p || t.capture !== s.capture || t.once !== s.once || t.passive !== s.passive, n = t !== p && (s === p || r);
+    r && this.element.removeEventListener(this.name, this, s), n && this.element.addEventListener(this.name, this, t), this._$AH = t;
   }
   handleEvent(t) {
     var i;
     typeof this._$AH == "function" ? this._$AH.call(((i = this.options) == null ? void 0 : i.host) ?? this.element, t) : this._$AH.handleEvent(t);
   }
 }
-class je {
-  constructor(t, i, r) {
-    this.element = t, this.type = 6, this._$AN = void 0, this._$AM = i, this.options = r;
+class Ve {
+  constructor(t, i, s) {
+    this.element = t, this.type = 6, this._$AN = void 0, this._$AM = i, this.options = s;
   }
   get _$AU() {
     return this._$AM._$AU;
   }
   _$AI(t) {
-    J(this, t);
+    tt(this, t);
   }
 }
-const St = nt.litHtmlPolyfillSupport;
-St == null || St(ct, lt), (nt.litHtmlVersions ?? (nt.litHtmlVersions = [])).push("3.3.3");
-const qe = (e, t, i) => {
-  const r = (i == null ? void 0 : i.renderBefore) ?? t;
-  let s = r._$litPart$;
-  if (s === void 0) {
+const kt = nt.litHtmlPolyfillSupport;
+kt == null || kt(ct, lt), (nt.litHtmlVersions ?? (nt.litHtmlVersions = [])).push("3.3.3");
+const je = (e, t, i) => {
+  const s = (i == null ? void 0 : i.renderBefore) ?? t;
+  let r = s._$litPart$;
+  if (r === void 0) {
     const n = (i == null ? void 0 : i.renderBefore) ?? null;
-    r._$litPart$ = s = new lt(t.insertBefore(ot(), n), n, void 0, i ?? {});
+    s._$litPart$ = r = new lt(t.insertBefore(ot(), n), n, void 0, i ?? {});
   }
-  return s._$AI(e), s;
+  return r._$AI(e), r;
 };
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const j = globalThis;
-class K extends Z {
+const q = globalThis;
+class Q extends K {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -532,7 +532,7 @@ class K extends Z {
   }
   update(t) {
     const i = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = qe(i, this.renderRoot, this.renderOptions);
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t), this._$Do = je(i, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     var t;
@@ -543,20 +543,20 @@ class K extends Z {
     super.disconnectedCallback(), (t = this._$Do) == null || t.setConnected(!1);
   }
   render() {
-    return X;
+    return J;
   }
 }
-var ge;
-K._$litElement$ = !0, K.finalized = !0, (ge = j.litElementHydrateSupport) == null || ge.call(j, { LitElement: K });
-const Mt = j.litElementPolyfillSupport;
-Mt == null || Mt({ LitElement: K });
-(j.litElementVersions ?? (j.litElementVersions = [])).push("4.2.2");
+var fe;
+Q._$litElement$ = !0, Q.finalized = !0, (fe = q.litElementHydrateSupport) == null || fe.call(q, { LitElement: Q });
+const St = q.litElementPolyfillSupport;
+St == null || St({ LitElement: Q });
+(q.litElementVersions ?? (q.litElementVersions = [])).push("4.2.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const ke = (e) => (t, i) => {
+const $e = (e) => (t, i) => {
   i !== void 0 ? i.addInitializer(() => {
     customElements.define(e, t);
   }) : customElements.define(e, t);
@@ -566,10 +566,10 @@ const ke = (e) => (t, i) => {
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const Ye = { attribute: !0, type: String, converter: _t, reflect: !1, hasChanged: Ot }, Ze = (e = Ye, t, i) => {
-  const { kind: r, metadata: s } = i;
-  let n = globalThis.litPropertyMetadata.get(s);
-  if (n === void 0 && globalThis.litPropertyMetadata.set(s, n = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), n.set(i.name, e), r === "accessor") {
+const qe = { attribute: !0, type: String, converter: yt, reflect: !1, hasChanged: Ot }, Ye = (e = qe, t, i) => {
+  const { kind: s, metadata: r } = i;
+  let n = globalThis.litPropertyMetadata.get(r);
+  if (n === void 0 && globalThis.litPropertyMetadata.set(r, n = /* @__PURE__ */ new Map()), s === "setter" && ((e = Object.create(e)).wrapped = !0), n.set(i.name, e), s === "accessor") {
     const { name: o } = i;
     return { set(a) {
       const c = t.get.call(this);
@@ -578,19 +578,19 @@ const Ye = { attribute: !0, type: String, converter: _t, reflect: !1, hasChanged
       return a !== void 0 && this.C(o, void 0, e, a), a;
     } };
   }
-  if (r === "setter") {
+  if (s === "setter") {
     const { name: o } = i;
     return function(a) {
       const c = this[o];
       t.call(this, a), this.requestUpdate(o, c, e, !0, a);
     };
   }
-  throw Error("Unsupported decorator location: " + r);
+  throw Error("Unsupported decorator location: " + s);
 };
-function Wt(e) {
-  return (t, i) => typeof i == "object" ? Ze(e, t, i) : ((r, s, n) => {
-    const o = s.hasOwnProperty(n);
-    return s.constructor.createProperty(n, r), o ? Object.getOwnPropertyDescriptor(s, n) : void 0;
+function Ht(e) {
+  return (t, i) => typeof i == "object" ? Ye(e, t, i) : ((s, r, n) => {
+    const o = r.hasOwnProperty(n);
+    return r.constructor.createProperty(n, s), o ? Object.getOwnPropertyDescriptor(r, n) : void 0;
   })(e, t, i);
 }
 /**
@@ -598,8 +598,8 @@ function Wt(e) {
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-function L(e) {
-  return Wt({ ...e, state: !0, attribute: !1 });
+function z(e) {
+  return Ht({ ...e, state: !0, attribute: !1 });
 }
 const zt = {
   red: "#F44336",
@@ -621,12 +621,12 @@ const zt = {
   brown: "#795548",
   grey: "#9E9E9E",
   "blue-grey": "#607D8B"
-}, Jt = Object.keys(zt);
-function D(e) {
+}, Ze = Object.keys(zt);
+function H(e) {
   if (e)
     return e === "primary" ? "var(--primary-color)" : e === "accent" ? "var(--accent-color)" : zt[e] ? `var(--${e}-color, ${zt[e]})` : e;
 }
-const Q = {
+const X = {
   temperature: {
     icon: "mdi:thermometer",
     color: "orange",
@@ -783,7 +783,7 @@ const Q = {
     aggregate: "mean",
     trend: "neutral"
   }
-}, te = ["teal", "amber", "deep-orange", "purple", "pink"], ut = ["teal", "orange", "pink", "cyan", "lime"], Ke = {
+}, Jt = ["teal", "amber", "deep-orange", "purple", "pink"], te = ["teal", "orange", "pink", "cyan", "lime"], Ke = {
   "clear-night": "mdi:weather-night",
   cloudy: "mdi:weather-cloudy",
   fog: "mdi:weather-fog",
@@ -812,41 +812,44 @@ function ie(e) {
   const t = parseInt(e.slice(1), 16);
   return [t >> 16 & 255, t >> 8 & 255, t & 255];
 }
-function T(e, t, i) {
-  const [r, s, n] = ie(e), [o, a, c] = ie(t), l = Math.max(0, Math.min(i, 1)), h = Math.round(r + (o - r) * l), d = Math.round(s + (a - s) * l), f = Math.round(n + (c - n) * l), y = (_) => _.toString(16).padStart(2, "0");
-  return `#${y(h)}${y(d)}${y(f)}`;
+function F(e, t, i) {
+  const [s, r, n] = ie(e), [o, a, c] = ie(t), l = Math.max(0, Math.min(i, 1)), h = Math.round(s + (o - s) * l), d = Math.round(r + (a - r) * l), y = Math.round(n + (c - n) * l), f = (_) => _.toString(16).padStart(2, "0");
+  return `#${f(h)}${f(d)}${f(y)}`;
 }
-function mt(e, t, i) {
-  return e.map((r, s) => T(r, t[s], i));
+function ut(e, t, i) {
+  return e.map((s, r) => F(s, t[r], i));
 }
-const re = ["#050a20", "#101c40", "#2a4270"], se = ["#292a5e", "#8c4a7c", "#ff9d5e"], ne = ["#3572bf", "#7fb2e2", "#ffd994".slice(0, 7)], oe = ["#2f80dc", "#79b7ee", "#d4edff"], Qe = ["#64758a", "#8fa1b1", "#c4ced8"], Xe = ["#3d4857", "#5c6976", "#8a96a3"], Je = ["#0e131d", "#1e2938", "#344254"];
+const se = ["#050a20", "#101c40", "#2a4270"], re = ["#292a5e", "#8c4a7c", "#ff9d5e"], ne = ["#3572bf", "#7fb2e2", "#ffd994".slice(0, 7)], oe = ["#2f80dc", "#79b7ee", "#d4edff"], Qe = ["#64758a", "#8fa1b1", "#c4ced8"], Xe = ["#3d4857", "#5c6976", "#8a96a3"], Je = ["#0e131d", "#1e2938", "#344254"];
 function ti(e) {
-  const t = e.condition ?? (e.isDay ? "partlycloudy" : "clear-night"), i = ["pouring", "lightning", "lightning-rainy", "hail"].includes(t), r = ["rainy", "snowy", "snowy-rainy"].includes(t), s = ["cloudy", "fog", "exceptional"].includes(t) || i || r, n = i ? 0.85 : r ? 0.68 : s ? 0.55 : t === "partlycloudy" ? 0.14 : 0, o = e.elevation ?? (e.isDay ? 40 : -20);
+  const t = e.condition ?? (e.isDay ? "partlycloudy" : "clear-night"), i = ["pouring", "lightning", "lightning-rainy", "hail"].includes(t), s = ["rainy", "snowy", "snowy-rainy"].includes(t), r = ["cloudy", "fog", "exceptional"].includes(t) || i || s, n = i ? 0.85 : s ? 0.68 : r ? 0.55 : t === "partlycloudy" ? 0.14 : 0, o = e.elevation ?? (e.isDay ? 40 : -20);
   let a;
-  o <= -8 ? a = re : o <= 2 ? a = mt(re, se, (o + 8) / 10) : o <= 14 ? a = mt(se, ne, (o - 2) / 12) : o <= 35 ? a = mt(ne, oe, (o - 14) / 21) : a = oe;
-  const c = o <= -4, h = mt(a, c ? Je : i ? Xe : Qe, n), d = Math.max(0, 1 - Math.abs(o - 1) / 13) * (1 - n * 0.8), f = o <= 2 ? "#ff7d4a" : T("#ff9d5c", "#ffd28a", Math.min((o - 2) / 12, 1)), y = T(h[2], h[1], 0.45), _ = T(T(h[2], "#0a0f18", c ? 0.62 : 0.34), h[1], 0.12), $ = T(h[2], "#0a0f18", c ? 0.84 : 0.58), x = T(h[2], "#060a12", c ? 0.92 : 0.72), m = c ? T("#93a3c0", "#4f5c74", n) : T("#ffffff", "#a9b6c4", n), b = d > 0.15 ? T(m, f, d * 0.45) : m, g = T(b, c ? "#232e44" : "#7e91a6", 0.4), S = T(b, "#ffffff", c ? 0.22 : 0.8), M = t === "sunny" || t === "clear-night" ? 0 : t === "partlycloudy" || t === "windy" || t === "windy-variant" ? 2 : i || r ? 4 : 3;
+  o <= -8 ? a = se : o <= 2 ? a = ut(se, re, (o + 8) / 10) : o <= 14 ? a = ut(re, ne, (o - 2) / 12) : o <= 35 ? a = ut(ne, oe, (o - 14) / 21) : a = oe;
+  const c = o <= -4, h = ut(a, c ? Je : i ? Xe : Qe, n), d = Math.max(0, 1 - Math.abs(o - 1) / 13) * (1 - n * 0.8), y = o <= 2 ? "#ff7d4a" : F("#ff9d5c", "#ffd28a", Math.min((o - 2) / 12, 1)), f = t === "snowy" || t === "snowy-rainy" || t === "hail", _ = o >= 10 ? 0 : o <= -8 ? 1 : (10 - o) / 18;
+  let $ = f ? "#dfe7f0" : F("#69a86b", "#7c8794", n * 0.5), b = f ? "#cdd8e4" : F("#4a8a54", "#5c6875", n * 0.5);
+  $ = F($, y, d * 0.18), b = F(b, y, d * 0.12);
+  const m = F(F($, h[1], 0.62), "#0b1220", _ * 0.6), x = F(F($, h[2], 0.26), "#0b1220", _ * 0.75), g = F(F(b, h[2], 0.1), "#080d18", _ * 0.85), S = F(f ? "#2a4d36" : "#2f5f3a", "#050a10", _ * 0.85 + n * 0.08), M = c ? F("#93a3c0", "#4f5c74", n) : F("#ffffff", "#a9b6c4", n), w = d > 0.15 ? F(M, y, d * 0.45) : M, N = F(w, c ? "#232e44" : "#7e91a6", 0.4), C = F(w, "#ffffff", c ? 0.22 : 0.8), O = t === "sunny" || t === "clear-night" ? 0 : t === "partlycloudy" || t === "windy" || t === "windy-variant" ? 2 : i || s ? 4 : 3;
   return {
     sky: h,
-    ridgeFar: y,
-    hillBack: _,
-    hillFront: $,
-    tree: x,
-    cloudFill: b,
-    cloudShade: g,
-    cloudLight: S,
+    ridgeFar: m,
+    hillBack: x,
+    hillFront: g,
+    tree: S,
+    cloudFill: w,
+    cloudShade: N,
+    cloudLight: C,
     cloudOpacity: c ? 0.75 : 0.95,
     isNight: c,
     sunY: o <= 0 ? 150 + Math.min(-o, 6) * 2 : 150 - Math.min(o, 55) / 55 * 112,
     // the low sun looms larger
     sunR: 15 + Math.max(0, 14 - Math.min(Math.max(o, 0), 14)) * 0.45,
-    showSun: !c && o > -3 && M < 3,
+    showSun: !c && o > -3 && O < 3,
     showRays: n < 0.3 && o > 10,
-    sunColor: o <= 2 ? "#ff8a4b" : T("#ffb347", "#ffdf5e", Math.min((o - 2) / 13, 1)),
+    sunColor: o <= 2 ? "#ff8a4b" : F("#ffb347", "#ffdf5e", Math.min((o - 2) / 13, 1)),
     horizon: d,
-    horizonColor: f,
+    horizonColor: y,
     rim: d * 0.85,
-    showMoon: c && M < 3,
-    clouds: M,
+    showMoon: c && O < 3,
+    clouds: O,
     rain: t === "pouring" || t === "lightning-rainy" ? 2 : t === "rainy" || t === "snowy-rainy" || t === "hail" ? 1 : 0,
     snow: t === "snowy" || t === "snowy-rainy" || t === "hail",
     lightning: t === "lightning" || t === "lightning-rainy",
@@ -856,7 +859,7 @@ function ti(e) {
   };
 }
 function ei(e, t) {
-  return w`<g opacity=${t}>
+  return v`<g opacity=${t}>
     <g fill=${e.cloudShade} transform="translate(1 3.5)">
       <ellipse cx="0" cy="0" rx="27" ry="16"/>
       <ellipse cx="21" cy="4" rx="22" ry="13"/>
@@ -873,17 +876,17 @@ function ei(e, t) {
     <ellipse cx="17" cy="-3" rx="10" ry="5" fill=${e.cloudLight} opacity="0.5"/>
   </g>`;
 }
-function ii(e, t, i, r, s, n, o, a = !1) {
-  return w`<g transform="translate(0 ${i})">
-    <g class="cloud" style="animation-duration:${s}s;animation-delay:${n}s"
+function ii(e, t, i, s, r, n, o, a = !1) {
+  return v`<g transform="translate(0 ${i})">
+    <g class="cloud" style="animation-duration:${r}s;animation-delay:${n}s"
        filter=${a ? "url(#wc-blur-far)" : p}>
       <g class="cloudbob" style="animation-duration:${o}s">
-        <g transform="scale(${r})">${ei(e, t)}</g>
+        <g transform="scale(${s})">${ei(e, t)}</g>
       </g>
     </g>
   </g>`;
 }
-const ri = "M 0 152 Q 60 134 120 146 T 240 142 Q 272 138 300 145", ae = "M 0 162 Q 40 138 85 154 T 170 150 Q 215 142 250 156 T 300 152", ce = "M 0 176 Q 55 158 110 172 T 220 170 Q 260 164 300 174", At = (e) => `${e} L 300 190 L 0 190 Z`, si = [
+const si = "M 0 152 Q 60 134 120 146 T 240 142 Q 272 138 300 145", ae = "M 0 162 Q 40 138 85 154 T 170 150 Q 215 142 250 156 T 300 152", ce = "M 0 176 Q 55 158 110 172 T 220 170 Q 260 164 300 174", Mt = (e) => `${e} L 300 190 L 0 190 Z`, ri = [
   // x, ground y, scale
   [52, 172, 1],
   [64, 174, 0.75],
@@ -891,47 +894,47 @@ const ri = "M 0 152 Q 60 134 120 146 T 240 142 Q 272 138 300 145", ae = "M 0 162
   [243, 171, 0.8]
 ];
 function ni(e) {
-  const t = ti(e), i = 1 + e.wind * 1.6, r = 3 + e.wind * 9, s = (2.6 / (0.35 + e.wind)).toFixed(2), n = 208, o = Array.from({ length: 12 }, ($, x) => {
-    const m = x / 12 * Math.PI * 2, b = t.sunR + 6, g = t.sunR + 15;
-    return w`<line x1=${Math.cos(m) * b} y1=${Math.sin(m) * b}
+  const t = ti(e), i = 1 + e.wind * 1.6, s = 3 + e.wind * 9, r = (2.6 / (0.35 + e.wind)).toFixed(2), n = 208, o = Array.from({ length: 12 }, ($, b) => {
+    const m = b / 12 * Math.PI * 2, x = t.sunR + 6, g = t.sunR + 15;
+    return v`<line x1=${Math.cos(m) * x} y1=${Math.sin(m) * x}
       x2=${Math.cos(m) * g} y2=${Math.sin(m) * g} stroke="#ffe08a"
       stroke-width="3" stroke-linecap="round"/>`;
-  }), a = t.stars ? Array.from({ length: 30 }, ($, x) => {
-    const m = 10 + x * 61 % 280, b = 8 + x * 37 % 96, g = `${(2.2 + x % 5 * 0.8).toFixed(1)}s`, S = `${(x % 9 * 0.45).toFixed(2)}s`;
-    if (x % 6 === 0) {
-      const M = 2.4 + x % 3;
-      return w`<path class="star" d="M ${-M} 0 H ${M} M 0 ${-M} V ${M}"
-            transform="translate(${m} ${b})" stroke="#fff" stroke-width="1"
+  }), a = t.stars ? Array.from({ length: 30 }, ($, b) => {
+    const m = 10 + b * 61 % 280, x = 8 + b * 37 % 96, g = `${(2.2 + b % 5 * 0.8).toFixed(1)}s`, S = `${(b % 9 * 0.45).toFixed(2)}s`;
+    if (b % 6 === 0) {
+      const M = 2.4 + b % 3;
+      return v`<path class="star" d="M ${-M} 0 H ${M} M 0 ${-M} V ${M}"
+            transform="translate(${m} ${x})" stroke="#fff" stroke-width="1"
             stroke-linecap="round" style="animation-duration:${g};animation-delay:${S}"/>`;
     }
-    return w`<circle class="star" cx=${m} cy=${b} r=${0.6 + x * 13 % 10 / 9}
+    return v`<circle class="star" cx=${m} cy=${x} r=${0.6 + b * 13 % 10 / 9}
           fill="#fff" style="animation-duration:${g};animation-delay:${S}"/>`;
-  }) : [], c = ($, x, m, b) => Array.from({ length: $ }, (g, S) => {
-    const M = 14 + S * 53 % 272, v = 62 + S * 29 % 96, A = 9 + S % 3 * 3;
-    return w`<line class=${x} x1=${M} y1=${v} x2=${M - r} y2=${v + A}
-        stroke="#cfe6ff" stroke-width=${m} stroke-linecap="round" opacity=${b}
+  }) : [], c = ($, b, m, x) => Array.from({ length: $ }, (g, S) => {
+    const M = 14 + S * 53 % 272, w = 62 + S * 29 % 96, N = 9 + S % 3 * 3;
+    return v`<line class=${b} x1=${M} y1=${w} x2=${M - s} y2=${w + N}
+        stroke="#cfe6ff" stroke-width=${m} stroke-linecap="round" opacity=${x}
         style="animation-delay:${S % 7 * 0.09}s"/>`;
   }), l = t.rain > 0 ? [
     ...c(t.rain === 2 ? 30 : 16, "rain-back", 1.1, 0.4),
     ...c(t.rain === 2 ? 34 : 18, "rain", 1.7, 0.85)
-  ] : [], h = t.rain === 2 ? Array.from({ length: 7 }, ($, x) => {
-    const m = 28 + x * 41 % 246;
-    return w`<ellipse class="splash" cx=${m} cy="181" rx="5" ry="1.6"
+  ] : [], h = t.rain === 2 ? Array.from({ length: 7 }, ($, b) => {
+    const m = 28 + b * 41 % 246;
+    return v`<ellipse class="splash" cx=${m} cy="181" rx="5" ry="1.6"
             fill="none" stroke="#cfe6ff" stroke-width="1"
-            style="animation-delay:${x % 5 * 0.24}s"/>`;
-  }) : [], d = t.snow ? Array.from({ length: 32 }, ($, x) => {
-    const m = 12 + x * 47 % 276, b = 56 + x * 31 % 104;
-    return w`<circle class=${x % 2 ? "snow" : "snow2"} cx=${m} cy=${b}
-          r=${1.3 + x % 3 * 0.7} fill="#fff" opacity="0.9"
-          style="animation-delay:${x % 8 * 0.4}s;animation-duration:${3.2 + x % 5 * 0.8}s"/>`;
-  }) : [], y = [
+            style="animation-delay:${b % 5 * 0.24}s"/>`;
+  }) : [], d = t.snow ? Array.from({ length: 32 }, ($, b) => {
+    const m = 12 + b * 47 % 276, x = 56 + b * 31 % 104;
+    return v`<circle class=${b % 2 ? "snow" : "snow2"} cx=${m} cy=${x}
+          r=${1.3 + b % 3 * 0.7} fill="#fff" opacity="0.9"
+          style="animation-delay:${b % 8 * 0.4}s;animation-duration:${3.2 + b % 5 * 0.8}s"/>`;
+  }) : [], f = [
     { y: 30, s: 0.5, dur: 34, blur: !0, op: 0.55 },
     { y: 46, s: 0.9, dur: 22, blur: !1, op: 0.85 },
     { y: 64, s: 1.25, dur: 15, blur: !1, op: 1 },
     { y: 38, s: 0.7, dur: 27, blur: !1, op: 0.7 }
   ].slice(0, t.clouds).map(
-    ($, x) => ii(t, t.cloudOpacity * $.op, $.y, $.s, $.dur / i, -x * 5.5, 3.4 + x * 0.9, $.blur)
-  ), _ = !t.isNight && t.clouds <= 2 && !t.rain && !t.snow ? w`<g class="birds">
+    ($, b) => ii(t, t.cloudOpacity * $.op, $.y, $.s, $.dur / i, -b * 5.5, 3.4 + b * 0.9, $.blur)
+  ), _ = !t.isNight && t.clouds <= 2 && !t.rain && !t.snow ? v`<g class="birds">
           <path d="M -7 0 Q -3.5 -4.5 0 0 Q 3.5 -4.5 7 0" transform="translate(0 34)"/>
           <path d="M -5 0 Q -2.5 -3.5 0 0 Q 2.5 -3.5 5 0" transform="translate(16 42)"/>
         </g>` : p;
@@ -954,7 +957,7 @@ function ni(e) {
       </radialGradient>
       <radialGradient id="wc-sun-disc">
         <stop offset="0%" stop-color="#fffbe6" />
-        <stop offset="55%" stop-color=${T(t.sunColor, "#ffffff", 0.35)} />
+        <stop offset="55%" stop-color=${F(t.sunColor, "#ffffff", 0.35)} />
         <stop offset="100%" stop-color=${t.sunColor} />
       </radialGradient>
       <radialGradient id="wc-horizon">
@@ -1027,7 +1030,7 @@ function ni(e) {
     <rect x="0" y="0" width="300" height="190" fill="url(#wc-sky-grad)" />
 
     ${a}
-    ${t.stars ? w`
+    ${t.stars ? v`
         <line class="shooting" x1="238" y1="26" x2="252" y2="19"
           stroke="#fff" stroke-width="1.6" stroke-linecap="round"
           style="animation-duration:13s"/>
@@ -1035,16 +1038,16 @@ function ni(e) {
           stroke="#fff" stroke-width="1.3" stroke-linecap="round"
           style="animation-duration:19s;animation-delay:-8s"/>` : p}
 
-    ${t.horizon > 0.03 ? w`<ellipse class="horizonpulse" cx=${n} cy="152" rx="205" ry="64"
+    ${t.horizon > 0.03 ? v`<ellipse class="horizonpulse" cx=${n} cy="152" rx="205" ry="64"
           fill="url(#wc-horizon)" opacity=${t.horizon}/>` : p}
 
-    ${t.showSun ? w`<g transform="translate(${n} ${t.sunY})">
+    ${t.showSun ? v`<g transform="translate(${n} ${t.sunY})">
           <g class="sunglow"><circle r=${t.sunR * 2.9} fill="url(#wc-sun-glow)"/></g>
-          ${t.showRays ? w`<g class="raypulse"><g class="sunrays">${o}</g></g>` : p}
+          ${t.showRays ? v`<g class="raypulse"><g class="sunrays">${o}</g></g>` : p}
           <circle r=${t.sunR + 6} fill=${t.sunColor} opacity="0.3" filter="url(#wc-blur-soft)"/>
           <circle r=${t.sunR} fill="url(#wc-sun-disc)"/>
         </g>` : p}
-    ${t.showMoon ? w`<g transform="translate(230 42)">
+    ${t.showMoon ? v`<g transform="translate(230 42)">
           <g class="moonhalo"><circle r="32" fill="url(#wc-moon-halo)"/></g>
           <circle r="15" fill="#eef1f7"/>
           <circle cx="-6.5" cy="-4" r="13.5" fill=${t.sky[0]}/>
@@ -1053,24 +1056,24 @@ function ni(e) {
         </g>` : p}
 
     ${_}
-    ${y}
+    ${f}
 
-    ${t.windy ? w`<g fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" stroke-linecap="round">
+    ${t.windy ? v`<g fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" stroke-linecap="round">
           <path class="gust" d="M 20 58 q 40 -12 86 -2 q 30 6 52 -4"/>
           <path class="gust" style="animation-delay:-1.2s" d="M 60 96 q 46 -10 92 0 q 26 5 48 -5"/>
         </g>` : p}
 
     <!-- layered landscape with atmospheric haze; the crests catch golden light -->
-    <path d=${At(ri)} fill=${t.ridgeFar}/>
-    <path d=${At(ae)} fill=${t.hillBack}/>
-    ${t.rim > 0.05 ? w`<path d=${ae} fill="none" stroke=${t.horizonColor}
+    <path d=${Mt(si)} fill=${t.ridgeFar}/>
+    <path d=${Mt(ae)} fill=${t.hillBack}/>
+    ${t.rim > 0.05 ? v`<path d=${ae} fill="none" stroke=${t.horizonColor}
           stroke-width="1.6" opacity=${t.rim} stroke-linecap="round"/>` : p}
-    <path d=${At(ce)} fill=${t.hillFront}/>
-    ${t.rim > 0.05 ? w`<path d=${ce} fill="none" stroke=${t.horizonColor}
+    <path d=${Mt(ce)} fill=${t.hillFront}/>
+    ${t.rim > 0.05 ? v`<path d=${ce} fill="none" stroke=${t.horizonColor}
           stroke-width="1.2" opacity=${t.rim * 0.6} stroke-linecap="round"/>` : p}
-    ${si.map(
-    ([$, x, m], b) => w`<g transform="translate(${$} ${x})">
-        <g class="sway" style="animation-duration:${s}s;animation-delay:${-b * 0.7}s">
+    ${ri.map(
+    ([$, b, m], x) => v`<g transform="translate(${$} ${b})">
+        <g class="sway" style="animation-duration:${r}s;animation-delay:${-x * 0.7}s">
           <g transform="scale(${m})" fill=${t.tree}>
             <polygon points="0,-16 6,-4 -6,-4"/>
             <polygon points="0,-10 7.5,3 -7.5,3"/>
@@ -1079,10 +1082,10 @@ function ni(e) {
         </g>
       </g>`
   )}
-    ${t.horizon > 0.03 ? w`<ellipse cx=${n} cy="156" rx="150" ry="26"
+    ${t.horizon > 0.03 ? v`<ellipse cx=${n} cy="156" rx="150" ry="26"
           fill="url(#wc-horizon)" opacity=${t.horizon * 0.45}/>` : p}
 
-    ${t.fog ? w`<g fill="rgba(255,255,255,0.5)">
+    ${t.fog ? v`<g fill="rgba(255,255,255,0.5)">
           <rect class="fogband" x="-24" y="112" width="348" height="11" rx="5.5"/>
           <rect class="fogband" style="animation-delay:-2.5s" x="-24" y="134" width="348" height="13" rx="6.5" opacity="0.85"/>
           <rect class="fogband" style="animation-delay:-5s" x="-24" y="158" width="348" height="16" rx="8" opacity="0.7"/>
@@ -1092,7 +1095,7 @@ function ni(e) {
     ${h}
     ${d}
 
-    ${t.lightning ? w`
+    ${t.lightning ? v`
         <rect class="flash" x="0" y="0" width="300" height="190" fill="#eaf2ff"/>
         <g class="bolt">
           <polygon points="152,64 139,112 153,112 141,156 178,100 159,100 170,64"
@@ -1101,7 +1104,7 @@ function ni(e) {
             fill="#fff8d6" stroke="#ffd83a" stroke-width="1"/>
         </g>` : p}
 
-    ${e.glow > 0 ? w`<rect class="warnglow" x="0" y="0" width="300" height="190"
+    ${e.glow > 0 ? v`<rect class="warnglow" x="0" y="0" width="300" height="190"
           fill="url(#wc-warn)" opacity=${Math.min(e.glow, 1)}/>` : p}
   </svg>`;
 }
@@ -1317,13 +1320,13 @@ function k(e, t) {
 function Nt(e, t) {
   return t ? k(e, `cond_${t}`) : "";
 }
-function he(e, t) {
+function At(e, t) {
   return t === void 0 || !Number.isFinite(t) ? "" : (de[dt(e)] ?? de.en)[Math.round(t % 360 / 22.5) % 16];
 }
 function P(e) {
   return dt(e) === "de" ? "de-DE" : "en-US";
 }
-function N(e, t, i) {
+function A(e, t, i) {
   return Number.isFinite(t) ? i === void 0 ? new Intl.NumberFormat(P(e), { maximumFractionDigits: 2 }).format(t) : new Intl.NumberFormat(P(e), {
     minimumFractionDigits: i,
     maximumFractionDigits: i
@@ -1332,69 +1335,69 @@ function N(e, t, i) {
 function E(e, t) {
   return t ? /^[%°'"]/.test(t) ? `${e}${t}` : `${e} ${t}` : e;
 }
-function rt(e, t) {
+function st(e, t) {
   if (!Number.isFinite(e)) return "–";
   let i;
-  const r = (t ?? "min").toLowerCase();
-  r.startsWith("h") ? i = e * 60 : r === "s" || r.startsWith("sec") ? i = e / 60 : i = e;
-  const s = Math.round(i * 60), n = Math.floor(s / 3600), o = Math.floor(s % 3600 / 60), a = s % 60;
+  const s = (t ?? "min").toLowerCase();
+  s.startsWith("h") ? i = e * 60 : s === "s" || s.startsWith("sec") ? i = e / 60 : i = e;
+  const r = Math.round(i * 60), n = Math.floor(r / 3600), o = Math.floor(r % 3600 / 60), a = r % 60;
   return n > 0 ? o ? `${n} h ${o} min` : `${n} h` : o > 0 ? a && o < 10 ? `${o} min ${a} s` : `${o} min` : `${a} s`;
 }
-function W(e, t) {
+function I(e, t) {
   const i = new Date(t);
   if (isNaN(i.getTime())) return "";
-  const r = /* @__PURE__ */ new Date(), s = (o, a) => o.getFullYear() === a.getFullYear() && o.getMonth() === a.getMonth() && o.getDate() === a.getDate();
-  if (s(i, r))
+  const s = /* @__PURE__ */ new Date(), r = (o, a) => o.getFullYear() === a.getFullYear() && o.getMonth() === a.getMonth() && o.getDate() === a.getDate();
+  if (r(i, s))
     return i.toLocaleTimeString(P(e), { hour: "numeric", minute: "2-digit" });
-  const n = new Date(r.getTime() - 864e5);
-  return s(i, n) ? k(e, "yesterday") : i.toLocaleDateString(P(e), { day: "numeric", month: "short" });
+  const n = new Date(s.getTime() - 864e5);
+  return r(i, n) ? k(e, "yesterday") : i.toLocaleDateString(P(e), { day: "numeric", month: "short" });
 }
-function ft(e, t) {
+function mt(e, t) {
   if (!t) return "";
   const i = new Date(t);
   return isNaN(i.getTime()) ? t : i.toLocaleTimeString(P(e), { hour: "2-digit", minute: "2-digit" });
 }
-function pe(e) {
+function he(e) {
   const t = (e.getTime() - Date.now()) / 6e4;
-  return t > 0 ? rt(t, "min") : "";
+  return t > 0 ? st(t, "min") : "";
 }
 const R = (e) => typeof e == "number" && Number.isFinite(e);
 function oi(e, t) {
-  const i = dt(e) === "de", r = (a, c = 0) => N(e, a, c), s = t.tempUnit ?? "°C", n = [], o = t.condition ? i ? t.condition : t.condition.toLowerCase() : void 0;
+  const i = dt(e) === "de", s = (a, c = 0) => A(e, a, c), r = t.tempUnit ?? "°C", n = [], o = t.condition ? i ? t.condition : t.condition.toLowerCase() : void 0;
   if (o && R(t.temp)) {
-    const a = R(t.feels) && Math.abs(t.feels - t.temp) >= 2 ? i ? ` (gefühlt ${E(r(t.feels), s)})` : ` (feels like ${E(r(t.feels), s)})` : "";
+    const a = R(t.feels) && Math.abs(t.feels - t.temp) >= 2 ? i ? ` (gefühlt ${E(s(t.feels), r)})` : ` (feels like ${E(s(t.feels), r)})` : "";
     n.push(
-      i ? `Aktuell ${o} bei ${E(r(t.temp), s)}${a}.` : `Currently ${o} at ${E(r(t.temp), s)}${a}.`
+      i ? `Aktuell ${o} bei ${E(s(t.temp), r)}${a}.` : `Currently ${o} at ${E(s(t.temp), r)}${a}.`
     );
-  } else o ? n.push(i ? `Aktuell ${o}.` : `Currently ${o}.`) : R(t.temp) && n.push(i ? `Aktuell ${E(r(t.temp), s)}.` : `Currently ${E(r(t.temp), s)}.`);
+  } else o ? n.push(i ? `Aktuell ${o}.` : `Currently ${o}.`) : R(t.temp) && n.push(i ? `Aktuell ${E(s(t.temp), r)}.` : `Currently ${E(s(t.temp), r)}.`);
   if (R(t.hi) && R(t.lo) && n.push(
-    i ? `Im Tagesverlauf ${E(r(t.lo), s)} bis ${E(r(t.hi), s)}.` : `Ranging from ${E(r(t.lo), s)} to ${E(r(t.hi), s)} today.`
+    i ? `Im Tagesverlauf ${E(s(t.lo), r)} bis ${E(s(t.hi), r)}.` : `Ranging from ${E(s(t.lo), r)} to ${E(s(t.hi), r)} today.`
   ), R(t.windSpeed) && t.windSpeed >= 1) {
     const a = t.windSpeed >= 40, c = t.windDir ? i ? ` aus ${t.windDir}` : ` from the ${t.windDir}` : "", l = a ? i ? "Kräftiger Wind" : "Strong winds" : "Wind";
-    n.push(`${l}${c} ${i ? "mit" : "at"} ${E(r(t.windSpeed), t.windUnit ?? "km/h")}.`);
+    n.push(`${l}${c} ${i ? "mit" : "at"} ${E(s(t.windSpeed), t.windUnit ?? "km/h")}.`);
   }
   if (R(t.precipProb) && t.precipProb >= 40 ? n.push(
-    i ? `${r(t.precipProb)}% Regenwahrscheinlichkeit — Schirm nicht vergessen.` : `${r(t.precipProb)}% chance of rain — take an umbrella.`
+    i ? `${s(t.precipProb)}% Regenwahrscheinlichkeit — Schirm nicht vergessen.` : `${s(t.precipProb)}% chance of rain — take an umbrella.`
   ) : R(t.precipMm) && t.precipMm >= 1 && n.push(
-    i ? `Rund ${E(r(t.precipMm, 1), "mm")} Niederschlag erwartet.` : `About ${E(r(t.precipMm, 1), "mm")} of precipitation expected.`
+    i ? `Rund ${E(s(t.precipMm, 1), "mm")} Niederschlag erwartet.` : `About ${E(s(t.precipMm, 1), "mm")} of precipitation expected.`
   ), R(t.uv) && t.uv >= 6 && n.push(
-    i ? `Hoher UV-Index (${r(t.uv)}) — an Sonnenschutz denken.` : `High UV index (${r(t.uv)}) — remember sun protection.`
+    i ? `Hoher UV-Index (${s(t.uv)}) — an Sonnenschutz denken.` : `High UV index (${s(t.uv)}) — remember sun protection.`
   ), R(t.temp) && (t.temp <= 0 ? n.push(i ? "Frostig — warm einpacken." : "Freezing — bundle up.") : t.temp >= 30 && n.push(i ? "Sehr heiß — viel trinken." : "Very hot — stay hydrated.")), t.tomorrowCondition && R(t.tomorrowHi)) {
-    const a = i ? t.tomorrowCondition : t.tomorrowCondition.toLowerCase(), c = R(t.tomorrowLo) ? `${E(r(t.tomorrowLo), s)}–` : "";
+    const a = i ? t.tomorrowCondition : t.tomorrowCondition.toLowerCase(), c = R(t.tomorrowLo) ? `${E(s(t.tomorrowLo), r)}–` : "";
     n.push(
-      i ? `Morgen ${a}, ${c}${E(r(t.tomorrowHi), s)}.` : `Tomorrow ${a}, ${c}${E(r(t.tomorrowHi), s)}.`
+      i ? `Morgen ${a}, ${c}${E(s(t.tomorrowHi), r)}.` : `Tomorrow ${a}, ${c}${E(s(t.tomorrowHi), r)}.`
     );
   }
   return n.join(" ");
 }
 async function ai(e, t, i) {
   if (!t.length) return {};
-  const r = /* @__PURE__ */ new Date(), s = /* @__PURE__ */ new Date();
-  s.setHours(0, 0, 0, 0), s.setDate(s.getDate() - (i - 1));
+  const s = /* @__PURE__ */ new Date(), r = /* @__PURE__ */ new Date();
+  r.setHours(0, 0, 0, 0), r.setDate(r.getDate() - (i - 1));
   const n = await e.callWS({
     type: "history/history_during_period",
-    start_time: s.toISOString(),
-    end_time: r.toISOString(),
+    start_time: r.toISOString(),
+    end_time: s.toISOString(),
     entity_ids: t,
     minimal_response: !0,
     no_attributes: !0
@@ -1404,16 +1407,16 @@ async function ai(e, t, i) {
   return o;
 }
 function ci(e, t, i) {
-  const r = /* @__PURE__ */ new Date();
-  r.setHours(0, 0, 0, 0);
-  const s = r.getTime() - (t - 1) * 864e5, n = Array.from({ length: t }, () => []);
+  const s = /* @__PURE__ */ new Date();
+  s.setHours(0, 0, 0, 0);
+  const r = s.getTime() - (t - 1) * 864e5, n = Array.from({ length: t }, () => []);
   for (const o of e) {
-    const a = Math.floor((o.t - s) / 864e5);
+    const a = Math.floor((o.t - r) / 864e5);
     a >= 0 && a < t && n[a].push(o.v);
   }
-  return n.map((o) => Se(o, i));
+  return n.map((o) => ke(o, i));
 }
-function Se(e, t) {
+function ke(e, t) {
   if (!e.length) return NaN;
   switch (t) {
     case "min":
@@ -1421,23 +1424,23 @@ function Se(e, t) {
     case "max":
       return Math.max(...e);
     case "sum":
-      return e.reduce((i, r) => i + r, 0);
+      return e.reduce((i, s) => i + s, 0);
     case "last":
       return e[e.length - 1];
     default:
-      return e.reduce((i, r) => i + r, 0) / e.length;
+      return e.reduce((i, s) => i + s, 0) / e.length;
   }
 }
-async function li(e, t, i, r = "day") {
+async function li(e, t, i, s = "day") {
   if (!t.length) return {};
-  const s = /* @__PURE__ */ new Date();
-  s.setHours(0, 0, 0, 0), r === "month" ? (s.setDate(1), s.setMonth(s.getMonth() - (i - 1))) : s.setDate(s.getDate() - (i - 1));
+  const r = /* @__PURE__ */ new Date();
+  r.setHours(0, 0, 0, 0), s === "month" ? (r.setDate(1), r.setMonth(r.getMonth() - (i - 1))) : r.setDate(r.getDate() - (i - 1));
   const n = await e.callWS({
     type: "recorder/statistics_during_period",
-    start_time: s.toISOString(),
+    start_time: r.toISOString(),
     end_time: (/* @__PURE__ */ new Date()).toISOString(),
     statistic_ids: t,
-    period: r,
+    period: s,
     types: ["mean", "min", "max", "state", "sum"]
   }), o = (c) => typeof c == "number" && Number.isFinite(c) ? c : null, a = {};
   for (const c of t)
@@ -1451,20 +1454,20 @@ async function li(e, t, i, r = "day") {
     }));
   return a;
 }
-function ue(e, t) {
+function pe(e, t) {
   return t === "min" ? e.min : t === "max" ? e.max ?? e.mean : t === "sum" ? e.sum ?? e.max ?? e.mean : t === "last" ? e.state ?? e.mean : e.mean;
 }
-function me(e, t, i, r = "day") {
-  const s = new Array(t).fill(NaN);
-  if (r === "month") {
+function ue(e, t, i, s = "day") {
+  const r = new Array(t).fill(NaN);
+  if (s === "month") {
     const a = /* @__PURE__ */ new Date(), c = a.getFullYear() * 12 + a.getMonth();
     for (const l of e) {
       const h = new Date(l.start), d = h.getFullYear() * 12 + h.getMonth() - (c - (t - 1));
       if (d < 0 || d >= t) continue;
-      const f = ue(l, i);
-      f !== null && (s[d] = f);
+      const y = pe(l, i);
+      y !== null && (r[d] = y);
     }
-    return s;
+    return r;
   }
   const n = /* @__PURE__ */ new Date();
   n.setHours(0, 0, 0, 0);
@@ -1472,29 +1475,29 @@ function me(e, t, i, r = "day") {
   for (const a of e) {
     const c = Math.floor((a.start - o) / 864e5);
     if (c < 0 || c >= t) continue;
-    const l = ue(a, i);
-    l !== null && (s[c] = l);
+    const l = pe(a, i);
+    l !== null && (r[c] = l);
   }
-  return s;
+  return r;
 }
 function di(e, t, i) {
-  const r = /* @__PURE__ */ new Date();
-  r.setMinutes(0, 0, 0);
-  const s = r.getTime() - (t - 1) * 36e5, n = Array.from({ length: t }, () => []);
+  const s = /* @__PURE__ */ new Date();
+  s.setMinutes(0, 0, 0);
+  const r = s.getTime() - (t - 1) * 36e5, n = Array.from({ length: t }, () => []);
   for (const o of e) {
-    const a = Math.floor((o.t - s) / 36e5);
+    const a = Math.floor((o.t - r) / 36e5);
     a >= 0 && a < t && n[a].push(o.v);
   }
-  return n.map((o) => Se(o, i));
+  return n.map((o) => ke(o, i));
 }
 function Et(e) {
   const t = [...e];
   let i = NaN;
-  for (let s = 0; s < t.length; s++)
-    Number.isFinite(t[s]) ? i = t[s] : t[s] = i;
-  let r = NaN;
-  for (let s = t.length - 1; s >= 0; s--)
-    Number.isFinite(t[s]) ? r = t[s] : t[s] = r;
+  for (let r = 0; r < t.length; r++)
+    Number.isFinite(t[r]) ? i = t[r] : t[r] = i;
+  let s = NaN;
+  for (let r = t.length - 1; r >= 0; r--)
+    Number.isFinite(t[r]) ? s = t[r] : t[r] = s;
   return t;
 }
 function Ft(e) {
@@ -1502,7 +1505,7 @@ function Ft(e) {
   return t.length < 2 ? NaN : t[t.length - 1] - t[0];
 }
 async function hi(e, t, i) {
-  var s, n, o, a, c;
+  var r, n, o, a, c;
   try {
     const l = await e.callWS({
       type: "execute_script",
@@ -1515,7 +1518,7 @@ async function hi(e, t, i) {
         },
         { stop: "done", response_variable: "_wc_forecast" }
       ]
-    }), h = (n = (s = l == null ? void 0 : l.response) == null ? void 0 : s[t]) == null ? void 0 : n.forecast;
+    }), h = (n = (r = l == null ? void 0 : l.response) == null ? void 0 : r[t]) == null ? void 0 : n.forecast;
     if (Array.isArray(h) && h.length) return h;
   } catch {
   }
@@ -1523,112 +1526,112 @@ async function hi(e, t, i) {
     try {
       const l = await new Promise((h) => {
         let d;
-        const f = setTimeout(() => {
+        const y = setTimeout(() => {
           d == null || d(), h([]);
         }, 4e3);
         e.connection.subscribeMessage(
-          (y) => {
-            clearTimeout(f), d == null || d(), h(y.forecast ?? []);
+          (f) => {
+            clearTimeout(y), d == null || d(), h(f.forecast ?? []);
           },
           {
             type: "weather/subscribe_forecast",
             forecast_type: i,
             entity_id: t
           }
-        ).then((y) => {
-          d = y;
+        ).then((f) => {
+          d = f;
         }).catch(() => h([]));
       });
       if (l.length) return l;
     } catch {
     }
-  const r = (c = (a = e.states[t]) == null ? void 0 : a.attributes) == null ? void 0 : c.forecast;
-  return Array.isArray(r) && r.length ? r : [];
+  const s = (c = (a = e.states[t]) == null ? void 0 : a.attributes) == null ? void 0 : c.forecast;
+  return Array.isArray(s) && s.length ? s : [];
 }
 function pi(e) {
   return !!e && e.startsWith("weather.");
 }
-const Me = 220, Ae = 60, z = 7, xt = "color-mix(in srgb, var(--primary-text-color) 14%, transparent)";
+const Se = 220, Me = 60, D = 7, bt = "color-mix(in srgb, var(--primary-text-color) 14%, transparent)";
 function Ne(e, t) {
-  var s;
-  const i = e.yFmt ? Math.max(26, ...t.map((n) => e.yFmt(n).length * 5.6 + 10)) : z, r = (s = e.xMarks) != null && s.some((n) => n.label) ? 15 : z;
-  return { padL: i, padB: r };
+  var r;
+  const i = e.yFmt ? Math.max(26, ...t.map((n) => e.yFmt(n).length * 5.6 + 10)) : D, s = (r = e.xMarks) != null && r.some((n) => n.label) ? 15 : D;
+  return { padL: i, padB: s };
 }
 function ui(e) {
-  const t = e.filter(Number.isFinite), i = Math.min(...t), r = Math.max(...t), s = r - i || Math.abs(r) * 0.1 || 1;
-  return { lo: i - s * 0.18, hi: r + s * 0.18 };
+  const t = e.filter(Number.isFinite), i = Math.min(...t), s = Math.max(...t), r = s - i || Math.abs(s) * 0.1 || 1;
+  return { lo: i - r * 0.18, hi: s + r * 0.18 };
 }
 function Ct(e, t = {}) {
-  const i = t.w ?? Me, r = t.h ?? Ae, s = t.dots ?? !0, n = e.filter((m) => m.values.some(Number.isFinite));
+  const i = t.w ?? Se, s = t.h ?? Me, r = t.dots ?? !0, n = e.filter((m) => m.values.some(Number.isFinite));
   if (!n.length) return p;
-  const { lo: o, hi: a } = ui(n.flatMap((m) => m.values)), c = Math.max(...n.map((m) => m.values.length)), l = t.yFmt ? [a - (a - o) * 0.08, (o + a) / 2, o + (a - o) * 0.08] : [], { padL: h, padB: d } = Ne(t, l), f = (m) => h + m * (i - h - z) / Math.max(c - 1, 1), y = (m) => r - d - (m - o) / (a - o) * (r - d - z), _ = l.map(
-    (m) => w`
-      <line x1=${h} x2=${i - z} y1=${y(m)} y2=${y(m)}
-        stroke=${xt} stroke-width="1" stroke-dasharray="2 3"/>
-      <text class="axis" x=${h - 5} y=${y(m)} text-anchor="end"
+  const { lo: o, hi: a } = ui(n.flatMap((m) => m.values)), c = Math.max(...n.map((m) => m.values.length)), l = t.yFmt ? [a - (a - o) * 0.08, (o + a) / 2, o + (a - o) * 0.08] : [], { padL: h, padB: d } = Ne(t, l), y = (m) => h + m * (i - h - D) / Math.max(c - 1, 1), f = (m) => s - d - (m - o) / (a - o) * (s - d - D), _ = l.map(
+    (m) => v`
+      <line x1=${h} x2=${i - D} y1=${f(m)} y2=${f(m)}
+        stroke=${bt} stroke-width="1" stroke-dasharray="2 3"/>
+      <text class="axis" x=${h - 5} y=${f(m)} text-anchor="end"
         dominant-baseline="middle">${t.yFmt(m)}</text>`
   ), $ = (t.xMarks ?? []).map(
-    (m) => w`
-      ${m.line ? w`<line x1=${f(m.i)} x2=${f(m.i)} y1=${z} y2=${r - d}
-              stroke=${xt} stroke-width="1"/>` : p}
-      ${m.label ? w`<text class="axis" x=${f(m.i)} y=${r - 3} text-anchor="middle">${m.label}</text>` : p}`
-  ), x = n.map((m, b) => {
-    const g = m.values.map((v, A) => ({ x: f(A), y: y(v), ok: Number.isFinite(v) })).filter((v) => v.ok);
+    (m) => v`
+      ${m.line ? v`<line x1=${y(m.i)} x2=${y(m.i)} y1=${D} y2=${s - d}
+              stroke=${bt} stroke-width="1"/>` : p}
+      ${m.label ? v`<text class="axis" x=${y(m.i)} y=${s - 3} text-anchor="middle">${m.label}</text>` : p}`
+  ), b = n.map((m, x) => {
+    const g = m.values.map((w, N) => ({ x: y(N), y: f(w), ok: Number.isFinite(w) })).filter((w) => w.ok);
     if (!g.length) return p;
     let S = `M ${g[0].x} ${g[0].y}`;
-    for (let v = 1; v < g.length; v++) {
-      const A = (g[v - 1].x + g[v].x) / 2;
-      S += ` C ${A} ${g[v - 1].y}, ${A} ${g[v].y}, ${g[v].x} ${g[v].y}`;
+    for (let w = 1; w < g.length; w++) {
+      const N = (g[w - 1].x + g[w].x) / 2;
+      S += ` C ${N} ${g[w - 1].y}, ${N} ${g[w].y}, ${g[w].x} ${g[w].y}`;
     }
-    const M = t.area && b === 0 ? w`<path d="${S} L ${g[g.length - 1].x} ${r - d} L ${g[0].x} ${r - d} Z"
+    const M = t.area && x === 0 ? v`<path d="${S} L ${g[g.length - 1].x} ${s - d} L ${g[0].x} ${s - d} Z"
             fill="color-mix(in srgb, ${m.color} 13%, transparent)"/>` : p;
-    return w`
+    return v`
       ${M}
       <path d=${S} fill="none" stroke=${m.color} stroke-width="2.2"
         stroke-linecap="round" stroke-linejoin="round"
         stroke-dasharray=${m.dashed ? "4 4" : p} opacity=${m.dashed ? 0.75 : 1}/>
-      ${s ? g.map(
-      (v) => w`<circle cx=${v.x} cy=${v.y} r="3.1" fill="var(--wc-dot-fill)"
+      ${r ? g.map(
+      (w) => v`<circle cx=${w.x} cy=${w.y} r="3.1" fill="var(--wc-dot-fill)"
                 stroke=${m.color} stroke-width="2"/>`
     ) : p}
-      ${t.nowDot && b === 0 ? w`<circle cx=${g[0].x} cy=${g[0].y} r="3.6" fill="var(--wc-dot-fill)"
+      ${t.nowDot && x === 0 ? v`<circle cx=${g[0].x} cy=${g[0].y} r="3.6" fill="var(--wc-dot-fill)"
               stroke=${m.color} stroke-width="2.2"/>` : p}
     `;
   });
-  return u`<svg class="chart" viewBox="0 0 ${i} ${r}" aria-hidden="true">
-    ${_}${$}${x}
+  return u`<svg class="chart" viewBox="0 0 ${i} ${s}" aria-hidden="true">
+    ${_}${$}${b}
   </svg>`;
 }
-function Tt(e, t, i, r = {}) {
-  const s = r.w ?? Me, n = r.h ?? Ae;
+function Tt(e, t, i, s = {}) {
+  const r = s.w ?? Se, n = s.h ?? Me;
   if (!e.some((g) => Number.isFinite(g) && g > 0)) return p;
-  const o = e.map((g) => Number.isFinite(g) && g > 0 ? g : 0), a = Math.max(...o, i ?? 0) || 1, c = o.length, l = r.yFmt ? [a, a / 2] : [], { padL: h, padB: d } = Ne(r, l), f = (s - h - z) / c, y = Math.min(f * 0.55, 14), _ = (g) => g / a * (n - d - z), $ = l.map(
-    (g) => w`
-      <line x1=${h} x2=${s - z} y1=${n - d - _(g)} y2=${n - d - _(g)}
-        stroke=${xt} stroke-width="1" stroke-dasharray="2 3"/>
+  const o = e.map((g) => Number.isFinite(g) && g > 0 ? g : 0), a = Math.max(...o, i ?? 0) || 1, c = o.length, l = s.yFmt ? [a, a / 2] : [], { padL: h, padB: d } = Ne(s, l), y = (r - h - D) / c, f = Math.min(y * 0.55, 14), _ = (g) => g / a * (n - d - D), $ = l.map(
+    (g) => v`
+      <line x1=${h} x2=${r - D} y1=${n - d - _(g)} y2=${n - d - _(g)}
+        stroke=${bt} stroke-width="1" stroke-dasharray="2 3"/>
       <text class="axis" x=${h - 5} y=${n - d - _(g)} text-anchor="end"
-        dominant-baseline="middle">${r.yFmt(g)}</text>`
-  ), x = (r.xMarks ?? []).map((g) => {
-    const S = h + g.i * f + f / 2;
-    return w`
-      ${g.line ? w`<line x1=${S} x2=${S} y1=${z} y2=${n - d}
-              stroke=${xt} stroke-width="1"/>` : p}
-      ${g.label ? w`<text class="axis" x=${S} y=${n - 3} text-anchor="middle">${g.label}</text>` : p}`;
+        dominant-baseline="middle">${s.yFmt(g)}</text>`
+  ), b = (s.xMarks ?? []).map((g) => {
+    const S = h + g.i * y + y / 2;
+    return v`
+      ${g.line ? v`<line x1=${S} x2=${S} y1=${D} y2=${n - d}
+              stroke=${bt} stroke-width="1"/>` : p}
+      ${g.label ? v`<text class="axis" x=${S} y=${n - 3} text-anchor="middle">${g.label}</text>` : p}`;
   }), m = o.map((g, S) => {
-    const M = Math.max(_(g), g > 0 ? 3 : 1.5), v = h + S * f + (f - y) / 2;
-    return w`<rect x=${v} y=${n - d - M} width=${y} height=${M}
-      rx=${Math.min(y / 2, 4)} fill=${t} opacity=${g > 0 ? 1 : 0.25}/>`;
-  }), b = Number.isFinite(i) ? w`<line x1=${h} x2=${s - z} y1=${n - d - _(i)} y2=${n - d - _(i)}
+    const M = Math.max(_(g), g > 0 ? 3 : 1.5), w = h + S * y + (y - f) / 2;
+    return v`<rect x=${w} y=${n - d - M} width=${f} height=${M}
+      rx=${Math.min(f / 2, 4)} fill=${t} opacity=${g > 0 ? 1 : 0.25}/>`;
+  }), x = Number.isFinite(i) ? v`<line x1=${h} x2=${r - D} y1=${n - d - _(i)} y2=${n - d - _(i)}
         stroke=${t} stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>` : p;
-  return u`<svg class="chart" viewBox="0 0 ${s} ${n}" aria-hidden="true">
-    ${$}${x}${b}${m}
+  return u`<svg class="chart" viewBox="0 0 ${r} ${n}" aria-hidden="true">
+    ${$}${b}${x}${m}
   </svg>`;
 }
-function It(e, t, i, r) {
-  const s = 2 * Math.PI * e;
-  return w`<circle cx="100" cy="100" r=${e} fill="none" stroke=${r}
+function It(e, t, i, s) {
+  const r = 2 * Math.PI * e;
+  return v`<circle cx="100" cy="100" r=${e} fill="none" stroke=${s}
     stroke-width=${t} stroke-linecap="round"
-    stroke-dasharray="${s * Math.max(i, 0.02)} ${s}"
+    stroke-dasharray="${r * Math.max(i, 0.02)} ${r}"
     transform="rotate(-90 100 100)"/>`;
 }
 function Rt(e, t, i = 10) {
@@ -1649,15 +1652,15 @@ function mi(e, t, i) {
         <feGaussianBlur stdDeviation="15" />
       </filter>
     </defs>
-    ${h ? w`<circle cx="100" cy="100" r="93" fill="none" stroke=${e}
+    ${h ? v`<circle cx="100" cy="100" r="93" fill="none" stroke=${e}
           stroke-width="2.5" opacity="0.4" filter="url(#wc-glow)" class="glowpulse"/>` : p}
     <circle cx="100" cy="100" r=${78} fill="none" stroke=${e}
       stroke-width=${20} stroke-linecap="round" stroke-dasharray=${o}
       transform="rotate(-90 100 100)" filter="url(#wc-glow)" opacity=${l}
       class=${h ? "glowpulse" : ""}/>
-    ${i != null && i.length ? i.map((d, f) => {
-    const y = f / i.length * 2 * Math.PI - Math.PI / 2;
-    return w`<circle cx=${100 + Math.cos(y) * 24} cy=${100 + Math.sin(y) * 24}
+    ${i != null && i.length ? i.map((d, y) => {
+    const f = y / i.length * 2 * Math.PI - Math.PI / 2;
+    return v`<circle cx=${100 + Math.cos(f) * 24} cy=${100 + Math.sin(f) * 24}
             r=${16 + d.share * 26} fill=${d.color}
             filter="url(#wc-blur-heavy)" opacity="0.5"/>`;
   }) : p}
@@ -1675,26 +1678,26 @@ function mi(e, t, i) {
   </svg>`;
 }
 function fi(e, t, i) {
-  const r = [];
+  const s = [];
   for (let o = 0; o <= 144; o++) {
     const a = o / 144 * 2 * Math.PI, c = 72 + 7 * Math.cos(12 * a);
-    r.push(
+    s.push(
       `${o ? "L" : "M"} ${(100 + Math.cos(a) * c).toFixed(1)} ${(100 + Math.sin(a) * c).toFixed(1)}`
     );
   }
   const n = 92;
   return u`<svg class="scorering" viewBox="0 0 200 200" aria-hidden="true">
-    <path d="${r.join(" ")} Z" fill="color-mix(in srgb, ${e} 22%, transparent)"/>
+    <path d="${s.join(" ")} Z" fill="color-mix(in srgb, ${e} 22%, transparent)"/>
     <circle cx="100" cy="100" r=${n} fill="none" stroke=${t} opacity="0.18"
       stroke-width="5"/>
     ${It(n, 5, i, t)}
   </svg>`;
 }
-function gi(e, t, i, r, s) {
-  return e === "material" ? fi(t, i, r) : e === "bubble" ? Rt(i, r, 15) : e === "mirror" ? Rt("#fff", r, 7) : e === "glass" ? mi(i, r, s) : Rt(i, r, 10);
+function gi(e, t, i, s, r) {
+  return e === "material" ? fi(t, i, s) : e === "bubble" ? Rt(i, s, 15) : e === "mirror" ? Rt("#fff", s, 7) : e === "glass" ? mi(i, s, r) : Rt(i, s, 10);
 }
 function yi(e, t, i) {
-  const r = Math.max(0, Math.min(e, 1)), s = 18, n = 182, o = 92, a = 20, c = `M ${s} ${o} Q 100 ${a - 40} ${n} ${o}`, l = r, h = (1 - l) ** 2 * s + 2 * (1 - l) * l * 100 + l ** 2 * n, d = (1 - l) ** 2 * o + 2 * (1 - l) * l * (a - 40) + l ** 2 * o, f = t ? o + 14 : d, y = t ? r < 0.5 ? s - 4 : n + 4 : h;
+  const s = Math.max(0, Math.min(e, 1)), r = 18, n = 182, o = 92, a = 20, c = `M ${r} ${o} Q 100 ${a - 40} ${n} ${o}`, l = s, h = (1 - l) ** 2 * r + 2 * (1 - l) * l * 100 + l ** 2 * n, d = (1 - l) ** 2 * o + 2 * (1 - l) * l * (a - 40) + l ** 2 * o, y = t ? o + 14 : d, f = t ? s < 0.5 ? r - 4 : n + 4 : h;
   return u`<svg class="sunarc" viewBox="0 0 200 110" aria-hidden="true">
     <defs>
       <linearGradient id="wc-sun-sky" x1="0" y1="0" x2="0" y2="1">
@@ -1702,22 +1705,22 @@ function yi(e, t, i) {
         <stop offset="100%" stop-color=${i} stop-opacity="0" />
       </linearGradient>
     </defs>
-    <path d="${c} L ${n} ${o} L ${s} ${o} Z"
+    <path d="${c} L ${n} ${o} L ${r} ${o} Z"
       fill="url(#wc-sun-sky)" opacity=${t ? 0.25 : 1}/>
     <path d=${c} fill="none" stroke=${i} stroke-width="2"
       stroke-dasharray="3 4" opacity="0.65"/>
     <line x1="6" x2="194" y1=${o} y2=${o}
       stroke="color-mix(in srgb, var(--primary-text-color) 22%, transparent)"
       stroke-width="1.5"/>
-    <circle cx=${y} cy=${f} r="9"
+    <circle cx=${f} cy=${y} r="9"
       fill=${t ? "color-mix(in srgb, var(--primary-text-color) 30%, transparent)" : i}
       stroke="var(--wc-card-bg)" stroke-width="2.5"/>
-    ${t ? p : w`<circle cx=${y} cy=${f} r="15" fill="none" stroke=${i}
+    ${t ? p : v`<circle cx=${f} cy=${y} r="15" fill="none" stroke=${i}
           stroke-width="1.5" opacity="0.4"/>`}
   </svg>`;
 }
 function _i(e, t) {
-  const r = Math.max(0, Math.min(e, 1)), s = "#eef1f6", n = "#39435a", o = 1 - 2 * r, a = 62 * Math.abs(o), c = o > 0 ? 1 : 0, l = `M 0 -62 A 62 62 0 0 1 0 62 A ${a.toFixed(1)} 62 0 0 ${c} 0 -62 Z`;
+  const s = Math.max(0, Math.min(e, 1)), r = "#eef1f6", n = "#39435a", o = 1 - 2 * s, a = 62 * Math.abs(o), c = o > 0 ? 1 : 0, l = `M 0 -62 A 62 62 0 0 1 0 62 A ${a.toFixed(1)} 62 0 0 ${c} 0 -62 Z`;
   return u`<svg class="moondisc" viewBox="0 0 200 200" aria-hidden="true">
     <defs>
       <radialGradient id="wc-moon-glow">
@@ -1726,10 +1729,10 @@ function _i(e, t) {
         <stop offset="100%" stop-color="#eef1f6" stop-opacity="0" />
       </radialGradient>
     </defs>
-    <circle cx="100" cy="100" r="88" fill="url(#wc-moon-glow)" opacity=${0.25 + r * 0.65} />
+    <circle cx="100" cy="100" r="88" fill="url(#wc-moon-glow)" opacity=${0.25 + s * 0.65} />
     <g transform="translate(100 100)">
       <circle r=${62} fill=${n} />
-      <path d=${l} fill=${s} transform=${t ? p : "scale(-1 1)"} />
+      <path d=${l} fill=${r} transform=${t ? p : "scale(-1 1)"} />
       <g fill="rgba(90,96,120,0.28)">
         <circle cx="-16" cy="-16" r="9" />
         <circle cx="15" cy="9" r="12" />
@@ -1741,16 +1744,16 @@ function _i(e, t) {
   </svg>`;
 }
 function bi(e, t, i) {
-  const r = e.filter(Number.isFinite);
-  let s = e, n = e.length - 1;
-  r.length < 3 && (s = Array.from({ length: 24 }, (b, g) => Math.sin(g / 24 * 2 * Math.PI * 2 - Math.PI / 2)), n = (/* @__PURE__ */ new Date()).getHours());
-  const o = 300, a = 96, c = 8, l = Math.min(...s.filter(Number.isFinite)), d = Math.max(...s.filter(Number.isFinite)) - l || 1, f = (b) => c + b * (o - 2 * c) / Math.max(s.length - 1, 1), y = (b) => a - c - (b - l) / d * (a - 2 * c), _ = s.map((b, g) => ({ x: f(g), y: y(Number.isFinite(b) ? b : l) }));
+  const s = e.filter(Number.isFinite);
+  let r = e, n = e.length - 1;
+  s.length < 3 && (r = Array.from({ length: 24 }, (x, g) => Math.sin(g / 24 * 2 * Math.PI * 2 - Math.PI / 2)), n = (/* @__PURE__ */ new Date()).getHours());
+  const o = 300, a = 96, c = 8, l = Math.min(...r.filter(Number.isFinite)), d = Math.max(...r.filter(Number.isFinite)) - l || 1, y = (x) => c + x * (o - 2 * c) / Math.max(r.length - 1, 1), f = (x) => a - c - (x - l) / d * (a - 2 * c), _ = r.map((x, g) => ({ x: y(g), y: f(Number.isFinite(x) ? x : l) }));
   let $ = `M ${_[0].x} ${_[0].y}`;
-  for (let b = 1; b < _.length; b++) {
-    const g = (_[b - 1].x + _[b].x) / 2;
-    $ += ` C ${g} ${_[b - 1].y}, ${g} ${_[b].y}, ${_[b].x} ${_[b].y}`;
+  for (let x = 1; x < _.length; x++) {
+    const g = (_[x - 1].x + _[x].x) / 2;
+    $ += ` C ${g} ${_[x - 1].y}, ${g} ${_[x].y}, ${_[x].x} ${_[x].y}`;
   }
-  const x = `${$} L ${_[_.length - 1].x} ${a} L ${_[0].x} ${a} Z`, m = Math.max(0, Math.min(Math.round(n), _.length - 1));
+  const b = `${$} L ${_[_.length - 1].x} ${a} L ${_[0].x} ${a} Z`, m = Math.max(0, Math.min(Math.round(n), _.length - 1));
   return u`<svg class="tidechart" viewBox="0 0 ${o} ${a}" aria-hidden="true">
     <defs>
       <linearGradient id="wc-tide-fill" x1="0" y1="0" x2="0" y2="1">
@@ -1758,7 +1761,7 @@ function bi(e, t, i) {
         <stop offset="100%" stop-color=${t} stop-opacity="0.02" />
       </linearGradient>
     </defs>
-    <path d=${x} fill="url(#wc-tide-fill)" />
+    <path d=${b} fill="url(#wc-tide-fill)" />
     <path d=${$} fill="none" stroke=${t} stroke-width="2.4" stroke-linecap="round" />
     <line x1=${_[m].x} x2=${_[m].x} y1=${_[m].y} y2=${a}
       stroke=${t} stroke-width="1" stroke-dasharray="2 3" opacity="0.5" />
@@ -1767,7 +1770,7 @@ function bi(e, t, i) {
   </svg>`;
 }
 function xi(e, t, i) {
-  const r = Number.isFinite(e), s = ((r ? e : 0) - 90) * (Math.PI / 180);
+  const s = Number.isFinite(e), r = ((s ? e : 0) - 90) * (Math.PI / 180);
   return u`<svg class="windrose" viewBox="0 0 200 200" aria-hidden="true">
     <circle cx="100" cy="100" r="82" fill="none"
       stroke="color-mix(in srgb, var(--primary-text-color) 12%, transparent)" stroke-width="2"/>
@@ -1779,12 +1782,12 @@ function xi(e, t, i) {
     { l: "S", x: 100, y: 184 },
     { l: "W", x: 22, y: 104 }
   ].map(
-    (o) => w`<text class="rose-card" x=${o.x} y=${o.y} text-anchor="middle"
+    (o) => v`<text class="rose-card" x=${o.x} y=${o.y} text-anchor="middle"
         dominant-baseline="middle">${o.l}</text>`
   )}
-    ${r ? w`<g transform="translate(100 100)">
-          <line x1=${Math.cos(s) * 58} y1=${Math.sin(s) * 58}
-            x2=${-Math.cos(s) * 58} y2=${-Math.sin(s) * 58}
+    ${s ? v`<g transform="translate(100 100)">
+          <line x1=${Math.cos(r) * 58} y1=${Math.sin(r) * 58}
+            x2=${-Math.cos(r) * 58} y2=${-Math.sin(r) * 58}
             stroke=${i} stroke-width="5" stroke-linecap="round"/>
           <polygon points="0,-9 0,9 62,0"
             transform="rotate(${e + 90})" fill=${i}/>
@@ -1792,12 +1795,12 @@ function xi(e, t, i) {
     <circle cx="100" cy="100" r="6" fill=${i}/>
   </svg>`;
 }
-var wi = Object.defineProperty, vi = Object.getOwnPropertyDescriptor, ht = (e, t, i, r) => {
-  for (var s = r > 1 ? void 0 : r ? vi(t, i) : t, n = e.length - 1, o; n >= 0; n--)
-    (o = e[n]) && (s = (r ? o(t, i, s) : o(s)) || s);
-  return r && s && wi(t, i, s), s;
+var wi = Object.defineProperty, vi = Object.getOwnPropertyDescriptor, ht = (e, t, i, s) => {
+  for (var r = s > 1 ? void 0 : s ? vi(t, i) : t, n = e.length - 1, o; n >= 0; n--)
+    (o = e[n]) && (r = (s ? o(t, i, r) : o(r)) || r);
+  return s && r && wi(t, i, r), r;
 };
-const $i = Object.keys(Q), ki = ["air_quality", "pollen"], Si = [
+const $i = Object.keys(X), ki = ["air_quality", "pollen"], Si = [
   "temperature",
   "feels_like",
   "wind",
@@ -1879,16 +1882,7 @@ const $i = Object.keys(Q), ki = ["air_quality", "pollen"], Si = [
     wind_entity: "Wind entity (cloud drift)",
     night: "Force night mode",
     scene_offset_y: "Scene vertical offset %",
-    label_opacity: "Label opacity",
-    anchors: "Value labels on the scene",
-    add_anchor: "Add label",
-    anchor_x: "X %",
-    anchor_y: "Y %",
-    dot: "Dot position",
-    dot_left: "left",
-    dot_right: "right",
-    dot_top: "top",
-    dot_bottom: "bottom",
+    details: "Values below the forecast (labeled chips)",
     sunrise_entity: "Sunrise entity (optional)",
     sunset_entity: "Sunset entity (optional)",
     moon_entity: "Moon phase entity (optional)",
@@ -1993,16 +1987,7 @@ const $i = Object.keys(Q), ki = ["air_quality", "pollen"], Si = [
     wind_entity: "Wind-Entität (Wolken-Drift)",
     night: "Nachtmodus erzwingen",
     scene_offset_y: "Vertikaler Versatz %",
-    label_opacity: "Label-Deckkraft",
-    anchors: "Wert-Labels auf der Szene",
-    add_anchor: "Label hinzufügen",
-    anchor_x: "X %",
-    anchor_y: "Y %",
-    dot: "Punkt-Position",
-    dot_left: "links",
-    dot_right: "rechts",
-    dot_top: "oben",
-    dot_bottom: "unten",
+    details: "Werte unter der Vorhersage (Chips)",
     sunrise_entity: "Sonnenaufgang-Entität (optional)",
     sunset_entity: "Sonnenuntergang-Entität (optional)",
     moon_entity: "Mondphasen-Entität (optional)",
@@ -2047,7 +2032,7 @@ const $i = Object.keys(Q), ki = ["air_quality", "pollen"], Si = [
     trend_none: "Ausblenden"
   }
 };
-let Y = class extends K {
+let Z = class extends Q {
   constructor() {
     super(...arguments), this._expanded = -1, this._tab = "general";
   }
@@ -2129,7 +2114,7 @@ let Y = class extends K {
     return i[e] && t.push(i[e]), t;
   }
   _metricSchema(e, t) {
-    const i = e.type ?? "custom", r = (n, o) => n.map((a) => ({ value: a, label: this._label(`${o}_${a}`) })), s = !e.entities || e.entities.every((n) => typeof n == "string");
+    const i = e.type ?? "custom", s = (n, o) => n.map((a) => ({ value: a, label: this._label(`${o}_${a}`) })), r = !e.entities || e.entities.every((n) => typeof n == "string");
     switch (t) {
       case "display":
         return [
@@ -2144,7 +2129,7 @@ let Y = class extends K {
                   select: {
                     mode: "dropdown",
                     custom_value: !0,
-                    options: Jt.map((n) => ({ value: n, label: n }))
+                    options: Ze.map((n) => ({ value: n, label: n }))
                   }
                 }
               },
@@ -2154,7 +2139,7 @@ let Y = class extends K {
                 selector: {
                   select: {
                     mode: "dropdown",
-                    options: r(["line", "bar", "progress", "none"], "graph")
+                    options: s(["line", "bar", "progress", "none"], "graph")
                   }
                 }
               },
@@ -2164,7 +2149,7 @@ let Y = class extends K {
                   selector: {
                     select: {
                       mode: "dropdown",
-                      options: r(["forecast", "history"], "cs")
+                      options: s(["forecast", "history"], "cs")
                     }
                   }
                 }
@@ -2187,7 +2172,7 @@ let Y = class extends K {
                 selector: {
                   select: {
                     mode: "dropdown",
-                    options: r(["hourly", "daily", "twice_daily"], "ft")
+                    options: s(["hourly", "daily", "twice_daily"], "ft")
                   }
                 }
               },
@@ -2223,7 +2208,7 @@ let Y = class extends K {
               {
                 name: "goal_type",
                 selector: {
-                  select: { mode: "dropdown", options: r(["atleast", "atmost"], "gt") }
+                  select: { mode: "dropdown", options: s(["atleast", "atmost"], "gt") }
                 }
               },
               ...i === "air_quality" || i === "pollen" ? [{ name: "max", selector: { number: { min: 1, mode: "box" } } }] : []
@@ -2241,7 +2226,7 @@ let Y = class extends K {
                 selector: {
                   select: {
                     mode: "dropdown",
-                    options: r(["popup", "more-info", "link", "none"], "ta")
+                    options: s(["popup", "more-info", "link", "none"], "ta")
                   }
                 }
               },
@@ -2251,7 +2236,7 @@ let Y = class extends K {
                 selector: {
                   select: {
                     mode: "dropdown",
-                    options: r(["mean", "min", "max", "sum", "last"], "agg")
+                    options: s(["mean", "min", "max", "sum", "last"], "agg")
                   }
                 }
               },
@@ -2260,7 +2245,7 @@ let Y = class extends K {
                 selector: {
                   select: {
                     mode: "dropdown",
-                    options: r(["up_good", "down_good", "neutral", "none"], "trend")
+                    options: s(["up_good", "down_good", "neutral", "none"], "trend")
                   }
                 }
               },
@@ -2285,10 +2270,7 @@ let Y = class extends K {
               }
             ]
           },
-          {
-            name: "label_opacity",
-            selector: { number: { min: 0, max: 1, step: 0.05, mode: "slider" } }
-          },
+          { name: "details", selector: { entity: { multiple: !0 } } },
           { name: "night", selector: { boolean: {} } }
         ];
       case "sun":
@@ -2360,7 +2342,7 @@ let Y = class extends K {
           },
           { name: "entity", selector: { entity: {} } },
           ...i === "wind" ? [{ name: "entity2", selector: { entity: {} } }] : [],
-          ...ki.includes(i) && s ? [{ name: "entities", selector: { entity: { multiple: !0 } } }] : [],
+          ...ki.includes(i) && r ? [{ name: "entities", selector: { entity: { multiple: !0 } } }] : [],
           ...i === "air_quality" && (!e.breakdown || e.breakdown.every((n) => typeof n == "string")) ? [{ name: "breakdown", selector: { entity: { multiple: !0 } } }] : []
         ];
     }
@@ -2392,17 +2374,17 @@ let Y = class extends K {
     `;
   }
   _renderMetricEditor(e, t) {
-    const i = e.type ?? "custom", r = Q[i] ?? Q.custom, s = this._expanded === t, n = this._config.metrics.length;
+    const i = e.type ?? "custom", s = X[i] ?? X.custom, r = this._expanded === t, n = this._config.metrics.length;
     return u`
-      <div class="metric ${s ? "open" : ""}">
+      <div class="metric ${r ? "open" : ""}">
         <div
           class="metric-head"
           @click=${() => {
-      this._expanded = s ? -1 : t, this._tab = "general";
+      this._expanded = r ? -1 : t, this._tab = "general";
     }}
         >
-          <span class="chip" style="--c:${D(e.color) ?? D(r.color)}">
-            <ha-icon .icon=${e.icon ?? r.icon}></ha-icon>
+          <span class="chip" style="--c:${H(e.color) ?? H(s.color)}">
+            <ha-icon .icon=${e.icon ?? s.icon}></ha-icon>
           </span>
           <span class="metric-title">
             ${e.name ?? k(this.hass, i)}
@@ -2417,20 +2399,20 @@ let Y = class extends K {
           <button class="icon-btn danger" @click=${(o) => this._remove(o, t)}>
             <ha-icon icon="mdi:delete-outline"></ha-icon>
           </button>
-          <ha-icon class="expand" icon=${s ? "mdi:chevron-up" : "mdi:chevron-down"}></ha-icon>
+          <ha-icon class="expand" icon=${r ? "mdi:chevron-up" : "mdi:chevron-down"}></ha-icon>
         </div>
-        ${s ? this._renderMetricBody(e, t, i) : p}
+        ${r ? this._renderMetricBody(e, t, i) : p}
       </div>
     `;
   }
   _renderMetricBody(e, t, i) {
     var n, o, a, c;
-    const r = this._metricTabs(i), s = r.some((l) => l.id === this._tab) ? this._tab : "general";
+    const s = this._metricTabs(i), r = s.some((l) => l.id === this._tab) ? this._tab : "general";
     return u`<div class="metric-body">
       <div class="tabs">
-        ${r.map(
+        ${s.map(
       (l) => u`<button
-            class="tab ${s === l.id ? "active" : ""}"
+            class="tab ${r === l.id ? "active" : ""}"
             @click=${() => this._tab = l.id}
           >
             <ha-icon .icon=${l.icon}></ha-icon>
@@ -2451,100 +2433,11 @@ let Y = class extends K {
       parts_evening: (a = e.parts) == null ? void 0 : a.evening,
       parts_night: (c = e.parts) == null ? void 0 : c.night
     }}
-        .schema=${this._metricSchema(e, s)}
+        .schema=${this._metricSchema(e, r)}
         .computeLabel=${(l) => this._label(l.name)}
         @value-changed=${(l) => this._metricChanged(l, t)}
       ></ha-form>
-      ${s === "sky" ? this._renderAnchorEditor(e, t) : p}
     </div>`;
-  }
-  _anchorSchema() {
-    return [
-      { name: "entity", selector: { entity: {} } },
-      {
-        type: "grid",
-        name: "",
-        schema: [
-          { name: "name", selector: { text: {} } },
-          {
-            name: "color",
-            selector: {
-              select: {
-                mode: "dropdown",
-                custom_value: !0,
-                options: Jt.map((e) => ({ value: e, label: e }))
-              }
-            }
-          },
-          { name: "anchor_x", selector: { number: { min: 0, max: 100, mode: "box" } } },
-          { name: "anchor_y", selector: { number: { min: 0, max: 100, mode: "box" } } },
-          {
-            name: "dot",
-            selector: {
-              select: {
-                mode: "dropdown",
-                options: [
-                  { value: "left", label: "← " + this._label("dot_left") },
-                  { value: "right", label: "→ " + this._label("dot_right") },
-                  { value: "top", label: "↑ " + this._label("dot_top") },
-                  { value: "bottom", label: "↓ " + this._label("dot_bottom") },
-                  { value: "top-left", label: "↖" },
-                  { value: "top-right", label: "↗" },
-                  { value: "bottom-left", label: "↙" },
-                  { value: "bottom-right", label: "↘" }
-                ]
-              }
-            }
-          }
-        ]
-      },
-      { name: "entity2", selector: { entity: {} } }
-    ];
-  }
-  _renderAnchorEditor(e, t) {
-    const i = e.anchors ?? [];
-    return u`
-      <div class="anchor-editor">
-        <div class="anchor-editor-title">${this._label("anchors")}</div>
-        ${i.map(
-      (r, s) => u`
-            <div class="anchor-row">
-              <ha-form
-                .hass=${this.hass}
-                .data=${{ ...r, anchor_x: r.x, anchor_y: r.y }}
-                .schema=${this._anchorSchema()}
-                .computeLabel=${(n) => this._label(n.name)}
-                @value-changed=${(n) => this._anchorChanged(n, t, s)}
-              ></ha-form>
-              <button class="icon-btn danger" title="✕" @click=${() => this._removeAnchor(t, s)}>
-                <ha-icon icon="mdi:delete-outline"></ha-icon>
-              </button>
-            </div>
-          `
-    )}
-        <button class="add small" @click=${() => this._addAnchor(t)}>
-          <ha-icon icon="mdi:plus"></ha-icon>
-          ${this._label("add_anchor")}
-        </button>
-      </div>
-    `;
-  }
-  _anchorChanged(e, t, i) {
-    if (e.stopPropagation(), !this._config) return;
-    const r = { ...e.detail.value }, s = {};
-    r.entity && (s.entity = r.entity), r.entity2 && (s.entity2 = r.entity2), r.name && (s.name = r.name), r.color && (s.color = r.color), r.anchor_x !== void 0 && r.anchor_x !== null && (s.x = r.anchor_x), r.anchor_y !== void 0 && r.anchor_y !== null && (s.y = r.anchor_y), r.dot && (s.dot = r.dot);
-    const n = [...this._config.metrics], o = [...n[t].anchors ?? []];
-    o[i] = s, n[t] = { ...n[t], anchors: o }, this._emit({ ...this._config, metrics: n });
-  }
-  _addAnchor(e) {
-    if (!this._config) return;
-    const t = [...this._config.metrics], i = [...t[e].anchors ?? [], { entity: "", x: 50, y: 20 }];
-    t[e] = { ...t[e], anchors: i }, this._emit({ ...this._config, metrics: t });
-  }
-  _removeAnchor(e, t) {
-    if (!this._config) return;
-    const i = [...this._config.metrics], r = (i[e].anchors ?? []).filter((s, n) => n !== t);
-    i[e] = { ...i[e], anchors: r }, this._emit({ ...this._config, metrics: i });
   }
   _emit(e) {
     this._config = e, this.dispatchEvent(
@@ -2553,8 +2446,8 @@ let Y = class extends K {
   }
   _clean(e) {
     const t = {};
-    for (const [i, r] of Object.entries(e))
-      r === "" || r === null || r === void 0 || Array.isArray(r) && !r.length || (t[i] = r);
+    for (const [i, s] of Object.entries(e))
+      s === "" || s === null || s === void 0 || Array.isArray(s) && !s.length || (t[i] = s);
     return t;
   }
   _topChanged(e) {
@@ -2564,18 +2457,18 @@ let Y = class extends K {
   }
   _metricChanged(e, t) {
     if (e.stopPropagation(), !this._config) return;
-    const i = { ...e.detail.value }, r = {};
+    const i = { ...e.detail.value }, s = {};
     for (const n of ["morning", "noon", "evening", "night"]) {
       const o = i[`parts_${n}`];
-      delete i[`parts_${n}`], typeof o == "string" && o && (r[n] = o);
+      delete i[`parts_${n}`], typeof o == "string" && o && (s[n] = o);
     }
-    Object.keys(r).length ? i.parts = r : delete i.parts;
+    Object.keys(s).length ? i.parts = s : delete i.parts;
     for (const n of ["goal", "start"]) {
       const o = i[`${n}_entity`];
       delete i[`${n}_entity`], typeof o == "string" && o && (i[n] = o);
     }
-    const s = [...this._config.metrics];
-    s[t] = this._clean(i), this._emit({ ...this._config, metrics: s });
+    const r = [...this._config.metrics];
+    r[t] = this._clean(i), this._emit({ ...this._config, metrics: r });
   }
   _addMetric() {
     if (!this._config) return;
@@ -2584,16 +2477,16 @@ let Y = class extends K {
   }
   _remove(e, t) {
     if (e.stopPropagation(), !this._config) return;
-    const i = this._config.metrics.filter((r, s) => s !== t);
+    const i = this._config.metrics.filter((s, r) => r !== t);
     this._expanded === t && (this._expanded = -1), this._emit({ ...this._config, metrics: i });
   }
   _move(e, t, i) {
     if (e.stopPropagation(), !this._config) return;
-    const r = [...this._config.metrics], s = t + i;
-    s < 0 || s >= r.length || ([r[t], r[s]] = [r[s], r[t]], this._expanded === t && (this._expanded = s), this._emit({ ...this._config, metrics: r }));
+    const s = [...this._config.metrics], r = t + i;
+    r < 0 || r >= s.length || ([s[t], s[r]] = [s[r], s[t]], this._expanded === t && (this._expanded = r), this._emit({ ...this._config, metrics: s }));
   }
 };
-Y.styles = _e`
+Z.styles = ye`
     .metrics {
       display: flex;
       flex-direction: column;
@@ -2729,52 +2622,28 @@ Y.styles = _e`
       padding: 6px 12px;
       font-size: 13px;
     }
-    .anchor-editor {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid var(--divider-color);
-    }
-    .anchor-editor-title {
-      font-weight: 500;
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: var(--primary-text-color);
-    }
-    .anchor-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
-      padding: 8px;
-      margin-bottom: 8px;
-      border: 1px solid var(--divider-color);
-      border-radius: 10px;
-    }
-    .anchor-row ha-form {
-      flex: 1;
-      min-width: 0;
-    }
   `;
 ht([
-  Wt({ attribute: !1 })
-], Y.prototype, "hass", 2);
+  Ht({ attribute: !1 })
+], Z.prototype, "hass", 2);
 ht([
-  L()
-], Y.prototype, "_config", 2);
+  z()
+], Z.prototype, "_config", 2);
 ht([
-  L()
-], Y.prototype, "_expanded", 2);
+  z()
+], Z.prototype, "_expanded", 2);
 ht([
-  L()
-], Y.prototype, "_tab", 2);
-Y = ht([
-  ke("weatherglass-card-editor")
-], Y);
-var Ai = Object.defineProperty, Ni = Object.getOwnPropertyDescriptor, H = (e, t, i, r) => {
-  for (var s = r > 1 ? void 0 : r ? Ni(t, i) : t, n = e.length - 1, o; n >= 0; n--)
-    (o = e[n]) && (s = (r ? o(t, i, s) : o(s)) || s);
-  return r && s && Ai(t, i, s), s;
+  z()
+], Z.prototype, "_tab", 2);
+Z = ht([
+  $e("weatherglass-card-editor")
+], Z);
+var Ni = Object.defineProperty, Ai = Object.getOwnPropertyDescriptor, L = (e, t, i, s) => {
+  for (var r = s > 1 ? void 0 : s ? Ai(t, i) : t, n = e.length - 1, o; n >= 0; n--)
+    (o = e[n]) && (r = (s ? o(t, i, r) : o(r)) || r);
+  return s && r && Ni(t, i, r), r;
 };
-const Ei = "0.3.1", Fi = 5 * 60 * 1e3, Ci = 15 * 60 * 1e3, Ti = 15 * 60 * 1e3, Ri = ["default", "glass", "material", "bubble", "mirror"], Di = ["air_quality"], fe = [
+const Ei = "0.4.0", Fi = 5 * 60 * 1e3, Ci = 15 * 60 * 1e3, Ti = 15 * 60 * 1e3, Ri = ["default", "glass", "material", "bubble", "mirror"], Di = ["air_quality"], me = [
   "temperature",
   "feels_like",
   "wind",
@@ -2793,7 +2662,7 @@ const Ei = "0.3.1", Fi = 5 * 60 * 1e3, Ci = 15 * 60 * 1e3, Ti = 15 * 60 * 1e3, R
   pressure: "pressure",
   cloud: "cloud_coverage",
   uv: "uv_index"
-}, gt = [
+}, ft = [
   { key: "day", kind: "hour", count: 24 },
   { key: "week", kind: "day", count: 7 },
   { key: "month", kind: "day", count: 30 },
@@ -2801,9 +2670,9 @@ const Ei = "0.3.1", Fi = 5 * 60 * 1e3, Ci = 15 * 60 * 1e3, Ti = 15 * 60 * 1e3, R
   { key: "year", kind: "day", count: 365 },
   { key: "max", kind: "month", count: 60 }
 ];
-let C = class extends K {
+let T = class extends Q {
   constructor() {
-    super(...arguments), this._history = {}, this._popup = null, this._popupRange = null, this._tileRanges = {}, this._statsCache = {}, this._forecasts = {}, this._statsCacheTime = {}, this._statsFetching = /* @__PURE__ */ new Set(), this._forecastTime = {}, this._forecastFetching = /* @__PURE__ */ new Set(), this._onKeydown = (e) => {
+    super(...arguments), this._history = {}, this._popup = null, this._popupRange = null, this._tileRanges = {}, this._skyRanges = {}, this._statsCache = {}, this._forecasts = {}, this._statsCacheTime = {}, this._statsFetching = /* @__PURE__ */ new Set(), this._forecastTime = {}, this._forecastFetching = /* @__PURE__ */ new Set(), this._onKeydown = (e) => {
       e.key === "Escape" && this._popup !== null && (this._popup = null);
     }, this._fetching = !1, this._cfgSig = "", this._stateSig = "", this._lastFetch = 0;
   }
@@ -2817,7 +2686,7 @@ let C = class extends K {
     return document.createElement("weatherglass-card-editor");
   }
   static getStubConfig(e) {
-    const t = Object.keys(e.states).find((r) => r.startsWith("weather.")), i = [];
+    const t = Object.keys(e.states).find((s) => s.startsWith("weather.")), i = [];
     return t ? (i.push({ type: "sky", entity: t }), i.push({ type: "summary" })) : i.push({ type: "temperature", entity: "" }), { title: "Wetter", weather: t, metrics: i };
   }
   setConfig(e) {
@@ -2839,7 +2708,7 @@ let C = class extends K {
     super.updated(e), (e.has("hass") || e.has("_config")) && (this._maybeFetch(), this._syncForecasts()), this._syncStats(), (e.has("_popup") || e.has("_popupRange") || e.has("_tileRanges") || e.has("_statsCache")) && ((t = this.renderRoot) == null || t.querySelectorAll(".chart-scroll").forEach((i) => i.scrollLeft = i.scrollWidth));
   }
   _activeRange() {
-    return gt.find((e) => e.key === this._popupRange) ?? null;
+    return ft.find((e) => e.key === this._popupRange) ?? null;
   }
   /* ---- forecast ------------------------------------------------------- */
   _defaultForecastType(e) {
@@ -2857,19 +2726,19 @@ let C = class extends K {
     if (!this.hass || !this._config) return;
     const e = /* @__PURE__ */ new Set(), t = this._config.weather;
     t && this.hass.states[t] && (e.add(`${t}|daily`), e.add(`${t}|hourly`)), this._config.metrics.forEach((i) => {
-      const r = i.type ?? "custom", s = this._forecastId(i);
-      !s || !this.hass.states[s] || (fe.includes(r) || r === "summary" || i.forecast) && e.add(`${s}|${i.forecast_type ?? this._defaultForecastType(r)}`);
+      const s = i.type ?? "custom", r = this._forecastId(i);
+      !r || !this.hass.states[r] || (s === "sky" ? (e.add(`${r}|hourly`), e.add(`${r}|daily`)) : (me.includes(s) || s === "summary" || i.forecast) && e.add(`${r}|${i.forecast_type ?? this._defaultForecastType(s)}`));
     });
     for (const i of e) {
-      const [r, s] = i.split("|");
-      this._ensureForecast(r, s);
+      const [s, r] = i.split("|");
+      this._ensureForecast(s, r);
     }
   }
   _ensureForecast(e, t) {
     const i = `${e}|${t}`;
-    this._forecasts[i] && Date.now() - (this._forecastTime[i] ?? 0) < Ti || this._forecastFetching.has(i) || (this._forecastFetching.add(i), hi(this.hass, e, t).then((s) => {
-      this._forecastTime[i] = Date.now(), this._forecasts = { ...this._forecasts, [i]: s };
-    }).catch((s) => console.warn("weatherglass-card: forecast fetch failed", s)).finally(() => this._forecastFetching.delete(i)));
+    this._forecasts[i] && Date.now() - (this._forecastTime[i] ?? 0) < Ti || this._forecastFetching.has(i) || (this._forecastFetching.add(i), hi(this.hass, e, t).then((r) => {
+      this._forecastTime[i] = Date.now(), this._forecasts = { ...this._forecasts, [i]: r };
+    }).catch((r) => console.warn("weatherglass-card: forecast fetch failed", r)).finally(() => this._forecastFetching.delete(i)));
   }
   /* ---- statistics + history ------------------------------------------ */
   _syncStats() {
@@ -2881,8 +2750,8 @@ let C = class extends K {
     }
     this._config.metrics.forEach((t, i) => {
       if (!t.expanded) return;
-      const r = gt.find((s) => s.key === this._tileRanges[i]);
-      r && e.push(r);
+      const s = ft.find((r) => r.key === this._tileRanges[i]);
+      s && e.push(s);
     });
     for (const t of e) {
       const i = t.kind === "month" ? "month" : t.kind === "day" && t.count > 10 ? "day" : null;
@@ -2892,41 +2761,39 @@ let C = class extends K {
   _ensureStats(e, t) {
     const i = `${e}|${t}`;
     if (this._statsCache[i] && Date.now() - (this._statsCacheTime[i] ?? 0) < 18e5 || this._statsFetching.has(i)) return;
-    const s = this._watchedEntities();
-    s.length && (this._statsFetching.add(i), li(this.hass, s, t, e).then((n) => {
+    const r = this._watchedEntities();
+    r.length && (this._statsFetching.add(i), li(this.hass, r, t, e).then((n) => {
       this._statsCacheTime[i] = Date.now(), this._statsCache = { ...this._statsCache, [i]: n };
     }).catch((n) => console.warn("weatherglass-card: statistics fetch failed", n)).finally(() => this._statsFetching.delete(i)));
   }
-  _bucketsFor(e, t, i, r) {
-    var s, n;
+  _bucketsFor(e, t, i, s) {
+    var r, n;
     if (t === "hour")
-      return di(this._history[e] ?? [], i, r);
+      return di(this._history[e] ?? [], i, s);
     if (t === "month") {
-      const o = (s = this._statsCache[`month|${i}`]) == null ? void 0 : s[e];
-      return o != null && o.length ? me(o, i, r, "month") : new Array(i).fill(NaN);
+      const o = (r = this._statsCache[`month|${i}`]) == null ? void 0 : r[e];
+      return o != null && o.length ? ue(o, i, s, "month") : new Array(i).fill(NaN);
     }
     if (i > 10) {
       const o = (n = this._statsCache[`day|${i}`]) == null ? void 0 : n[e];
-      if (o != null && o.length) return me(o, i, r, "day");
+      if (o != null && o.length) return ue(o, i, s, "day");
     }
-    return ci(this._history[e] ?? [], i, r);
+    return ci(this._history[e] ?? [], i, s);
   }
   _watchedEntities() {
     var t;
     const e = /* @__PURE__ */ new Set();
     for (const i of ((t = this._config) == null ? void 0 : t.metrics) ?? []) {
-      for (const r of this._series(i)) r.entity && e.add(r.entity);
-      for (const r of i.secondary ?? []) e.add(r);
-      for (const r of Object.values(i.parts ?? {})) r && e.add(r);
+      for (const s of this._series(i)) s.entity && e.add(s.entity);
+      for (const s of i.secondary ?? []) e.add(s);
+      for (const s of Object.values(i.parts ?? {})) s && e.add(s);
       i.score_entity && e.add(i.score_entity), i.wind_entity && e.add(i.wind_entity);
-      for (const r of i.anchors ?? [])
-        e.add(r.entity), r.entity2 && e.add(r.entity2);
-      for (const r of i.breakdown ?? []) e.add(typeof r == "string" ? r : r.entity);
+      for (const s of i.breakdown ?? []) e.add(typeof s == "string" ? s : s.entity);
     }
     return [...e].filter(
       (i) => {
-        var r;
-        return ((r = this.hass) == null ? void 0 : r.states[i]) && !i.startsWith("weather.");
+        var s;
+        return ((s = this.hass) == null ? void 0 : s.states[i]) && !i.startsWith("weather.");
       }
     );
   }
@@ -2937,9 +2804,9 @@ let C = class extends K {
     return parseFloat(t ? t.state : e);
   }
   _handleTap(e, t, i) {
-    const r = e.tap_action ?? "popup";
-    if (r !== "none") {
-      if (r === "link") {
+    const s = e.tap_action ?? "popup";
+    if (s !== "none") {
+      if (s === "link") {
         if (!e.link) return;
         if (/^https?:\/\//.test(e.link)) {
           window.open(e.link, "_blank", "noopener");
@@ -2948,7 +2815,7 @@ let C = class extends K {
         history.pushState(null, "", e.link), this.dispatchEvent(new Event("location-changed", { bubbles: !0, composed: !0 }));
         return;
       }
-      if (r === "more-info") {
+      if (s === "more-info") {
         this._moreInfo(i);
         return;
       }
@@ -2961,20 +2828,20 @@ let C = class extends K {
     if (!e.length) return;
     const t = Math.max(
       ...this._config.metrics.map((o) => o.days ?? this._config.days ?? 7)
-    ), i = `${t}|${e.join(",")}`, r = e.map((o) => {
+    ), i = `${t}|${e.join(",")}`, s = e.map((o) => {
       var a;
       return ((a = this.hass.states[o]) == null ? void 0 : a.last_updated) ?? "";
-    }).join("|"), s = Date.now();
-    (i !== this._cfgSig || s - this._lastFetch > Ci || r !== this._stateSig && s - this._lastFetch > Fi) && (this._fetching = !0, this._cfgSig = i, this._stateSig = r, ai(this.hass, e, t).then((o) => {
+    }).join("|"), r = Date.now();
+    (i !== this._cfgSig || r - this._lastFetch > Ci || s !== this._stateSig && r - this._lastFetch > Fi) && (this._fetching = !0, this._cfgSig = i, this._stateSig = s, ai(this.hass, e, t).then((o) => {
       this._history = o, this._lastFetch = Date.now();
     }).catch((o) => console.warn("weatherglass-card: history fetch failed", o)).finally(() => this._fetching = !1));
   }
   _series(e) {
-    var i, r;
+    var i, s;
     if ((i = e.entities) != null && i.length)
-      return e.entities.map((s) => typeof s == "string" ? { entity: s } : s);
+      return e.entities.map((r) => typeof r == "string" ? { entity: r } : r);
     const t = [];
-    return e.entity && t.push({ entity: e.entity }), e.entity2 && t.push({ entity: e.entity2 }), !t.length && e.type === "sky" && ((r = this._config) != null && r.weather) && t.push({ entity: this._config.weather }), t;
+    return e.entity && t.push({ entity: e.entity }), e.entity2 && t.push({ entity: e.entity2 }), !t.length && e.type === "sky" && ((s = this._config) != null && s.weather) && t.push({ entity: this._config.weather }), t;
   }
   _numeric(e, t) {
     if (!e) return NaN;
@@ -3002,7 +2869,7 @@ let C = class extends K {
       `s-${this._cardStyle()}`,
       e.tiles === !1 ? "flat" : "tiles",
       e.flush ? "flush" : ""
-    ].join(" "), r = u`
+    ].join(" "), s = u`
       ${e.title ? u`<div class="header">
             <div class="title">${e.title}</div>
             ${e.subtitle ? u`<div class="subtitle">${e.subtitle}</div>` : p}
@@ -3011,58 +2878,58 @@ let C = class extends K {
         class="metrics ${e.layout === "carousel" ? "carousel" : ""}"
         style="--wc-columns:${e.columns ?? 1}"
       >
-        ${e.metrics.map((s, n) => this._renderMetric(s, n))}
+        ${e.metrics.map((r, n) => this._renderMetric(r, n))}
       </div>
     `;
     return u`
-      ${e.background === !1 ? u`<div class="${i} nobg">${r}</div>` : u`<ha-card class=${i}>${r}</ha-card>`}
+      ${e.background === !1 ? u`<div class="${i} nobg">${s}</div>` : u`<ha-card class=${i}>${s}</ha-card>`}
       ${this._renderPopup()}
     `;
   }
   _ctx(e, t) {
     var g, S, M;
-    const i = e.type && Q[e.type] ? e.type : "custom", r = Q[i], s = D(e.color) ?? D(r.color), n = e.name ?? k(this.hass, i), o = e.icon ?? r.icon;
+    const i = e.type && X[e.type] ? e.type : "custom", s = X[i], r = H(e.color) ?? H(s.color), n = e.name ?? k(this.hass, i), o = e.icon ?? s.icon;
     let a = this._series(e);
     const c = Object.values(e.parts ?? {}).filter(Boolean);
     !a.length && i === "precipitation" && c.length && (a = [{ entity: c[0] }]);
-    const l = (g = a[0]) != null && g.entity ? this.hass.states[a[0].entity] : void 0, h = (t == null ? void 0 : t.kind) ?? "day", d = Math.max(1, (t == null ? void 0 : t.count) ?? e.days ?? ((S = this._config) == null ? void 0 : S.days) ?? 7), f = e.graph ?? r.graph, y = e.aggregate ?? r.aggregate, _ = e.trend ?? r.trend, $ = e.precision ?? r.precision, x = e.unit ?? ((M = a[0]) == null ? void 0 : M.unit) ?? (l == null ? void 0 : l.attributes.unit_of_measurement) ?? r.unit ?? "", m = a.map((v, A) => {
-      const F = this._bucketsFor(v.entity, h, d, y);
+    const l = (g = a[0]) != null && g.entity ? this.hass.states[a[0].entity] : void 0, h = (t == null ? void 0 : t.kind) ?? "day", d = Math.max(1, (t == null ? void 0 : t.count) ?? e.days ?? ((S = this._config) == null ? void 0 : S.days) ?? 7), y = e.graph ?? s.graph, f = e.aggregate ?? s.aggregate, _ = e.trend ?? s.trend, $ = e.precision ?? s.precision, b = e.unit ?? ((M = a[0]) == null ? void 0 : M.unit) ?? (l == null ? void 0 : l.attributes.unit_of_measurement) ?? s.unit ?? "", m = a.map((w, N) => {
+      const C = this._bucketsFor(w.entity, h, d, f);
       return {
-        ...v,
-        colorResolved: D(v.color) ?? (A === 0 ? s : D(ut[(A - 1) % ut.length])),
-        buckets: F,
-        filled: Et(F)
+        ...w,
+        colorResolved: H(w.color) ?? (N === 0 ? r : H(te[(N - 1) % te.length])),
+        buckets: C,
+        filled: Et(C)
       };
     });
-    let b;
+    let x;
     if (i === "precipitation" && !e.entity && e.parts && m.length) {
-      const v = c, A = v.map((O) => this._bucketsFor(O, h, d, y)), F = Array.from({ length: d }, (O, B) => {
-        const pt = A.map((vt) => vt[B]).filter(Number.isFinite);
-        return pt.length ? pt.reduce((vt, Ee) => vt + Ee, 0) : NaN;
+      const w = c, N = w.map((W) => this._bucketsFor(W, h, d, f)), C = Array.from({ length: d }, (W, G) => {
+        const pt = N.map((wt) => wt[G]).filter(Number.isFinite);
+        return pt.length ? pt.reduce((wt, Ae) => wt + Ae, 0) : NaN;
       });
-      m[0] = { ...m[0], buckets: F, filled: Et(F) };
-      const tt = v.map((O) => this._numeric(this.hass.states[O])).filter(Number.isFinite);
-      tt.length && (b = tt.reduce((O, B) => O + B, 0));
+      m[0] = { ...m[0], buckets: C, filled: Et(C) };
+      const O = w.map((W) => this._numeric(this.hass.states[W])).filter(Number.isFinite);
+      O.length && (x = O.reduce((W, G) => W + G, 0));
     }
     return {
       m: e,
       type: i,
-      preset: r,
-      accent: s,
+      preset: s,
+      accent: r,
       name: n,
       icon: o,
       series: a,
       primaryState: l,
       days: d,
       kind: h,
-      graph: f,
-      aggregate: y,
+      graph: y,
+      aggregate: f,
       trendMode: _,
       precision: $,
-      unit: x,
+      unit: b,
       data: m,
-      valueOverride: b,
-      goalType: e.goal_type ?? r.goalType ?? "atleast",
+      valueOverride: x,
+      goalType: e.goal_type ?? s.goalType ?? "atleast",
       multi: !!e.entities && a.length > 1
     };
   }
@@ -3090,7 +2957,7 @@ let C = class extends K {
     if (i.type === "pollen") return this._renderPollen(i, t);
     if (Di.includes(i.type)) return this._renderScore(i, t);
     if (e.expanded) {
-      const h = gt.find((y) => y.key === this._tileRanges[t]) ?? null, d = h ? this._ctx(e, h) : i, f = this._tileRanges[t] ?? (d.days === 7 && d.kind === "day" ? "week" : "");
+      const h = ft.find((f) => f.key === this._tileRanges[t]) ?? null, d = h ? this._ctx(e, h) : i, y = this._tileRanges[t] ?? (d.days === 7 && d.kind === "day" ? "week" : "");
       return u`
         <div
           class="metric expanded ${(e.tap_action ?? "popup") === "none" ? "noclick" : ""}"
@@ -3101,19 +2968,19 @@ let C = class extends K {
             <div class="iconchip"><ha-icon .icon=${i.icon}></ha-icon></div>
             <div class="name">${i.name}</div>
             ${this._renderScoreBadge(e)}
-            <div class="time">${W(this.hass, i.primaryState.last_updated)}</div>
+            <div class="time">${I(this.hass, i.primaryState.last_updated)}</div>
           </div>
           <div class="exp-value">
             ${this._renderValue(e, d)}
             ${this._renderStatus(e, d)}
           </div>
-          ${this._renderDetails(e, d, f, (y) => {
-        this._tileRanges = { ...this._tileRanges, [t]: y };
+          ${this._renderDetails(e, d, y, (f) => {
+        this._tileRanges = { ...this._tileRanges, [t]: f };
       })}
         </div>
       `;
     }
-    const r = !i.multi || !!e.label, s = i.multi && i.graph !== "progress", n = !i.multi, o = i.multi && i.graph === "progress", a = this._metricForecast(e);
+    const s = !i.multi || !!e.label, r = i.multi && i.graph !== "progress", n = !i.multi, o = i.multi && i.graph === "progress", a = this._metricForecast(e);
     return u`
       <div
         class="metric ${(e.tap_action ?? "popup") === "none" ? "noclick" : ""}"
@@ -3124,12 +2991,12 @@ let C = class extends K {
           <div class="iconchip"><ha-icon .icon=${i.icon}></ha-icon></div>
           <div class="name">${i.name}</div>
           ${this._renderScoreBadge(e)}
-          <div class="time">${W(this.hass, i.primaryState.last_updated)}</div>
+          <div class="time">${I(this.hass, i.primaryState.last_updated)}</div>
         </div>
         <div class="body ${o ? "stack" : ""}">
-          ${r || s || n || (l = e.secondary) != null && l.length ? u`<div class="info">
-                ${r ? this._renderValue(e, i) : p}
-                ${s ? this._renderSeriesChips(i.data, i.precision, i.trendMode) : p}
+          ${s || r || n || (l = e.secondary) != null && l.length ? u`<div class="info">
+                ${s ? this._renderValue(e, i) : p}
+                ${r ? this._renderSeriesChips(i.data, i.precision, i.trendMode) : p}
                 ${this._renderSecondary(e)}
                 ${n ? this._renderStatus(e, i) : p}
               </div>` : p}
@@ -3145,9 +3012,9 @@ let C = class extends K {
   /* ---- forecast strip ------------------------------------------------- */
   _metricForecast(e) {
     const t = e.type ?? "custom";
-    if (!fe.includes(t) && !e.forecast) return;
-    const i = this._forecastId(e), r = e.forecast_type ?? this._defaultForecastType(t), s = this._forecastFor(i, r);
-    return s.length ? { points: s, type: r } : void 0;
+    if (!me.includes(t) && !e.forecast) return;
+    const i = this._forecastId(e), s = e.forecast_type ?? this._defaultForecastType(t), r = this._forecastFor(i, s);
+    return r.length ? { points: r, type: s } : void 0;
   }
   /**
    * Numeric forecast series for a metric's tile chart (forecast-first view).
@@ -3158,40 +3025,40 @@ let C = class extends K {
     if ((e.chart_source ?? "forecast") === "history") return;
     const i = zi[t];
     if (!i) return;
-    const r = this._metricForecast(e);
-    if (!r) return;
-    const s = r.type === "hourly", n = e.forecast_count ?? (s ? 18 : 7), o = r.points.slice(0, n), a = o.map((h) => {
+    const s = this._metricForecast(e);
+    if (!s) return;
+    const r = s.type === "hourly", n = e.forecast_count ?? (r ? 18 : 7), o = s.points.slice(0, n), a = o.map((h) => {
       const d = h[i];
       return typeof d == "number" && Number.isFinite(d) ? d : NaN;
     });
     if (a.filter(Number.isFinite).length < 2) return;
     const c = P(this.hass), l = [];
     return o.forEach((h, d) => {
-      const f = new Date(h.datetime);
-      if (!isNaN(f.getTime()))
-        if (s) {
-          const y = f.getHours();
-          y % 6 === 0 && l.push({ i: d, label: String(y), line: y === 0 });
+      const y = new Date(h.datetime);
+      if (!isNaN(y.getTime()))
+        if (r) {
+          const f = y.getHours();
+          f % 6 === 0 && l.push({ i: d, label: String(f), line: f === 0 });
         } else
-          l.push({ i: d, label: f.toLocaleDateString(c, { weekday: "narrow" }) });
+          l.push({ i: d, label: y.toLocaleDateString(c, { weekday: "narrow" }) });
     }), { values: a, xMarks: l };
   }
   _fcLabel(e, t, i) {
-    const r = new Date(e.datetime);
-    return isNaN(r.getTime()) ? "" : t === "hourly" ? i ? k(this.hass, "now") : r.toLocaleTimeString(P(this.hass), { hour: "2-digit" }) : i ? k(this.hass, "today") : r.toLocaleDateString(P(this.hass), { weekday: "short" });
+    const s = new Date(e.datetime);
+    return isNaN(s.getTime()) ? "" : t === "hourly" ? i ? k(this.hass, "now") : s.toLocaleTimeString(P(this.hass), { hour: "2-digit" }) : i ? k(this.hass, "today") : s.toLocaleDateString(P(this.hass), { weekday: "short" });
   }
   _renderForecast(e, t, i) {
-    const r = e.slice(0, i);
+    const s = e.slice(0, i);
     return u`<div class="forecast">
-      ${r.map((s, n) => {
-      const o = s.is_daytime ?? !0, a = s.precipitation_probability, c = typeof a == "number" && a >= 5 ? u`<span class="fc-pop">${N(this.hass, a, 0)}%</span>` : typeof s.precipitation == "number" && s.precipitation >= 0.2 ? u`<span class="fc-pop">${N(this.hass, s.precipitation, 1)}</span>` : u`<span class="fc-pop empty"></span>`;
+      ${s.map((r, n) => {
+      const o = r.is_daytime ?? !0, a = r.precipitation_probability, c = typeof a == "number" && a >= 5 ? u`<span class="fc-pop">${A(this.hass, a, 0)}%</span>` : typeof r.precipitation == "number" && r.precipitation >= 0.2 ? u`<span class="fc-pop">${A(this.hass, r.precipitation, 1)}</span>` : u`<span class="fc-pop empty"></span>`;
       return u`<div class="fc-step">
-          <span class="fc-when">${this._fcLabel(s, t, n === 0)}</span>
-          <ha-icon class="fc-ico" .icon=${ee(s.condition, o)}></ha-icon>
+          <span class="fc-when">${this._fcLabel(r, t, n === 0)}</span>
+          <ha-icon class="fc-ico" .icon=${ee(r.condition, o)}></ha-icon>
           ${c}
           <span class="fc-temp">
-            ${typeof s.temperature == "number" ? u`${N(this.hass, s.temperature, 0)}°` : "–"}
-            ${t !== "hourly" && typeof s.templow == "number" ? u`<span class="fc-lo">${N(this.hass, s.templow, 0)}°</span>` : p}
+            ${typeof r.temperature == "number" ? u`${A(this.hass, r.temperature, 0)}°` : "–"}
+            ${t !== "hourly" && typeof r.templow == "number" ? u`<span class="fc-lo">${A(this.hass, r.templow, 0)}°</span>` : p}
           </span>
         </div>`;
     })}
@@ -3200,55 +3067,55 @@ let C = class extends K {
   /* ---- air quality / index ring -------------------------------------- */
   _breakdown(e) {
     return (e.breakdown ?? []).map((t, i) => {
-      const r = typeof t == "string" ? { entity: t } : t, s = this.hass.states[r.entity];
+      const s = typeof t == "string" ? { entity: t } : t, r = this.hass.states[s.entity];
       return {
-        ...r,
-        state: s,
-        value: this._numeric(s),
-        name: r.name ?? (s == null ? void 0 : s.attributes.friendly_name) ?? r.entity,
-        colorResolved: D(r.color) ?? D(te[i % te.length])
+        ...s,
+        state: r,
+        value: this._numeric(r),
+        name: s.name ?? (r == null ? void 0 : r.attributes.friendly_name) ?? s.entity,
+        colorResolved: H(s.color) ?? H(Jt[i % Jt.length])
       };
     }).filter((t) => t.state);
   }
   _renderScore(e, t) {
-    const i = e.m, r = e.primaryState, s = this._numeric(r, i.attribute), n = i.max ?? 100, o = (i.goal_type ?? e.preset.goalType) !== "atmost", a = this._breakdown(i), c = a.filter((d) => Number.isFinite(d.value) && d.value > 0), l = c.reduce((d, f) => d + f.value, 0), h = l > 0 ? c.map((d) => ({ color: d.colorResolved, share: d.value / l })) : void 0;
+    const i = e.m, s = e.primaryState, r = this._numeric(s, i.attribute), n = i.max ?? 100, o = (i.goal_type ?? e.preset.goalType) !== "atmost", a = this._breakdown(i), c = a.filter((d) => Number.isFinite(d.value) && d.value > 0), l = c.reduce((d, y) => d + y.value, 0), h = l > 0 ? c.map((d) => ({ color: d.colorResolved, share: d.value / l })) : void 0;
     return u`
       <div
         class="metric score-metric ${(i.tap_action ?? "popup") === "none" ? "noclick" : ""}"
         style="--wc-accent:${e.accent}"
-        @click=${() => this._handleTap(i, t, r.entity_id)}
+        @click=${() => this._handleTap(i, t, s.entity_id)}
       >
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${e.icon}></ha-icon></div>
           <div class="name">${e.name}</div>
-          <div class="time">${W(this.hass, r.last_updated)}</div>
+          <div class="time">${I(this.hass, s.last_updated)}</div>
         </div>
         <div class="scorewrap">
           ${gi(
       this._cardStyle(),
       e.accent,
-      this._scoreColor(s, n, o),
-      Math.max(0, Math.min(Number.isFinite(s) ? s / n : 0, 1)),
+      this._scoreColor(r, n, o),
+      Math.max(0, Math.min(Number.isFinite(r) ? r / n : 0, 1)),
       h
     )}
           <div class="scoreinner">
-            <div class="scorenum">${N(this.hass, s, i.precision ?? 0)}</div>
+            <div class="scorenum">${A(this.hass, r, i.precision ?? 0)}</div>
             <div class="scoremax">${k(this.hass, "of")} ${n}</div>
           </div>
         </div>
         ${a.length ? u`<div class="score-bars">
               ${a.map((d) => {
-      const f = Number.isFinite(d.value) ? Math.max(0, Math.min(d.value / n * 100, 100)) : 0;
+      const y = Number.isFinite(d.value) ? Math.max(0, Math.min(d.value / n * 100, 100)) : 0;
       return u`<div class="sbar">
                   <span class="sbar-name">${d.name}</span>
                   <div class="sbar-track">
                     <div
                       class="sbar-fill"
-                      style="width:${f}%;background:${d.colorResolved}"
+                      style="width:${y}%;background:${d.colorResolved}"
                     ></div>
                   </div>
                   <span class="sbar-val">
-                    ${Number.isFinite(d.value) ? N(this.hass, d.value, 0) : "–"}
+                    ${Number.isFinite(d.value) ? A(this.hass, d.value, 0) : "–"}
                   </span>
                 </div>`;
     })}
@@ -3270,19 +3137,19 @@ let C = class extends K {
         return d.setHours(+h[1], +h[2], 0, 0), d;
       }
     };
-    let i = t((o = this.hass.states[e.sunrise_entity ?? ""]) == null ? void 0 : o.state), r = t((a = this.hass.states[e.sunset_entity ?? ""]) == null ? void 0 : a.state);
-    const s = this.hass.states[e.sun_entity ?? "sun.sun"], n = s ? s.state === "above_horizon" : !0;
-    if (s && (!i || !r)) {
-      const c = t(s.attributes.next_rising), l = t(s.attributes.next_setting);
-      n ? (r = r ?? l, i = i ?? (c ? new Date(c.getTime() - 864e5) : void 0)) : (i = i ?? c, r = r ?? l);
+    let i = t((o = this.hass.states[e.sunrise_entity ?? ""]) == null ? void 0 : o.state), s = t((a = this.hass.states[e.sunset_entity ?? ""]) == null ? void 0 : a.state);
+    const r = this.hass.states[e.sun_entity ?? "sun.sun"], n = r ? r.state === "above_horizon" : !0;
+    if (r && (!i || !s)) {
+      const c = t(r.attributes.next_rising), l = t(r.attributes.next_setting);
+      n ? (s = s ?? l, i = i ?? (c ? new Date(c.getTime() - 864e5) : void 0)) : (i = i ?? c, s = s ?? l);
     }
-    return { sunrise: i, sunset: r, up: n };
+    return { sunrise: i, sunset: s, up: n };
   }
   _renderSun(e, t) {
-    const i = e.m, { sunrise: r, sunset: s, up: n } = this._sunTimes(i);
+    const i = e.m, { sunrise: s, sunset: r, up: n } = this._sunTimes(i);
     let o = 0.5;
-    r && s && s > r && (o = (Date.now() - r.getTime()) / (s.getTime() - r.getTime()));
-    const a = r && s && s > r ? s.getTime() - r.getTime() : NaN, c = n ? s && s > /* @__PURE__ */ new Date() ? k(this.hass, "sunset_in").replace("{n}", pe(s)) : "" : r && r > /* @__PURE__ */ new Date() ? k(this.hass, "sunrise_in").replace("{n}", pe(r)) : "", l = i.entity ?? i.sun_entity ?? "sun.sun";
+    s && r && r > s && (o = (Date.now() - s.getTime()) / (r.getTime() - s.getTime()));
+    const a = s && r && r > s ? r.getTime() - s.getTime() : NaN, c = n ? r && r > /* @__PURE__ */ new Date() ? k(this.hass, "sunset_in").replace("{n}", he(r)) : "" : s && s > /* @__PURE__ */ new Date() ? k(this.hass, "sunrise_in").replace("{n}", he(s)) : "", l = i.entity ?? i.sun_entity ?? "sun.sun";
     return u`
       <div
         class="metric sun-metric ${(i.tap_action ?? "more-info") === "none" ? "noclick" : ""}"
@@ -3297,13 +3164,13 @@ let C = class extends K {
         <div class="sun-times">
           <div class="sun-end">
             <ha-icon icon="mdi:weather-sunset-up"></ha-icon>
-            <span>${r ? ft(this.hass, r.toISOString()) : "–"}</span>
+            <span>${s ? mt(this.hass, s.toISOString()) : "–"}</span>
           </div>
           ${Number.isFinite(a) ? u`<div class="sun-daylen">
-                ${rt(a / 6e4, "min")}
+                ${st(a / 6e4, "min")}
               </div>` : p}
           <div class="sun-end">
-            <span>${s ? ft(this.hass, s.toISOString()) : "–"}</span>
+            <span>${r ? mt(this.hass, r.toISOString()) : "–"}</span>
             <ha-icon icon="mdi:weather-sunset-down"></ha-icon>
           </div>
         </div>
@@ -3312,11 +3179,11 @@ let C = class extends K {
     `;
   }
   _renderMoon(e, t) {
-    const i = e.m, r = e.primaryState, s = r == null ? void 0 : r.state, n = s ? C.MOON_MAP[s] : void 0;
+    const i = e.m, s = e.primaryState, r = s == null ? void 0 : s.state, n = r ? T.MOON_MAP[r] : void 0;
     let o = n ? n[0] : NaN;
-    const a = n ? n[1] : !0, c = i.illumination_entity ? this._numeric(this.hass.states[i.illumination_entity]) : n ? NaN : this._numeric(r);
+    const a = n ? n[1] : !0, c = i.illumination_entity ? this._numeric(this.hass.states[i.illumination_entity]) : n ? NaN : this._numeric(s);
     Number.isFinite(c) && (o = c > 1 ? c / 100 : c), Number.isFinite(o) || (o = 0);
-    const l = n ? k(this.hass, `moon_${s}`) : s ?? "", h = i.entity ?? i.moon_entity ?? i.illumination_entity;
+    const l = n ? k(this.hass, `moon_${r}`) : r ?? "", h = i.entity ?? i.moon_entity ?? i.illumination_entity;
     return u`
       <div
         class="metric moon-metric ${(i.tap_action ?? "more-info") === "none" ? "noclick" : ""}"
@@ -3326,11 +3193,11 @@ let C = class extends K {
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${e.icon}></ha-icon></div>
           <div class="name">${e.name}</div>
-          ${r ? u`<div class="time">${W(this.hass, r.last_updated)}</div>` : p}
+          ${s ? u`<div class="time">${I(this.hass, s.last_updated)}</div>` : p}
         </div>
         <div class="moonwrap">${_i(o, a)}</div>
         <div class="moon-phase" style="color:${e.accent}">${l}</div>
-        <div class="moon-note">${k(this.hass, "illumination")}: ${N(this.hass, o * 100, 0)}%</div>
+        <div class="moon-note">${k(this.hass, "illumination")}: ${A(this.hass, o * 100, 0)}%</div>
       </div>
     `;
   }
@@ -3341,13 +3208,13 @@ let C = class extends K {
     if (!isNaN(t.getTime())) return t;
     const i = /^(\d{1,2}):(\d{2})/.exec(e);
     if (i) {
-      const r = /* @__PURE__ */ new Date();
-      return r.setHours(+i[1], +i[2], 0, 0), r;
+      const s = /* @__PURE__ */ new Date();
+      return s.setHours(+i[1], +i[2], 0, 0), s;
     }
   }
   _renderTides(e, t) {
-    var l, h, d, f;
-    const i = e.m, r = e.primaryState, s = this._numeric(r, i.attribute), n = r ? Et(this._bucketsFor(r.entity_id, "hour", 24, e.aggregate)) : [], o = this._parseTime((l = this.hass.states[i.high_tide_entity ?? ""]) == null ? void 0 : l.state) ?? this._parseTime((h = r == null ? void 0 : r.attributes) == null ? void 0 : h.next_high_tide), a = this._parseTime((d = this.hass.states[i.low_tide_entity ?? ""]) == null ? void 0 : d.state) ?? this._parseTime((f = r == null ? void 0 : r.attributes) == null ? void 0 : f.next_low_tide), c = i.entity ?? i.high_tide_entity;
+    var l, h, d, y;
+    const i = e.m, s = e.primaryState, r = this._numeric(s, i.attribute), n = s ? Et(this._bucketsFor(s.entity_id, "hour", 24, e.aggregate)) : [], o = this._parseTime((l = this.hass.states[i.high_tide_entity ?? ""]) == null ? void 0 : l.state) ?? this._parseTime((h = s == null ? void 0 : s.attributes) == null ? void 0 : h.next_high_tide), a = this._parseTime((d = this.hass.states[i.low_tide_entity ?? ""]) == null ? void 0 : d.state) ?? this._parseTime((y = s == null ? void 0 : s.attributes) == null ? void 0 : y.next_low_tide), c = i.entity ?? i.high_tide_entity;
     return u`
       <div
         class="metric tides-metric ${(i.tap_action ?? "popup") === "none" ? "noclick" : ""}"
@@ -3357,20 +3224,20 @@ let C = class extends K {
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${e.icon}></ha-icon></div>
           <div class="name">${e.name}</div>
-          ${r ? u`<div class="time">${W(this.hass, r.last_updated)}</div>` : p}
+          ${s ? u`<div class="time">${I(this.hass, s.last_updated)}</div>` : p}
         </div>
-        ${Number.isFinite(s) ? u`<div class="value">
-              ${N(this.hass, s, e.precision)}<span class="unit">${e.unit}</span>
+        ${Number.isFinite(r) ? u`<div class="value">
+              ${A(this.hass, r, e.precision)}<span class="unit">${e.unit}</span>
             </div>` : p}
         <div class="tidewrap">${bi(n, e.accent)}</div>
         ${o || a ? u`<div class="tide-times">
               ${o ? u`<div class="tide-end">
                     <ha-icon icon="mdi:arrow-up-bold"></ha-icon>
-                    <span>${k(this.hass, "high_tide")} ${ft(this.hass, o.toISOString())}</span>
+                    <span>${k(this.hass, "high_tide")} ${mt(this.hass, o.toISOString())}</span>
                   </div>` : p}
               ${a ? u`<div class="tide-end">
                     <ha-icon icon="mdi:arrow-down-bold"></ha-icon>
-                    <span>${k(this.hass, "low_tide")} ${ft(this.hass, a.toISOString())}</span>
+                    <span>${k(this.hass, "low_tide")} ${mt(this.hass, a.toISOString())}</span>
                   </div>` : p}
             </div>` : p}
       </div>
@@ -3381,7 +3248,7 @@ let C = class extends K {
     if (!e) return NaN;
     const i = this._numeric(e);
     if (Number.isFinite(i)) return i;
-    const r = e.state.toLowerCase().replace(/[\s_-]/g, ""), s = {
+    const s = e.state.toLowerCase().replace(/[\s_-]/g, ""), r = {
       none: 0,
       keine: 0,
       no: 0,
@@ -3402,19 +3269,19 @@ let C = class extends K {
       sehrhoch: 5,
       extreme: 5
     };
-    return r in s ? s[r] / 5 * t : NaN;
+    return s in r ? r[s] / 5 * t : NaN;
   }
   _pollenColor(e, t) {
     const i = Number.isFinite(e) ? e / t : 0;
     return i <= 0.05 ? "var(--grey-color, #9E9E9E)" : i < 0.4 ? "var(--green-color, #4CAF50)" : i < 0.7 ? "var(--amber-color, #FFC107)" : "var(--red-color, #F44336)";
   }
   _renderPollen(e, t) {
-    const i = e.m, r = i.max ?? 5, s = e.series.map((n) => {
-      const o = this.hass.states[n.entity], a = this._pollenValue(o, r), c = Number.isFinite(a) ? Math.max(0, Math.min(Math.round(a / r * 5), 5)) : 0;
+    const i = e.m, s = i.max ?? 5, r = e.series.map((n) => {
+      const o = this.hass.states[n.entity], a = this._pollenValue(o, s), c = Number.isFinite(a) ? Math.max(0, Math.min(Math.round(a / s * 5), 5)) : 0;
       return {
         name: n.name ?? (o == null ? void 0 : o.attributes.friendly_name) ?? n.entity,
         value: a,
-        color: D(n.color) ?? this._pollenColor(a, r),
+        color: H(n.color) ?? this._pollenColor(a, s),
         level: k(this.hass, `pollen_lvl_${c}`)
       };
     });
@@ -3430,7 +3297,7 @@ let C = class extends K {
           ${this._renderScoreBadge(i)}
         </div>
         <div class="pbars">
-          ${s.map(
+          ${r.map(
       (n) => u`<div class="pbar">
               <div class="pbar-label">
                 <span>${n.name}</span>
@@ -3439,7 +3306,7 @@ let C = class extends K {
               <div class="ptrack" style="--wc-p:${n.color}">
                 <div
                   class="pfill"
-                  style="width:${Number.isFinite(n.value) ? Math.max(0, Math.min(n.value / r * 100, 100)) : 0}%"
+                  style="width:${Number.isFinite(n.value) ? Math.max(0, Math.min(n.value / s * 100, 100)) : 0}%"
                 ></div>
               </div>
             </div>`
@@ -3450,9 +3317,9 @@ let C = class extends K {
   }
   /* ---- radar ---------------------------------------------------------- */
   _renderRadar(e, t) {
-    const i = e.m, r = e.primaryState;
-    let s = i.image_url;
-    !s && r && (s = r.attributes.entity_picture);
+    const i = e.m, s = e.primaryState;
+    let r = i.image_url;
+    !r && s && (r = s.attributes.entity_picture);
     const n = i.entity;
     return u`
       <div
@@ -3463,112 +3330,145 @@ let C = class extends K {
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${e.icon}></ha-icon></div>
           <div class="name">${e.name}</div>
-          ${r ? u`<div class="time">${W(this.hass, r.last_updated)}</div>` : p}
+          ${s ? u`<div class="time">${I(this.hass, s.last_updated)}</div>` : p}
         </div>
-        ${s ? u`<div class="radarframe">
-              <img class="radar-img" src=${s} alt="" />
+        ${r ? u`<div class="radarframe">
+              <img class="radar-img" src=${r} alt="" />
             </div>` : u`<div class="missing">${k(this.hass, "no_data")}</div>`}
       </div>
     `;
   }
   /* ---- sky hero scene ------------------------------------------------- */
   _weatherAttr(e, t) {
-    var s;
+    var r;
     if (!e) return NaN;
-    const i = this.hass.states[e], r = (s = i == null ? void 0 : i.attributes) == null ? void 0 : s[t];
-    return typeof r == "number" ? r : parseFloat(r);
+    const i = this.hass.states[e], s = (r = i == null ? void 0 : i.attributes) == null ? void 0 : r[t];
+    return typeof s == "number" ? s : parseFloat(s);
   }
   _renderSky(e, t) {
-    var A, F, tt, O;
-    const i = e.m, r = e.primaryState, s = r.entity_id.startsWith("weather."), n = (i.condition_entity ? (A = this.hass.states[i.condition_entity]) == null ? void 0 : A.state : void 0) ?? (s ? r.state : void 0), o = this.hass.states[i.sun_entity ?? "sun.sun"], a = i.night === !0 ? !1 : o ? o.state === "above_horizon" : !0, c = (F = o == null ? void 0 : o.attributes) == null ? void 0 : F.elevation, l = i.night === !0 ? -20 : typeof c == "number" && Number.isFinite(c) ? c : void 0, h = i.wind_entity ?? (s ? r.entity_id : void 0), d = i.wind_entity ? this._numeric(this.hass.states[i.wind_entity]) : this._weatherAttr(h, "wind_speed"), f = Number.isFinite(d) ? Math.min(d / 60, 1) : 0.15, y = i.score_entity ? this._numeric(this.hass.states[i.score_entity]) : NaN, _ = Number.isFinite(y) ? Math.min(0.2 + y / 100 * 0.7, 1) : 0, $ = Number.isFinite(y) ? this._scoreColor(y, 100, !1) : "transparent", x = s ? this._weatherAttr(r.entity_id, "temperature") : this._numeric(r), m = s ? ((O = (tt = this.hass.states[r.entity_id]) == null ? void 0 : tt.attributes) == null ? void 0 : O.temperature_unit) ?? "°" : r.attributes.unit_of_measurement ?? "°", g = this._forecastFor(this._forecastId(i), "daily")[0], S = g == null ? void 0 : g.temperature, M = g == null ? void 0 : g.templow, v = (i.anchors ?? []).filter((B) => this.hass.states[B.entity]);
+    var N, C, O, W;
+    const i = e.m, s = e.primaryState, r = s.entity_id.startsWith("weather."), n = (i.condition_entity ? (N = this.hass.states[i.condition_entity]) == null ? void 0 : N.state : void 0) ?? (r ? s.state : void 0), o = this.hass.states[i.sun_entity ?? "sun.sun"], a = i.night === !0 ? !1 : o ? o.state === "above_horizon" : !0, c = (C = o == null ? void 0 : o.attributes) == null ? void 0 : C.elevation, l = i.night === !0 ? -20 : typeof c == "number" && Number.isFinite(c) ? c : void 0, h = i.wind_entity ?? (r ? s.entity_id : void 0), d = i.wind_entity ? this._numeric(this.hass.states[i.wind_entity]) : this._weatherAttr(h, "wind_speed"), y = Number.isFinite(d) ? Math.min(d / 60, 1) : 0.15, f = i.score_entity ? this._numeric(this.hass.states[i.score_entity]) : NaN, _ = Number.isFinite(f) ? Math.min(0.2 + f / 100 * 0.7, 1) : 0, $ = Number.isFinite(f) ? this._scoreColor(f, 100, !1) : "transparent", b = r ? this._weatherAttr(s.entity_id, "temperature") : this._numeric(s), m = r ? ((W = (O = this.hass.states[s.entity_id]) == null ? void 0 : O.attributes) == null ? void 0 : W.temperature_unit) ?? "°" : s.attributes.unit_of_measurement ?? "°", g = this._forecastFor(this._forecastId(i), "daily")[0], S = g == null ? void 0 : g.temperature, M = g == null ? void 0 : g.templow, w = this._skyRanges[t] ?? i.forecast_type ?? "daily";
     return u`
       <div
         class="metric sky-metric ${(i.tap_action ?? "popup") === "none" ? "noclick" : ""}"
         style="--wc-accent:${e.accent}"
-        @click=${() => this._handleTap(i, t, r.entity_id)}
+        @click=${() => this._handleTap(i, t, s.entity_id)}
       >
         <div class="head">
           <div class="iconchip"><ha-icon .icon=${ee(n, a)}></ha-icon></div>
           <div class="name">${e.name}</div>
           ${this._renderScoreBadge(i)}
-          <div class="time">${W(this.hass, r.last_updated)}</div>
+          <div class="time">${I(this.hass, s.last_updated)}</div>
         </div>
         <div class="skywrap" style="--wc-oy:${i.scene_offset_y ?? 0}%">
-          ${ni({ condition: n, isDay: a, elevation: l, wind: f, glow: _, glowColor: $ })}
+          ${ni({ condition: n, isDay: a, elevation: l, wind: y, glow: _, glowColor: $ })}
           <div class="sky-overlay">
             <div class="sky-temp">
-              ${Number.isFinite(x) ? u`${N(this.hass, x, e.precision)}<span class="sky-unit">${m}</span>` : p}
+              ${Number.isFinite(b) ? u`${A(this.hass, b, e.precision)}<span class="sky-unit">${m}</span>` : p}
             </div>
             <div class="sky-cond">${Nt(this.hass, n) || (n ?? "")}</div>
             ${Number.isFinite(S) || Number.isFinite(M) ? u`<div class="sky-hilo">
-                  ${Number.isFinite(S) ? u`<span><ha-icon icon="mdi:arrow-up-thin"></ha-icon>${N(this.hass, S, 0)}°</span>` : p}
-                  ${Number.isFinite(M) ? u`<span><ha-icon icon="mdi:arrow-down-thin"></ha-icon>${N(this.hass, M, 0)}°</span>` : p}
+                  ${Number.isFinite(S) ? u`<span><ha-icon icon="mdi:arrow-up-thin"></ha-icon>${A(this.hass, S, 0)}°</span>` : p}
+                  ${Number.isFinite(M) ? u`<span><ha-icon icon="mdi:arrow-down-thin"></ha-icon>${A(this.hass, M, 0)}°</span>` : p}
                 </div>` : p}
           </div>
-          ${v.map((B, pt) => this._renderAnchor(B, pt, i))}
+        </div>
+        <div class="periods sky-periods">
+          ${["hourly", "daily"].map(
+      (G) => u`<button
+              class="period ${w === G ? "active" : ""}"
+              @click=${(pt) => {
+        pt.stopPropagation(), this._skyRanges = { ...this._skyRanges, [t]: G };
+      }}
+            >
+              ${k(this.hass, G === "hourly" ? "forecast_hourly" : "forecast_daily")}
+            </button>`
+    )}
         </div>
         ${this._renderForecast(
-      this._forecastFor(this._forecastId(i), i.forecast_type ?? "daily"),
-      i.forecast_type ?? "daily",
-      i.forecast_count ?? 7
+      this._forecastFor(this._forecastId(i), w),
+      w,
+      i.forecast_count ?? (w === "hourly" ? 8 : 7)
     )}
+        ${this._renderSkyDetails(i, s)}
       </div>
     `;
   }
-  _renderAnchor(e, t, i) {
-    const r = C.SKY_ANCHOR_POS[e.position ?? "top-right"], s = this.hass.states[e.entity];
-    if (!r || !s) return p;
-    let n;
-    if (e.dot) n = e.dot;
-    else {
-      let f = r.dir;
-      e.flip && (f = f === "right" ? "left" : f === "left" ? "right" : f), n = f;
+  /**
+   * Labeled value chips under the sky forecast. Configured via `details`;
+   * without config they fall back to wind / humidity / pressure / UV read
+   * from the weather entity's attributes.
+   */
+  _renderSkyDetails(e, t) {
+    var s;
+    const i = [];
+    if ((s = e.details) != null && s.length)
+      for (const r of e.details) {
+        const n = typeof r == "string" ? { entity: r } : r, o = this.hass.states[n.entity];
+        if (!o) continue;
+        const a = this._numeric(o, n.attribute), c = n.unit ?? o.attributes.unit_of_measurement ?? "";
+        i.push({
+          label: n.name ?? o.attributes.friendly_name ?? n.entity,
+          value: Number.isFinite(a) ? E(A(this.hass, a), c) : o.state
+        });
+      }
+    else if (t.entity_id.startsWith("weather.")) {
+      const r = t.attributes, n = (h) => typeof h == "number" && Number.isFinite(h) ? h : NaN, o = n(r.wind_speed);
+      if (Number.isFinite(o)) {
+        const h = At(this.hass, n(r.wind_bearing));
+        i.push({
+          label: k(this.hass, "wind"),
+          value: `${E(A(this.hass, o, 0), r.wind_speed_unit ?? "km/h")}${h ? ` ${h}` : ""}`
+        });
+      }
+      const a = n(r.humidity);
+      Number.isFinite(a) && i.push({
+        label: k(this.hass, "humidity"),
+        value: E(A(this.hass, a, 0), "%")
+      });
+      const c = n(r.pressure);
+      Number.isFinite(c) && i.push({
+        label: k(this.hass, "pressure"),
+        value: E(A(this.hass, c, 0), r.pressure_unit ?? "hPa")
+      });
+      const l = n(r.uv_index);
+      Number.isFinite(l) && i.push({ label: k(this.hass, "uv"), value: A(this.hass, l, 0) });
     }
-    const o = e.x ?? r.x, a = e.y ?? r.y, c = D(e.color) ?? D(ut[t % ut.length]), l = this._numeric(s);
-    let h;
-    if (e.entity2) {
-      const f = this._numeric(this.hass.states[e.entity2]);
-      h = `${N(this.hass, l, 0)}/${N(this.hass, f, 0)}`;
-    } else
-      h = Number.isFinite(l) ? E(N(this.hass, l), s.attributes.unit_of_measurement ?? "") : s.state;
-    const d = i.label_opacity ?? 1;
-    return u`<div
-      class="anchor dot-${n}"
-      style="left:${o}%;top:${a}%;--ac:${c};--wc-label-op:${d}"
-    >
-      <span class="anchor-dot"></span>
-      <div class="anchor-chip">
-        <span class="anchor-name">${e.name ?? s.attributes.friendly_name ?? ""}</span>
-        <span class="anchor-val">${h}</span>
-      </div>
-    </div>`;
+    return i.length ? u`<div class="sky-details">
+      ${i.map(
+      (r) => u`<div class="skd">
+          <div class="skd-label">${r.label}</div>
+          <div class="skd-value">${r.value}</div>
+        </div>`
+    )}
+    </div>` : p;
   }
   /* ---- AI summary ----------------------------------------------------- */
   _summarySnapshot(e) {
-    var y, _, $, x, m, b, g, S, M, v;
-    const t = this._forecastId(e), i = t ? this.hass.states[t] : void 0, r = this._forecastFor(t, "daily"), s = this._forecastFor(t, "hourly"), n = (A) => this._weatherAttr(t, A), o = (A) => A ? this._numeric(this.hass.states[A]) : NaN, a = e.summary_sources ?? [], c = (A) => a.map((F) => this.hass.states[F]).find((F) => (F == null ? void 0 : F.attributes.device_class) === A), l = (A) => this._numeric(c(A)), h = i != null && i.entity_id.startsWith("weather.") ? i.state : void 0, d = n("wind_bearing"), f = s.slice(0, 12).map((A) => A.precipitation_probability ?? 0);
+    var f, _, $, b, m, x, g, S, M, w;
+    const t = this._forecastId(e), i = t ? this.hass.states[t] : void 0, s = this._forecastFor(t, "daily"), r = this._forecastFor(t, "hourly"), n = (N) => this._weatherAttr(t, N), o = (N) => N ? this._numeric(this.hass.states[N]) : NaN, a = e.summary_sources ?? [], c = (N) => a.map((C) => this.hass.states[C]).find((C) => (C == null ? void 0 : C.attributes.device_class) === N), l = (N) => this._numeric(c(N)), h = i != null && i.entity_id.startsWith("weather.") ? i.state : void 0, d = n("wind_bearing"), y = r.slice(0, 12).map((N) => N.precipitation_probability ?? 0);
     return {
       condition: Nt(this.hass, h),
       temp: it(n("temperature"), l("temperature")),
-      tempUnit: ((y = i == null ? void 0 : i.attributes) == null ? void 0 : y.temperature_unit) ?? "°C",
-      hi: (_ = r[0]) == null ? void 0 : _.temperature,
-      lo: ($ = r[0]) == null ? void 0 : $.templow,
-      feels: it(n("apparent_temperature"), o((x = e.summary_sources) == null ? void 0 : x[0])),
+      tempUnit: ((f = i == null ? void 0 : i.attributes) == null ? void 0 : f.temperature_unit) ?? "°C",
+      hi: (_ = s[0]) == null ? void 0 : _.temperature,
+      lo: ($ = s[0]) == null ? void 0 : $.templow,
+      feels: it(n("apparent_temperature"), o((b = e.summary_sources) == null ? void 0 : b[0])),
       windSpeed: it(n("wind_speed"), l("wind_speed")),
       windUnit: ((m = i == null ? void 0 : i.attributes) == null ? void 0 : m.wind_speed_unit) ?? "km/h",
-      windDir: he(this.hass, d),
-      precipProb: f.length ? Math.max(...f) : (b = r[0]) == null ? void 0 : b.precipitation_probability,
-      precipMm: (g = r[0]) == null ? void 0 : g.precipitation,
+      windDir: At(this.hass, d),
+      precipProb: y.length ? Math.max(...y) : (x = s[0]) == null ? void 0 : x.precipitation_probability,
+      precipMm: (g = s[0]) == null ? void 0 : g.precipitation,
       uv: it(n("uv_index"), l("uv_index")),
       humidity: it(n("humidity"), l("humidity")),
-      tomorrowCondition: Nt(this.hass, (S = r[1]) == null ? void 0 : S.condition),
-      tomorrowHi: (M = r[1]) == null ? void 0 : M.temperature,
-      tomorrowLo: (v = r[1]) == null ? void 0 : v.templow
+      tomorrowCondition: Nt(this.hass, (S = s[1]) == null ? void 0 : S.condition),
+      tomorrowHi: (M = s[1]) == null ? void 0 : M.temperature,
+      tomorrowLo: (w = s[1]) == null ? void 0 : w.templow
     };
   }
   _renderSummary(e, t) {
     var n;
-    const i = e.m, r = i.summary_entity ? (n = this.hass.states[i.summary_entity]) == null ? void 0 : n.state : void 0, s = r && r !== "unknown" && r !== "unavailable" ? r : oi(this.hass, this._summarySnapshot(i));
+    const i = e.m, s = i.summary_entity ? (n = this.hass.states[i.summary_entity]) == null ? void 0 : n.state : void 0, r = s && s !== "unknown" && s !== "unavailable" ? s : oi(this.hass, this._summarySnapshot(i));
     return u`
       <div
         class="metric summary-metric ${(i.tap_action ?? "none") === "none" ? "noclick" : ""}"
@@ -3579,8 +3479,8 @@ let C = class extends K {
           <div class="iconchip"><ha-icon .icon=${e.icon}></ha-icon></div>
           <div class="name">${e.name}</div>
         </div>
-        <div class="summary-text">${s || k(this.hass, "no_data")}</div>
-        ${r ? p : u`<div class="summary-note">
+        <div class="summary-text">${r || k(this.hass, "no_data")}</div>
+        ${s ? p : u`<div class="summary-note">
               <ha-icon icon="mdi:creation"></ha-icon>
               <span>${k(this.hass, "ai_note")}</span>
             </div>`}
@@ -3589,70 +3489,70 @@ let C = class extends K {
   }
   /* ---- shared value / status / chart rendering ----------------------- */
   _scoreColor(e, t, i = !0) {
-    let r = Number.isFinite(e) ? e / t : 0;
-    return i || (r = 1 - r), r >= 0.66 ? "var(--success-color, #43a047)" : r >= 0.4 ? "var(--warning-color, #fb8c00)" : "var(--error-color, #e53935)";
+    let s = Number.isFinite(e) ? e / t : 0;
+    return i || (s = 1 - s), s >= 0.66 ? "var(--success-color, #43a047)" : s >= 0.4 ? "var(--warning-color, #fb8c00)" : "var(--error-color, #e53935)";
   }
   _renderScoreBadge(e) {
     if (!e.score_entity) return p;
     const t = this._numeric(this.hass.states[e.score_entity]);
     return Number.isFinite(t) ? u`<span class="scorebadge" style="background:${this._scoreColor(t, 100, !1)}">
-      ${N(this.hass, t, 0)}
+      ${A(this.hass, t, 0)}
     </span>` : p;
   }
   _fmtMetricValue(e, t) {
     var i;
-    return e.m.duration ?? e.preset.duration ? rt(t, e.m.unit ?? ((i = e.primaryState) == null ? void 0 : i.attributes.unit_of_measurement)) : E(N(this.hass, t, e.precision), e.unit);
+    return e.m.duration ?? e.preset.duration ? st(t, e.m.unit ?? ((i = e.primaryState) == null ? void 0 : i.attributes.unit_of_measurement)) : E(A(this.hass, t, e.precision), e.unit);
   }
   _xMarks(e, t) {
-    const i = P(this.hass), r = [];
+    const i = P(this.hass), s = [];
     if (e === "hour") {
       const a = /* @__PURE__ */ new Date();
       a.setMinutes(0, 0, 0);
       const c = a.getTime() - (t - 1) * 36e5;
       for (let l = 0; l < t; l++) {
         const h = new Date(c + l * 36e5).getHours();
-        h % 6 === 0 && r.push({ i: l, label: String(h), line: h === 0 });
+        h % 6 === 0 && s.push({ i: l, label: String(h), line: h === 0 });
       }
-      return r;
+      return s;
     }
     if (e === "month") {
       const a = /* @__PURE__ */ new Date();
       for (let c = 0; c < t; c++) {
         const l = new Date(a.getFullYear(), a.getMonth() - (t - 1 - c), 1);
-        l.getMonth() === 0 && r.push({ i: c, label: String(l.getFullYear()), line: !0 });
+        l.getMonth() === 0 && s.push({ i: c, label: String(l.getFullYear()), line: !0 });
       }
-      return r;
+      return s;
     }
-    const s = /* @__PURE__ */ new Date();
-    if (s.setHours(0, 0, 0, 0), s.setDate(s.getDate() - (t - 1)), t <= 14) {
+    const r = /* @__PURE__ */ new Date();
+    if (r.setHours(0, 0, 0, 0), r.setDate(r.getDate() - (t - 1)), t <= 14) {
       for (let a = 0; a < t; a++) {
-        const c = new Date(s.getTime() + a * 864e5);
-        r.push({ i: a, label: c.toLocaleDateString(i, { weekday: "narrow" }) });
+        const c = new Date(r.getTime() + a * 864e5);
+        s.push({ i: a, label: c.toLocaleDateString(i, { weekday: "narrow" }) });
       }
-      return r;
+      return s;
     }
     let n = 0, o = 0;
     for (let a = 0; a < t; a++) {
-      const c = new Date(s.getTime() + a * 864e5);
-      t <= 45 ? c.getDay() === 1 && r.push({
+      const c = new Date(r.getTime() + a * 864e5);
+      t <= 45 ? c.getDay() === 1 && s.push({
         i: a,
         label: n++ % 2 === 0 ? c.toLocaleDateString(i, { day: "numeric", month: "numeric" }) : void 0,
         line: !0
-      }) : c.getDate() === 1 && (r.push({
+      }) : c.getDate() === 1 && (s.push({
         i: a,
         label: t <= 120 || o % 2 === 0 ? c.toLocaleDateString(i, { month: "short" }) : void 0,
         line: !0
       }), o++);
     }
-    return r;
+    return s;
   }
   _renderEventTimes(e) {
     const t = (this._history[e] ?? []).filter((o) => o.v > 0);
     if (!t.length) return p;
-    const i = P(this.hass), r = /* @__PURE__ */ new Date();
-    r.setHours(0, 0, 0, 0);
-    const s = r.getTime() - 6 * 864e5, n = Array.from({ length: 7 }, (o, a) => {
-      const c = s + a * 864e5;
+    const i = P(this.hass), s = /* @__PURE__ */ new Date();
+    s.setHours(0, 0, 0, 0);
+    const r = s.getTime() - 6 * 864e5, n = Array.from({ length: 7 }, (o, a) => {
+      const c = r + a * 864e5;
       return {
         date: new Date(c),
         events: t.filter((l) => l.t >= c && l.t < c + 864e5)
@@ -3678,16 +3578,16 @@ let C = class extends K {
       <div class="times-hours"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>
     </div>`;
   }
-  _renderDetails(e, t, i, r) {
-    var x;
-    const s = t.data[0].buckets.filter(Number.isFinite), n = Ft(t.data[0].filled), o = this._resolveGoal(e.goal), a = t.valueOverride ?? this._numeric(t.primaryState, e.attribute), c = [];
-    if (s.length && (c.push(
-      { label: k(this.hass, "stat_min"), value: this._fmtMetricValue(t, Math.min(...s)) },
+  _renderDetails(e, t, i, s) {
+    var b;
+    const r = t.data[0].buckets.filter(Number.isFinite), n = Ft(t.data[0].filled), o = this._resolveGoal(e.goal), a = t.valueOverride ?? this._numeric(t.primaryState, e.attribute), c = [];
+    if (r.length && (c.push(
+      { label: k(this.hass, "stat_min"), value: this._fmtMetricValue(t, Math.min(...r)) },
       {
         label: k(this.hass, "stat_avg"),
-        value: this._fmtMetricValue(t, s.reduce((m, b) => m + b, 0) / s.length)
+        value: this._fmtMetricValue(t, r.reduce((m, x) => m + x, 0) / r.length)
       },
-      { label: k(this.hass, "stat_max"), value: this._fmtMetricValue(t, Math.max(...s)) }
+      { label: k(this.hass, "stat_max"), value: this._fmtMetricValue(t, Math.max(...r)) }
     ), Number.isFinite(n) && n !== 0 && c.push({
       label: k(this.hass, "stat_trend"),
       value: `${n > 0 ? "+" : ""}${this._fmtMetricValue(t, n)}`
@@ -3698,11 +3598,11 @@ let C = class extends K {
         value: m > 0 ? this._fmtMetricValue(t, m) : "✓"
       });
     }
-    const l = t.days, h = t.kind === "month" || t.kind === "day" && l > 16, d = t.graph === "bar" || t.graph === "progress" ? "bar" : "line", f = e.duration ?? t.preset.duration, y = (m) => f ? this._fmtMetricValue(t, m) : N(this.hass, m, t.precision), _ = {
+    const l = t.days, h = t.kind === "month" || t.kind === "day" && l > 16, d = t.graph === "bar" || t.graph === "progress" ? "bar" : "line", y = e.duration ?? t.preset.duration, f = (m) => y ? this._fmtMetricValue(t, m) : A(this.hass, m, t.precision), _ = {
       w: h ? l * (t.kind === "month" ? 14 : 10) : 340,
       h: h ? 110 : 130,
       dots: t.kind === "day" && l <= 14,
-      yFmt: y,
+      yFmt: f,
       xMarks: this._xMarks(t.kind, l)
     }, $ = d === "bar" ? Tt(
       t.data[0].buckets,
@@ -3715,11 +3615,11 @@ let C = class extends K {
     );
     return u`
       <div class="periods">
-        ${gt.map(
+        ${ft.map(
       (m) => u`<button
             class="period ${i === m.key ? "active" : ""}"
-            @click=${(b) => {
-        b.stopPropagation(), r(m.key);
+            @click=${(x) => {
+        x.stopPropagation(), s(m.key);
       }}
           >
             ${k(this.hass, `period_${m.key}`)}
@@ -3739,7 +3639,7 @@ let C = class extends K {
     )}
           </div>` : p}
       ${t.type === "wind" ? this._renderWindDetail(e, t) : p}
-      ${t.type === "precipitation" && ((x = t.series[0]) != null && x.entity) ? this._renderEventTimes(t.series[0].entity) : p}
+      ${t.type === "precipitation" && ((b = t.series[0]) != null && b.entity) ? this._renderEventTimes(t.series[0].entity) : p}
       ${t.multi ? this._renderSeriesChips(t.data, t.precision, t.trendMode) : p}
       ${t.type === "precipitation" && e.parts ? this._renderParts(e) : p}
       ${this._renderSecondary(e)}
@@ -3747,12 +3647,12 @@ let C = class extends K {
   }
   _renderWindDetail(e, t) {
     var n;
-    const i = e.entity ? this._weatherAttr(e.entity, "wind_bearing") : NaN, r = Number.isFinite(i) ? i : this._numeric(this.hass.states[((n = e.secondary) == null ? void 0 : n[0]) ?? ""]);
-    if (!Number.isFinite(r)) return p;
-    const s = this._numeric(t.primaryState);
+    const i = e.entity ? this._weatherAttr(e.entity, "wind_bearing") : NaN, s = Number.isFinite(i) ? i : this._numeric(this.hass.states[((n = e.secondary) == null ? void 0 : n[0]) ?? ""]);
+    if (!Number.isFinite(s)) return p;
+    const r = this._numeric(t.primaryState);
     return u`<div class="windrose-wrap">
-      ${xi(r, s, t.accent)}
-      <div class="windrose-label">${he(this.hass, r)} · ${E(N(this.hass, s, 0), t.unit)}</div>
+      ${xi(s, r, t.accent)}
+      <div class="windrose-label">${At(this.hass, s)} · ${E(A(this.hass, r, 0), t.unit)}</div>
     </div>`;
   }
   _renderPopup() {
@@ -3761,7 +3661,7 @@ let C = class extends K {
     if (!e) return p;
     const t = this._ctx(e, this._activeRange());
     if (!t.primaryState) return p;
-    const i = t.primaryState, r = this._popupRange ?? (t.days === 7 && t.kind === "day" ? "week" : ""), s = this._metricForecast(e);
+    const i = t.primaryState, s = this._popupRange ?? (t.days === 7 && t.kind === "day" ? "week" : ""), r = this._metricForecast(e);
     return u`
       <div class="backdrop s-${this._cardStyle()}" @click=${() => this._popup = null}>
         <div
@@ -3785,12 +3685,12 @@ let C = class extends K {
           </div>
           <div class="dialog-value">
             ${this._renderValue(e, t)}
-            <div class="time">${W(this.hass, i.last_updated)}</div>
+            <div class="time">${I(this.hass, i.last_updated)}</div>
           </div>
           ${this._renderStatus(e, t)}
-          ${s ? u`<div class="forecast-title">${k(this.hass, "forecast")}</div>
-                ${this._renderForecast(s.points, s.type, e.forecast_count ?? 12)}` : p}
-          ${this._renderDetails(e, t, r, (n) => {
+          ${r ? u`<div class="forecast-title">${k(this.hass, "forecast")}</div>
+                ${this._renderForecast(r.points, r.type, e.forecast_count ?? 12)}` : p}
+          ${this._renderDetails(e, t, s, (n) => {
       this._popupRange = n;
     })}
           <button
@@ -3813,67 +3713,67 @@ let C = class extends K {
       noon: "var(--light-blue-color, #03A9F4)",
       evening: "var(--deep-purple-color, #673AB7)",
       night: "var(--indigo-color, #3F51B5)"
-    }, i = ["morning", "noon", "evening", "night"].map((s) => {
+    }, i = ["morning", "noon", "evening", "night"].map((r) => {
       var c;
-      const n = (c = e.parts) == null ? void 0 : c[s], o = n ? this.hass.states[n] : void 0, a = this._numeric(o);
+      const n = (c = e.parts) == null ? void 0 : c[r], o = n ? this.hass.states[n] : void 0, a = this._numeric(o);
       if (Number.isFinite(a))
-        return { key: s, v: a, unit: o == null ? void 0 : o.attributes.unit_of_measurement, color: t[s] };
-    }).filter((s) => !!s);
+        return { key: r, v: a, unit: o == null ? void 0 : o.attributes.unit_of_measurement, color: t[r] };
+    }).filter((r) => !!r);
     if (!i.length) return p;
-    const r = i.reduce((s, n) => s + n.v, 0) || 1;
+    const s = i.reduce((r, n) => r + n.v, 0) || 1;
     return u`
       <div class="segbar">
         ${i.map(
-      (s) => u`<div class="seg" style="flex-grow:${Math.max(s.v, r * 0.02)};background:${s.color}"></div>`
+      (r) => u`<div class="seg" style="flex-grow:${Math.max(r.v, s * 0.02)};background:${r.color}"></div>`
     )}
       </div>
       <div class="phases">
         ${i.map(
-      (s) => u`<div class="phase">
-            <span class="phasedot" style="background:${s.color}"></span>
-            <span>${k(this.hass, `part_${s.key}`)}</span>
-            <span class="phaseval">${E(N(this.hass, s.v, 1), s.unit ?? "mm")}</span>
+      (r) => u`<div class="phase">
+            <span class="phasedot" style="background:${r.color}"></span>
+            <span>${k(this.hass, `part_${r.key}`)}</span>
+            <span class="phaseval">${E(A(this.hass, r.v, 1), r.unit ?? "mm")}</span>
           </div>`
     )}
       </div>
     `;
   }
   _renderValue(e, t) {
-    const { type: i, data: r, primaryState: s, unit: n, precision: o } = t;
+    const { type: i, data: s, primaryState: r, unit: n, precision: o } = t;
     if (e.label) return u`<div class="value">${e.label}</div>`;
-    if (i === "wind" && r.length >= 2) {
-      const c = this._numeric(s, e.attribute), l = this._numeric(this.hass.states[r[1].entity]);
+    if (i === "wind" && s.length >= 2) {
+      const c = this._numeric(r, e.attribute), l = this._numeric(this.hass.states[s[1].entity]);
       return u`<div class="value">
-          ${N(this.hass, c, o)}<span class="unit">${n}</span>
+          ${A(this.hass, c, o)}<span class="unit">${n}</span>
         </div>
         <div class="bplabels">
           <span class="bpitem">
-            <span class="bpdot" style="background:${r[0].colorResolved}"></span>WIND
-            ${N(this.hass, c, 0)}
+            <span class="bpdot" style="background:${s[0].colorResolved}"></span>WIND
+            ${A(this.hass, c, 0)}
           </span>
           <span class="bpitem">
-            <span class="bpdot" style="background:${r[1].colorResolved}"></span>BÖ
-            ${N(this.hass, l, 0)}
+            <span class="bpdot" style="background:${s[1].colorResolved}"></span>BÖ
+            ${A(this.hass, l, 0)}
           </span>
         </div>`;
     }
-    const a = t.valueOverride ?? this._numeric(s, e.attribute);
+    const a = t.valueOverride ?? this._numeric(r, e.attribute);
     return Number.isFinite(a) ? e.duration ?? t.preset.duration ? u`<div class="value">
-        ${rt(a, e.unit ?? s.attributes.unit_of_measurement)}
+        ${st(a, e.unit ?? r.attributes.unit_of_measurement)}
       </div>` : u`<div class="value">
-      ${N(this.hass, a, o)}<span class="unit">${n}</span>
-    </div>` : u`<div class="value">${s.state}</div>`;
+      ${A(this.hass, a, o)}<span class="unit">${n}</span>
+    </div>` : u`<div class="value">${r.state}</div>`;
   }
   _renderSeriesChips(e, t, i) {
     return u`<div class="serieslist">
-      ${e.map((r) => {
-      const s = this.hass.states[r.entity], n = this._numeric(s), o = r.unit ?? (s == null ? void 0 : s.attributes.unit_of_measurement) ?? "", a = r.name ?? (s == null ? void 0 : s.attributes.friendly_name) ?? r.entity, c = Ft(r.filled), l = Number.isFinite(c) ? c > 0 ? "mdi:arrow-top-right" : c < 0 ? "mdi:arrow-bottom-right" : "mdi:arrow-right" : "mdi:minus";
+      ${e.map((s) => {
+      const r = this.hass.states[s.entity], n = this._numeric(r), o = s.unit ?? (r == null ? void 0 : r.attributes.unit_of_measurement) ?? "", a = s.name ?? (r == null ? void 0 : r.attributes.friendly_name) ?? s.entity, c = Ft(s.filled), l = Number.isFinite(c) ? c > 0 ? "mdi:arrow-top-right" : c < 0 ? "mdi:arrow-bottom-right" : "mdi:arrow-right" : "mdi:minus";
       return u`<div class="serieschip">
-          ${i !== "none" ? u`<span class="dotarrow" style="background:${r.colorResolved}">
+          ${i !== "none" ? u`<span class="dotarrow" style="background:${s.colorResolved}">
                 <ha-icon .icon=${l}></ha-icon>
               </span>` : p}
           <span class="serieslabel">
-            ${a}: ${Number.isFinite(n) ? E(N(this.hass, n, t), o) : (s == null ? void 0 : s.state) ?? "–"}
+            ${a}: ${Number.isFinite(n) ? E(A(this.hass, n, t), o) : (r == null ? void 0 : r.state) ?? "–"}
           </span>
         </div>`;
     })}
@@ -3882,39 +3782,39 @@ let C = class extends K {
   _renderSecondary(e) {
     var i;
     if (!((i = e.secondary) != null && i.length)) return p;
-    const t = e.secondary.map((r) => {
-      const s = this.hass.states[r];
-      if (!s) return;
-      const n = this._numeric(s), o = s.attributes.unit_of_measurement ?? "";
-      return Number.isFinite(n) ? E(N(this.hass, n), o) : s.state;
+    const t = e.secondary.map((s) => {
+      const r = this.hass.states[s];
+      if (!r) return;
+      const n = this._numeric(r), o = r.attributes.unit_of_measurement ?? "";
+      return Number.isFinite(n) ? E(A(this.hass, n), o) : r.state;
     }).filter(Boolean);
     return t.length ? u`<div class="secondary">${t.join(" • ")}</div>` : p;
   }
   _renderStatus(e, t) {
     var S;
-    const { primaryState: i, unit: r, precision: s, trendMode: n, goalType: o, data: a, valueOverride: c } = t, l = a[0], h = c ?? this._numeric(i, e.attribute), d = this._resolveGoal(e.goal);
+    const { primaryState: i, unit: s, precision: r, trendMode: n, goalType: o, data: a, valueOverride: c } = t, l = a[0], h = c ?? this._numeric(i, e.attribute), d = this._resolveGoal(e.goal);
     if (Number.isFinite(d) && Number.isFinite(h)) {
       const M = this._resolveGoal(e.start);
-      let v = NaN;
-      if (Number.isFinite(M) && M !== d ? v = (M - h) / (M - d) * 100 : d > 0 && (v = o === "atmost" ? d / h * 100 : h / d * 100), !Number.isNaN(v)) {
-        const A = Math.round(Math.min(Math.max(v, 0), 999)), F = A >= 100;
-        return u`<div class="status ${F ? "good" : ""}">
-          <ha-icon .icon=${F ? "mdi:check-circle" : "mdi:flag-outline"}></ha-icon>
-          <span>${k(this.hass, "goal")}: ${A} %</span>
+      let w = NaN;
+      if (Number.isFinite(M) && M !== d ? w = (M - h) / (M - d) * 100 : d > 0 && (w = o === "atmost" ? d / h * 100 : h / d * 100), !Number.isNaN(w)) {
+        const N = Math.round(Math.min(Math.max(w, 0), 999)), C = N >= 100;
+        return u`<div class="status ${C ? "good" : ""}">
+          <ha-icon .icon=${C ? "mdi:check-circle" : "mdi:flag-outline"}></ha-icon>
+          <span>${k(this.hass, "goal")}: ${N} %</span>
         </div>`;
       }
     }
     if (n === "none") return p;
-    const f = ((S = this._forecastChartData(e, t.type)) == null ? void 0 : S.values) ?? l.filled, y = Ft(f);
-    if (!Number.isFinite(y)) return p;
-    const _ = f.find(Number.isFinite) ?? 0, $ = Math.abs(y) < Math.max(Math.abs(_) * 5e-3, 1e-9), x = $ || n === "neutral" ? "neutral" : y > 0 == (n === "up_good") ? "good" : "bad", m = $ ? "mdi:arrow-right" : y > 0 ? "mdi:arrow-top-right" : "mdi:arrow-bottom-right", b = e.duration ?? t.preset.duration, g = $ ? k(this.hass, "stable") : b ? rt(Math.abs(y), r || void 0) : `${N(this.hass, Math.abs(y), s)}${r ? ` ${r}` : ""}`;
-    return u`<div class="status ${x}">
+    const y = ((S = this._forecastChartData(e, t.type)) == null ? void 0 : S.values) ?? l.filled, f = Ft(y);
+    if (!Number.isFinite(f)) return p;
+    const _ = y.find(Number.isFinite) ?? 0, $ = Math.abs(f) < Math.max(Math.abs(_) * 5e-3, 1e-9), b = $ || n === "neutral" ? "neutral" : f > 0 == (n === "up_good") ? "good" : "bad", m = $ ? "mdi:arrow-right" : f > 0 ? "mdi:arrow-top-right" : "mdi:arrow-bottom-right", x = e.duration ?? t.preset.duration, g = $ ? k(this.hass, "stable") : x ? st(Math.abs(f), s || void 0) : `${A(this.hass, Math.abs(f), r)}${s ? ` ${s}` : ""}`;
+    return u`<div class="status ${b}">
       <span class="dotarrow"><ha-icon .icon=${m}></ha-icon></span>
       <span>${g}</span>
     </div>`;
   }
-  _renderChart(e, t, i, r, s) {
-    const n = e.type && Q[e.type] ? e.type : "custom", o = t === "line" || t === "bar" ? this._forecastChartData(e, n) : void 0;
+  _renderChart(e, t, i, s, r) {
+    const n = e.type && X[e.type] ? e.type : "custom", o = t === "line" || t === "bar" ? this._forecastChartData(e, n) : void 0;
     if (t === "line")
       return o ? u`${Ct([{ values: o.values, color: i[0].colorResolved }], {
         h: 66,
@@ -3936,16 +3836,16 @@ let C = class extends K {
     }
     if (t === "progress") {
       const a = i.map((c) => {
-        const l = this.hass.states[c.entity], h = this._numeric(l), d = this._resolveGoal(c.goal ?? e.goal) || e.max || (r === "%" ? 100 : NaN);
+        const l = this.hass.states[c.entity], h = this._numeric(l), d = this._resolveGoal(c.goal ?? e.goal) || e.max || (s === "%" ? 100 : NaN);
         if (!Number.isFinite(h) || !Number.isFinite(d) || d <= 0) return p;
-        const f = Math.max(0, Math.min(h / d * 100, 100)), y = c.unit ?? (l == null ? void 0 : l.attributes.unit_of_measurement) ?? r;
+        const y = Math.max(0, Math.min(h / d * 100, 100)), f = c.unit ?? (l == null ? void 0 : l.attributes.unit_of_measurement) ?? s;
         return u`<div class="pbar">
           ${i.length > 1 ? u`<div class="pbar-label">
                 <span>${c.name ?? (l == null ? void 0 : l.attributes.friendly_name) ?? c.entity}</span>
-                <span>${E(N(this.hass, h, s), y)}</span>
+                <span>${E(A(this.hass, h, r), f)}</span>
               </div>` : p}
           <div class="ptrack" style="--wc-p:${c.colorResolved}">
-            <div class="pfill" style="width:${f}%"></div>
+            <div class="pfill" style="width:${y}%"></div>
           </div>
         </div>`;
       });
@@ -3954,7 +3854,7 @@ let C = class extends K {
     return p;
   }
 };
-C.MOON_MAP = {
+T.MOON_MAP = {
   new_moon: [0, !0],
   waxing_crescent: [0.25, !0],
   first_quarter: [0.5, !0],
@@ -3964,16 +3864,7 @@ C.MOON_MAP = {
   last_quarter: [0.5, !1],
   waning_crescent: [0.25, !1]
 };
-C.SKY_ANCHOR_POS = {
-  top: { x: 50, y: 12, dir: "bottom" },
-  "top-left": { x: 22, y: 16, dir: "right" },
-  "top-right": { x: 78, y: 16, dir: "left" },
-  center: { x: 50, y: 48, dir: "top" },
-  "bottom-left": { x: 24, y: 78, dir: "right" },
-  "bottom-right": { x: 76, y: 78, dir: "left" },
-  bottom: { x: 50, y: 84, dir: "top" }
-};
-C.styles = _e`
+T.styles = ye`
     :host {
       --wc-card-bg: var(--ha-card-background, var(--card-background-color, #fff));
       --wc-tile-bg: color-mix(in srgb, var(--primary-text-color) 4%, var(--wc-card-bg));
@@ -4838,76 +4729,50 @@ C.styles = _e`
       color: var(--wc-accent);
     }
 
-    /* ---- anchors (pinned values on the sky) ---------------------------- */
-    .anchor {
-      position: absolute;
-      pointer-events: none;
-      --gap: 9px;
-      --dg: 2px;
+    /* ---- sky forecast toggle + detail chips ---------------------------- */
+    .sky-periods {
+      justify-content: flex-end;
+      margin-top: 2px;
     }
-    .anchor-dot {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--ac);
-      border: 2px solid var(--wc-card-bg);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    .sky-periods .period {
+      padding: 4px 12px;
+      font-size: 11px;
     }
-    .anchor-chip {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: color-mix(
-        in srgb,
-        var(--wc-card-bg) calc(var(--wc-label-op, 1) * 100%),
-        transparent
-      );
-      border-radius: 10px;
-      padding: 4px 9px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, calc(var(--wc-label-op, 1) * 0.16));
-      display: flex;
-      flex-direction: column;
-      line-height: 1.25;
-      white-space: nowrap;
+    .sky-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+      gap: 6px;
     }
-    .anchor.dot-right .anchor-chip { transform: translate(calc(-100% - var(--gap)), -50%); }
-    .anchor.dot-left .anchor-chip { transform: translate(var(--gap), -50%); }
-    .anchor.dot-bottom .anchor-chip { transform: translate(-50%, calc(-100% - var(--gap))); }
-    .anchor.dot-top .anchor-chip { transform: translate(-50%, var(--gap)); }
-    .anchor.dot-bottom-right .anchor-chip { transform: translate(calc(-100% - var(--dg)), calc(-100% - var(--dg))); }
-    .anchor.dot-bottom-left .anchor-chip { transform: translate(var(--dg), calc(-100% - var(--dg))); }
-    .anchor.dot-top-right .anchor-chip { transform: translate(calc(-100% - var(--dg)), var(--dg)); }
-    .anchor.dot-top-left .anchor-chip { transform: translate(var(--dg), var(--dg)); }
-    .s-glass .anchor-chip {
-      border: 1px solid color-mix(in srgb, #fff 30%, transparent);
-      -webkit-backdrop-filter: blur(8px) saturate(1.4);
-      backdrop-filter: blur(8px) saturate(1.4);
-      box-shadow:
-        inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent),
-        0 4px 14px rgba(0, 0, 0, 0.16);
+    .skd {
+      background: color-mix(in srgb, var(--primary-text-color) 4%, transparent);
+      border-radius: 12px;
+      padding: 6px 8px;
+      text-align: center;
+      min-width: 0;
     }
-    .s-material .anchor-chip { border-radius: 14px; }
-    .s-bubble .anchor-chip { border-radius: 14px; }
-    .anchor-name {
-      font-size: 10px;
-      font-weight: 600;
+    .skd-label {
+      font-size: 11px;
       color: var(--secondary-text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .anchor-val {
-      font-size: 12px;
+    .skd-value {
+      font-size: 14px;
       font-weight: 700;
       color: var(--primary-text-color);
+      white-space: nowrap;
     }
-    .s-mirror .anchor-chip {
+    .s-glass .skd {
+      border: 1px solid color-mix(in srgb, #fff 22%, transparent);
+    }
+    .s-mirror .skd {
       background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: none;
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
-    .s-mirror .anchor-dot { border-color: #000; }
+    .s-mirror .skd-value {
+      color: #fff;
+    }
 
     /* ---- detail popup -------------------------------------------------- */
     .backdrop {
@@ -5118,33 +4983,36 @@ C.styles = _e`
     .s-mirror .times-track { background: rgba(255, 255, 255, 0.12); }
     .s-mirror .times-dot { background: #fff; }
   `;
-H([
-  Wt({ attribute: !1 })
-], C.prototype, "hass", 2);
-H([
-  L()
-], C.prototype, "_config", 2);
-H([
-  L()
-], C.prototype, "_history", 2);
-H([
-  L()
-], C.prototype, "_popup", 2);
-H([
-  L()
-], C.prototype, "_popupRange", 2);
-H([
-  L()
-], C.prototype, "_tileRanges", 2);
-H([
-  L()
-], C.prototype, "_statsCache", 2);
-H([
-  L()
-], C.prototype, "_forecasts", 2);
-C = H([
-  ke("weatherglass-card")
-], C);
+L([
+  Ht({ attribute: !1 })
+], T.prototype, "hass", 2);
+L([
+  z()
+], T.prototype, "_config", 2);
+L([
+  z()
+], T.prototype, "_history", 2);
+L([
+  z()
+], T.prototype, "_popup", 2);
+L([
+  z()
+], T.prototype, "_popupRange", 2);
+L([
+  z()
+], T.prototype, "_tileRanges", 2);
+L([
+  z()
+], T.prototype, "_skyRanges", 2);
+L([
+  z()
+], T.prototype, "_statsCache", 2);
+L([
+  z()
+], T.prototype, "_forecasts", 2);
+T = L([
+  $e("weatherglass-card")
+], T);
 function it(...e) {
   for (const t of e) if (typeof t == "number" && Number.isFinite(t)) return t;
 }
@@ -5162,5 +5030,5 @@ window.customCards.push({
   documentationURL: "https://github.com/BobMcGlobus/Weatherglass"
 });
 export {
-  C as WeatherCard
+  T as WeatherCard
 };

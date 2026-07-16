@@ -78,38 +78,13 @@ export interface DayParts {
   night?: string;
 }
 
-/** The pinnable spot on the sky scene */
-export type SkyAnchorPosition =
-  | 'top'
-  | 'top-left'
-  | 'top-right'
-  | 'center'
-  | 'bottom-left'
-  | 'bottom-right'
-  | 'bottom';
-
-/** Value label pinned to a spot on the sky scene */
-export interface SkyAnchor {
+/** Labeled value shown in the detail row under the sky forecast */
+export interface DetailConfig {
   entity: string;
-  /** second entity, e.g. gust — arm-style anchors render both values */
-  entity2?: string;
   name?: string;
-  color?: string;
-  position?: SkyAnchorPosition;
-  /** free placement (percent of the scene area), overrides position */
-  x?: number;
-  y?: number;
-  flip?: boolean;
-  /** where the dot sits relative to the label (8-way) */
-  dot?:
-    | 'left'
-    | 'right'
-    | 'top'
-    | 'bottom'
-    | 'top-left'
-    | 'top-right'
-    | 'bottom-left'
-    | 'bottom-right';
+  /** read this attribute instead of the state */
+  attribute?: string;
+  unit?: string;
 }
 
 export interface SeriesConfig {
@@ -190,10 +165,11 @@ export interface MetricConfig {
   night?: boolean;
   /** Wind entity — stronger wind drifts the clouds faster */
   wind_entity?: string;
-  /** Value labels pinned onto the scene */
-  anchors?: SkyAnchor[];
-  /** Label chip background opacity (0-1, default 1) */
-  label_opacity?: number;
+  /**
+   * Labeled values under the forecast strip. Defaults to wind / humidity /
+   * pressure / UV pulled from the weather entity's attributes.
+   */
+  details?: (string | DetailConfig)[];
   /** Vertical nudge of the scene in percent */
   scene_offset_y?: number;
 
