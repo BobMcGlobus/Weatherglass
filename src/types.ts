@@ -145,10 +145,12 @@ export interface MetricConfig {
   /** how many forecast steps to show in the strip (default 8) */
   forecast_count?: number;
   /**
-   * What the tile chart plots: the upcoming forecast (default when the metric
-   * has one) or the recorder history (the old behaviour; always in the popup).
+   * What the tile chart plots. `both` (default): measured history from the
+   * tile's own (local) sensor up to now, then the forecast — solid/dashed
+   * line or full/faded bars with a now-divider. `forecast`: outlook only.
+   * `history`: the plain recorder sparkline (full history sits in the popup).
    */
-  chart_source?: 'forecast' | 'history';
+  chart_source?: 'forecast' | 'history' | 'both';
 
   /** ---- sky (hero scene) ---------------------------------------------- */
   /** Weather entity or text sensor giving the condition (sunny/rainy/…) */

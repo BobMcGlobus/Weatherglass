@@ -29,8 +29,13 @@ export interface ChartOpts {
   xMarks?: AxisMark[];
   /** soft tinted fill under the first series (forecast look) */
   area?: boolean;
-  /** ring dot on the first point of the first series ("now") */
-  nowDot?: boolean;
+  /**
+   * combined history+forecast charts: index of "now" — draws a subtle
+   * divider line and a ring dot on the first series with a value there
+   */
+  nowIdx?: number;
+  /** bars from this index on are forecast — rendered faded */
+  fadeFrom?: number;
 }
 
 const W = 220;
@@ -125,17 +130,26 @@ export function lineChart(
             )
           : nothing
       }
-      ${
-        opts.nowDot && si === 0
-          ? svg`<circle cx=${pts[0].x} cy=${pts[0].y} r="3.6" fill="var(--wc-dot-fill)"
-              stroke=${s.color} stroke-width="2.2"/>`
-          : nothing
-      }
     `;
   });
 
+  // "now" divider under the series, ring dot on top of them
+  let nowLine: unknown = nothing;
+  let nowDot: unknown = nothing;
+  if (opts.nowIdx !== undefined && n > 1) {
+    const ni = Math.max(0, Math.min(opts.nowIdx, n - 1));
+    nowLine = svg`<line x1=${x(ni)} x2=${x(ni)} y1=${PAD} y2=${h - padB}
+      stroke="color-mix(in srgb, var(--primary-text-color) 26%, transparent)"
+      stroke-width="1"/>`;
+    const src = drawable.find((s) => Number.isFinite(s.values[ni]));
+    if (src) {
+      nowDot = svg`<circle cx=${x(ni)} cy=${y(src.values[ni])} r="3.6"
+        fill="var(--wc-dot-fill)" stroke=${src.color} stroke-width="2.2"/>`;
+    }
+  }
+
   return html`<svg class="chart" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-    ${grid}${marks}${parts}
+    ${grid}${marks}${nowLine}${parts}${nowDot}
   </svg>`;
 }
 
@@ -180,15 +194,27 @@ export function barChart(
       }`;
   });
 
+  const fadeAt = opts.fadeFrom;
   const bars = vals.map((v, i) => {
     const bh = Math.max(y(v), v > 0 ? 3 : 1.5);
     const bx = padL + i * slot + (slot - bw) / 2;
+    const forecastBar = fadeAt !== undefined && i >= fadeAt;
     return svg`<rect x=${bx} y=${h - padB - bh} width=${bw} height=${bh}
-      rx=${Math.min(bw / 2, 4)} fill=${color} opacity=${v > 0 ? 1 : 0.25}/>`;
+      rx=${Math.min(bw / 2, 4)} fill=${color}
+      opacity=${v > 0 ? (forecastBar ? 0.45 : 1) : 0.22}/>`;
   });
 
+  // divider between measured and forecast bars
+  const nowLine =
+    fadeAt !== undefined && fadeAt > 0 && fadeAt < n
+      ? svg`<line x1=${padL + fadeAt * slot} x2=${padL + fadeAt * slot}
+          y1=${PAD} y2=${h - padB}
+          stroke="color-mix(in srgb, var(--primary-text-color) 26%, transparent)"
+          stroke-width="1"/>`
+      : nothing;
+
   return html`<svg class="chart" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-    ${grid}${marks}${bars}
+    ${grid}${marks}${nowLine}${bars}
   </svg>`;
 }
 

@@ -12,7 +12,7 @@ Vollständig Theme-kompatibel (Light & Dark).
 
 ## Features
 
-- 📅 **Vorhersage zuerst**: Kachel-Diagramme zeigen, was **kommt** — stündliche Prognose-Kurven/-Balken mit Stunden-Achse und „Jetzt"-Punkt; auch der Trend-Pfeil beschreibt die kommende Entwicklung. Der Verlauf (historische Daten) wohnt im Detail-Popup (Zeiträume: Tag stündlich / Woche / Monat / 3M / Jahr / Max). Umschaltbar je Kachel per `chart_source: history`.
+- 📅 **Gemessen + Vorhersage in einem Chart** (Default `chart_source: both`): Kachel-Diagramme zeichnen die **letzten 12 Stunden deiner (lokalen) Sensoren** als durchgezogene Linie bzw. volle Balken, eine „Jetzt"-Trennlinie mit Ring-Punkt, und daran anschließend die **Prognose** gestrichelt bzw. abgeblendet (täglich: 3 Tage zurück + 7 voraus). Der Trend-Pfeil beschreibt die kommende Entwicklung. Alternativ `chart_source: forecast` (nur Prognose) oder `history` (nur Verlaufs-Sparkline). Die volle Historie wohnt im Detail-Popup (Tag stündlich / Woche / Monat / 3M / Jahr / Max).
 - 🎨 **Cleaner Look**: Kacheln mit großen Werten, Icon-Chips und weichen Kurven
 - 🌗 **100 % Theme-Support**: nutzt ausschließlich HA-Theme-Variablen (`--primary-text-color`, `--ha-card-background`, `--red-color`, …)
 - 🌤️ **Himmel-Szene** (`type: sky`): das animierte Herzstück. Der Himmelsverlauf folgt der **echten Sonnen-Elevation** (Nacht → Dämmerungsrosa → goldene Stunde → Tag), die Sonne steht auf ihrer wahren Höhe (pulsierender Glow, drehende Strahlen), nachts funkeln Sterne (mit gelegentlicher Sternschnuppe) um den Mond. Wolken driften auf **drei Parallax-Ebenen** (die hinterste unscharf) in Windgeschwindigkeit, Regen fällt **windschräg** in zwei Tiefen (bei Starkregen mit Boden-Splashes), Schnee taumelt, Blitze erhellen die ganze Szene, Nebelbänke ziehen, bei klarem Tag kreuzen Vögel. **Grüne Hügel mit Tannen** erden die Szene — saftig bei schönem Wetter, schneebedeckt bei Schnee, entsättigt bei Sturm, Silhouetten bei Nacht. Temperatur, Wetterlage und Tages-Hoch/-Tief liegen darüber, ein `score_entity` legt eine pulsierende Warn-Vignette darüber. Unter der Szene: ein **Stündlich/Täglich-Umschalter** für den Vorhersagestreifen und eine **Datenzeile mit beschrifteten Chips** (`details`; ohne Konfiguration automatisch Wind/Luftfeuchte/Luftdruck/UV aus der Wetter-Entität).
@@ -185,7 +185,7 @@ metrics: [...]
 | `forecast`       | string        | Wetter-Entität für die Vorhersage (Default: `weather` der Karte)     |
 | `forecast_type`  | string        | `hourly` (Default bei Temp/Wind/Regen), `daily`, `twice_daily`       |
 | `forecast_count` | number        | Anzahl der angezeigten Vorhersage-Schritte                           |
-| `chart_source`   | string        | Kachel-Diagramm: `forecast` (Default — kommende Werte) oder `history` |
+| `chart_source`   | string        | Kachel-Diagramm: `both` (Default — gemessene Vergangenheit + Prognose), `forecast` oder `history` |
 | **Niederschlag** |               |                                                                        |
 | `parts`          | object        | `morning`/`noon`/`evening`/`night`-Entitäten                          |
 | **Himmel (`sky`)** |             |                                                                        |

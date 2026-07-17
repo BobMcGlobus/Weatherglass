@@ -67,6 +67,7 @@ const LABELS: Record<string, Record<string, string>> = {
     sec_radar: 'Radar',
     sec_summary: 'AI summary',
     chart_source: 'Tile chart shows',
+    cs_both: 'Measured + forecast (default)',
     cs_forecast: 'Forecast (upcoming)',
     cs_history: 'History (past)',
     tap_action: 'Tap action',
@@ -174,6 +175,7 @@ const LABELS: Record<string, Record<string, string>> = {
     sec_radar: 'Radar',
     sec_summary: 'AI-Zusammenfassung',
     chart_source: 'Kachel-Diagramm zeigt',
+    cs_both: 'Gemessen + Vorhersage (Standard)',
     cs_forecast: 'Vorhersage (kommend)',
     cs_history: 'Verlauf (vergangen)',
     tap_action: 'Klick-Aktion',
@@ -384,7 +386,7 @@ export class WeatherCardEditor extends LitElement {
                       selector: {
                         select: {
                           mode: 'dropdown',
-                          options: opts(['forecast', 'history'], 'cs'),
+                          options: opts(['both', 'forecast', 'history'], 'cs'),
                         },
                       },
                     },

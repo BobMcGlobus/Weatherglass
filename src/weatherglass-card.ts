@@ -58,7 +58,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.7.0';
+const CARD_VERSION = '0.8.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -699,41 +699,78 @@ export class WeatherCard extends LitElement {
   }
 
   /**
-   * Numeric forecast series for a metric's tile chart (forecast-first view).
-   * Returns undefined when the metric opted into history (`chart_source`),
-   * has no matching forecast field or the forecast is too thin to plot.
+   * Data for a metric's tile chart. `values` is the upcoming forecast;
+   * `hist` holds the measured past from the tile's own (local) sensor —
+   * 12 hours (hourly) or 3 days (daily) ending at `nowIdx`. `hist` stays
+   * empty for `chart_source: forecast` or when no usable history exists.
+   * Returns undefined for `chart_source: history` (plain sparkline path),
+   * missing forecast fields or too-thin forecasts.
    */
   private _forecastChartData(
     m: MetricConfig,
     type: MetricType,
     index?: number
-  ): { values: number[]; xMarks: AxisMark[] } | undefined {
-    if ((m.chart_source ?? 'forecast') === 'history') return undefined;
+  ):
+    | { hist: number[]; values: number[]; xMarks: AxisMark[]; nowIdx: number }
+    | undefined {
+    const source = m.chart_source ?? 'both';
+    if (source === 'history') return undefined;
     const key = FC_KEYS[type];
     if (!key) return undefined;
     const fc = this._metricForecast(m, index);
     if (!fc) return undefined;
     const hourly = fc.type === 'hourly';
-    const count = m.forecast_count ?? (hourly ? 18 : 7);
+    const count = m.forecast_count ?? (hourly ? 12 : 7);
     const points = fc.points.slice(0, count);
     const values = points.map((p) => {
       const v = p[key];
       return typeof v === 'number' && Number.isFinite(v) ? v : NaN;
     });
     if (values.filter(Number.isFinite).length < 2) return undefined;
+
+    // measured past from the local sensor (weather.* has no numeric history)
+    let hist: number[] = [];
+    if (source === 'both' && m.entity && !m.entity.startsWith('weather.')) {
+      const pts = this._history[m.entity];
+      if (pts?.length) {
+        const aggregate = m.aggregate ?? PRESETS[type].aggregate;
+        hist = hourly
+          ? bucketHourly(pts, 12, aggregate)
+          : bucketDaily(pts, 4, aggregate).slice(0, 3);
+        // sum sensors (rain): buckets without samples mean 0, not "no data"
+        if (aggregate === 'sum') hist = hist.map((v) => (Number.isFinite(v) ? v : 0));
+        if (!hist.some(Number.isFinite)) hist = [];
+      }
+    }
+    // hourly: last measured bucket is the current hour; daily: today is fc[0]
+    const nowIdx = hist.length ? (hourly ? hist.length - 1 : hist.length) : 0;
+
     const loc = locale(this.hass);
     const xMarks: AxisMark[] = [];
-    points.forEach((p, i) => {
-      const d = new Date(p.datetime);
-      if (isNaN(d.getTime())) return;
+    const mark = (i: number, d: Date) => {
       if (hourly) {
         const hh = d.getHours();
         if (hh % 6 === 0) xMarks.push({ i, label: String(hh), line: hh === 0 });
       } else {
         xMarks.push({ i, label: d.toLocaleDateString(loc, { weekday: 'narrow' }) });
       }
+    };
+    if (hist.length) {
+      const anchor = new Date();
+      if (hourly) anchor.setMinutes(0, 0, 0);
+      else anchor.setHours(0, 0, 0, 0);
+      for (let i = 0; i < hist.length; i++) {
+        const d = new Date(anchor);
+        if (hourly) d.setHours(d.getHours() - (hist.length - 1 - i));
+        else d.setDate(d.getDate() - (hist.length - i));
+        mark(i, d);
+      }
+    }
+    points.forEach((p, j) => {
+      const d = new Date(p.datetime);
+      if (!isNaN(d.getTime())) mark(hist.length + j, d);
     });
-    return { values, xMarks };
+    return { hist, values, xMarks, nowIdx };
   }
 
   private _fcLabel(p: ForecastPoint, ftype: ForecastType, first: boolean): string {
@@ -2100,11 +2137,25 @@ export class WeatherCard extends LitElement {
         : undefined;
     if (graph === 'line') {
       if (fcd) {
-        return html`${lineChart([{ values: fcd.values, color: data[0].colorResolved }], {
+        const color = data[0].colorResolved;
+        const pad = (k: number) => new Array(Math.max(k, 0)).fill(NaN);
+        const hist = fillGaps(fcd.hist);
+        // measured past as a solid line, forecast as its dashed continuation
+        const series = hist.length
+          ? [
+              { values: [...hist, ...pad(fcd.values.length)], color },
+              {
+                values: [...pad(hist.length - 1), hist[hist.length - 1], ...fcd.values],
+                color,
+                dashed: true,
+              },
+            ]
+          : [{ values: fcd.values, color }];
+        return html`${lineChart(series, {
           h: 66,
           dots: false,
           area: true,
-          nowDot: true,
+          nowIdx: fcd.nowIdx,
           xMarks: fcd.xMarks,
         })}`;
       }
@@ -2112,9 +2163,10 @@ export class WeatherCard extends LitElement {
     }
     if (graph === 'bar') {
       if (fcd) {
-        return html`${barChart(fcd.values, data[0].colorResolved, {
+        return html`${barChart([...fcd.hist, ...fcd.values], data[0].colorResolved, {
           h: 66,
           xMarks: fcd.xMarks,
+          fadeFrom: fcd.hist.length > 0 ? fcd.hist.length : undefined,
         })}`;
       }
       return html`${barChart(data[0].buckets, data[0].colorResolved)}`;
