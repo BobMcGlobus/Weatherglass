@@ -5,7 +5,6 @@ import type {
   Aggregate,
   ForecastPoint,
   ForecastType,
-  GoalType,
   GraphType,
   HomeAssistant,
   HassEntity,
@@ -59,7 +58,7 @@ import {
 import type { AxisMark, ChartOpts } from './charts';
 import './editor';
 
-const CARD_VERSION = '0.6.1';
+const CARD_VERSION = '0.7.0';
 
 const REFETCH_MIN_MS = 5 * 60 * 1000;
 const REFETCH_MAX_AGE_MS = 15 * 60 * 1000;
@@ -89,7 +88,6 @@ interface MetricCtx {
   unit: string;
   data: SeriesData[];
   valueOverride?: number;
-  goalType: GoalType;
   multi: boolean;
 }
 
@@ -377,13 +375,6 @@ export class WeatherCard extends LitElement {
     );
   }
 
-  private _resolveGoal(goal?: number | string): number {
-    if (typeof goal === 'number') return goal;
-    if (typeof goal !== 'string' || !goal) return NaN;
-    const st = this.hass.states[goal];
-    return st ? parseFloat(st.state) : parseFloat(goal);
-  }
-
   private _handleTap(m: MetricConfig, index: number, entityId?: string): void {
     const action = m.tap_action ?? 'popup';
     if (action === 'none') return;
@@ -575,7 +566,6 @@ export class WeatherCard extends LitElement {
       unit,
       data,
       valueOverride,
-      goalType: m.goal_type ?? preset.goalType ?? 'atleast',
       multi: !!m.entities && series.length > 1,
     };
   }
@@ -879,7 +869,8 @@ export class WeatherCard extends LitElement {
     const primaryState = c.primaryState!;
     const v = this._numeric(primaryState, m.attribute);
     const max = m.max ?? 100;
-    const goodHigh = (m.goal_type ?? c.preset.goalType) !== 'atmost';
+    // the only ring metric is air quality, where a low index is good
+    const goodHigh = false;
 
     const breakdown = this._breakdown(m);
     const withValue = breakdown.filter((b) => Number.isFinite(b.value) && b.value > 0);
@@ -1442,10 +1433,21 @@ export class WeatherCard extends LitElement {
       ? this._scoreColor(scoreV, 100, false)
       : 'transparent';
 
-    const temp = isWeather ? this._weatherAttr(weatherState.entity_id, 'temperature') : this._numeric(weatherState);
-    const tempUnit = isWeather
-      ? this.hass.states[weatherState.entity_id]?.attributes?.temperature_unit ?? '°'
-      : weatherState.attributes.unit_of_measurement ?? '°';
+    // a local station sensor (Shelly/Ecowitt …) beats the weather attribute
+    const localTempSt = m.temperature_entity
+      ? this.hass.states[m.temperature_entity]
+      : undefined;
+    const localTemp = this._numeric(localTempSt);
+    const temp = Number.isFinite(localTemp)
+      ? localTemp
+      : isWeather
+        ? this._weatherAttr(weatherState.entity_id, 'temperature')
+        : this._numeric(weatherState);
+    const tempUnit = Number.isFinite(localTemp)
+      ? (localTempSt?.attributes.unit_of_measurement ?? '°')
+      : isWeather
+        ? (this.hass.states[weatherState.entity_id]?.attributes?.temperature_unit ?? '°')
+        : (weatherState.attributes.unit_of_measurement ?? '°');
     const daily = this._forecastFor(this._forecastId(m), 'daily');
     const today = daily[0];
     const hi = today?.temperature;
@@ -1577,20 +1579,32 @@ export class WeatherCard extends LitElement {
     const cond = wSt?.entity_id.startsWith('weather.') ? wSt.state : undefined;
     const bearing = attr('wind_bearing');
     const nextProb = hourly.slice(0, 12).map((p) => p.precipitation_probability ?? 0);
+    // local station sensors win over weather attributes ("now" stays local,
+    // the outlook keeps coming from the forecast)
     return {
       condition: conditionName(this.hass, cond),
-      temp: firstFinite(attr('temperature'), bySource('temperature')),
-      tempUnit: wSt?.attributes?.temperature_unit ?? '°C',
+      temp: firstFinite(num(m.temperature_entity), attr('temperature'), bySource('temperature')),
+      tempUnit:
+        (m.temperature_entity
+          ? this.hass.states[m.temperature_entity]?.attributes.unit_of_measurement
+          : undefined) ??
+        wSt?.attributes?.temperature_unit ??
+        '°C',
       hi: daily[0]?.temperature,
       lo: daily[0]?.templow,
       feels: firstFinite(attr('apparent_temperature'), num(m.summary_sources?.[0])),
-      windSpeed: firstFinite(attr('wind_speed'), bySource('wind_speed')),
-      windUnit: wSt?.attributes?.wind_speed_unit ?? 'km/h',
+      windSpeed: firstFinite(num(m.wind_entity), attr('wind_speed'), bySource('wind_speed')),
+      windUnit:
+        (m.wind_entity
+          ? this.hass.states[m.wind_entity]?.attributes.unit_of_measurement
+          : undefined) ??
+        wSt?.attributes?.wind_speed_unit ??
+        'km/h',
       windDir: windDir(this.hass, bearing),
       precipProb: nextProb.length ? Math.max(...nextProb) : daily[0]?.precipitation_probability,
       precipMm: daily[0]?.precipitation,
       uv: firstFinite(attr('uv_index'), bySource('uv_index')),
-      humidity: firstFinite(attr('humidity'), bySource('humidity')),
+      humidity: firstFinite(num(m.humidity_entity), attr('humidity'), bySource('humidity')),
       tomorrowCondition: conditionName(this.hass, daily[1]?.condition),
       tomorrowHi: daily[1]?.temperature,
       tomorrowLo: daily[1]?.templow,
@@ -1757,8 +1771,6 @@ export class WeatherCard extends LitElement {
   ): TemplateResult {
     const finite = c.data[0].buckets.filter(Number.isFinite);
     const delta = trendDelta(c.data[0].filled);
-    const goal = this._resolveGoal(m.goal);
-    const v = c.valueOverride ?? this._numeric(c.primaryState, m.attribute);
     const stats: Array<{ label: string; value: string }> = [];
     if (finite.length) {
       stats.push(
@@ -1776,14 +1788,6 @@ export class WeatherCard extends LitElement {
         });
       }
     }
-    if (Number.isFinite(goal) && Number.isFinite(v)) {
-      const left = c.goalType === 'atmost' ? v - goal : goal - v;
-      stats.push({
-        label: t(this.hass, 'goal_left'),
-        value: left > 0 ? this._fmtMetricValue(c, left) : '✓',
-      });
-    }
-
     const n = c.days;
     const wide = c.kind === 'month' || (c.kind === 'day' && n > 16);
     const historyGraph = c.graph === 'bar' || c.graph === 'progress' ? 'bar' : 'line';
@@ -1799,12 +1803,7 @@ export class WeatherCard extends LitElement {
     };
     const historyTpl =
       historyGraph === 'bar'
-        ? barChart(
-            c.data[0].buckets,
-            c.data[0].colorResolved,
-            Number.isFinite(goal) ? goal : undefined,
-            opts
-          )
+        ? barChart(c.data[0].buckets, c.data[0].colorResolved, opts)
         : lineChart(
             c.data.map((s) => ({ values: s.filled, color: s.colorResolved })),
             opts
@@ -2050,28 +2049,8 @@ export class WeatherCard extends LitElement {
     c: MetricCtx,
     index?: number
   ): TemplateResult | typeof nothing {
-    const { primaryState, unit, precision, trendMode, goalType, data, valueOverride } = c;
+    const { unit, precision, trendMode, data } = c;
     const primary = data[0];
-    const v = valueOverride ?? this._numeric(primaryState!, m.attribute);
-    const goal = this._resolveGoal(m.goal);
-
-    if (Number.isFinite(goal) && Number.isFinite(v)) {
-      const start = this._resolveGoal(m.start);
-      let raw = NaN;
-      if (Number.isFinite(start) && start !== goal) {
-        raw = ((start - v) / (start - goal)) * 100;
-      } else if (goal > 0) {
-        raw = goalType === 'atmost' ? (goal / v) * 100 : (v / goal) * 100;
-      }
-      if (!Number.isNaN(raw)) {
-        const pct = Math.round(Math.min(Math.max(raw, 0), 999));
-        const reached = pct >= 100;
-        return html`<div class="status ${reached ? 'good' : ''}">
-          <ha-icon .icon=${reached ? 'mdi:check-circle' : 'mdi:flag-outline'}></ha-icon>
-          <span>${t(this.hass, 'goal')}: ${pct} %</span>
-        </div>`;
-      }
-    }
 
     if (trendMode === 'none') return nothing;
     // forecast-sourced tiles show the upcoming change, not the past one
@@ -2132,26 +2111,20 @@ export class WeatherCard extends LitElement {
       return html`${lineChart(data.map((s) => ({ values: s.filled, color: s.colorResolved })))}`;
     }
     if (graph === 'bar') {
-      const goal = this._resolveGoal(m.goal);
       if (fcd) {
-        return html`${barChart(fcd.values, data[0].colorResolved, undefined, {
+        return html`${barChart(fcd.values, data[0].colorResolved, {
           h: 66,
           xMarks: fcd.xMarks,
         })}`;
       }
-      return html`${barChart(
-        data[0].buckets,
-        data[0].colorResolved,
-        Number.isFinite(goal) ? goal : undefined
-      )}`;
+      return html`${barChart(data[0].buckets, data[0].colorResolved)}`;
     }
     if (graph === 'progress') {
       const bars = data.map((s) => {
         const st = this.hass.states[s.entity];
         const v = this._numeric(st);
-        // progress scale: goal, else the metric's max, else 100 for percentages
-        const scale =
-          this._resolveGoal(s.goal ?? m.goal) || m.max || (unit === '%' ? 100 : NaN);
+        // progress scale: the metric's max, else 100 for percentages
+        const scale = m.max || (unit === '%' ? 100 : NaN);
         if (!Number.isFinite(v) || !Number.isFinite(scale) || scale <= 0) return nothing;
         const pct = Math.max(0, Math.min((v / scale) * 100, 100));
         const sUnit = s.unit ?? st?.attributes.unit_of_measurement ?? unit;
@@ -2476,6 +2449,11 @@ export class WeatherCard extends LitElement {
     .metrics.carousel > .metric {
       flex: 0 0 min(85%, 320px);
       scroll-snap-align: center;
+      /* content (e.g. the hourly forecast strip) must scroll inside the tile
+         instead of inflating its min-content width — otherwise switching the
+         sky tile from daily to hourly grows the whole card */
+      min-width: 0;
+      overflow: hidden;
     }
     .metric {
       background: var(--wc-tile-bg);

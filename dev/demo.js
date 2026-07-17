@@ -140,7 +140,8 @@ const states = {
     elevation: 38,
     rising: false,
   }),
-  'sensor.aussentemperatur': entity('sensor.aussentemperatur', 18.4, { unit_of_measurement: '°C', device_class: 'temperature', friendly_name: 'Außentemperatur' }),
+  // local station reads slightly different from the provider — proves the override
+  'sensor.aussentemperatur': entity('sensor.aussentemperatur', 19.1, { unit_of_measurement: '°C', device_class: 'temperature', friendly_name: 'Außentemperatur' }),
   'sensor.gefuehlt': entity('sensor.gefuehlt', 17.2, { unit_of_measurement: '°C', device_class: 'temperature', friendly_name: 'Gefühlt' }),
   'sensor.wind': entity('sensor.wind', 14, { unit_of_measurement: 'km/h', wind_bearing: 235, device_class: 'wind_speed', friendly_name: 'Wind' }),
   'sensor.windboe': entity('sensor.windboe', 27, { unit_of_measurement: 'km/h', device_class: 'wind_speed', friendly_name: 'Böen' }),
@@ -365,6 +366,9 @@ const config = {
     {
       type: 'sky',
       entity: 'weather.home',
+      // local station (Shelly/Ecowitt): current temp from the sensor,
+      // forecasts keep coming from weather.home
+      temperature_entity: 'sensor.aussentemperatur',
       score_entity: 'sensor.warnstufe',
       // labeled chips under the forecast; omit to auto-fill from the weather entity
       details: ['sensor.wind', 'sensor.luftfeuchte', 'sensor.luftdruck', 'sensor.uv'],

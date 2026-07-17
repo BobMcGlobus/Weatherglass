@@ -57,7 +57,6 @@ const LABELS: Record<string, Record<string, string>> = {
     style_mirror: 'Magic Mirror',
     tab_general: 'General',
     sec_display: 'Appearance',
-    sec_goal: 'Goal & progress',
     sec_behavior: 'Behavior & data',
     sec_forecast: 'Forecast',
     sec_parts: 'Day parts',
@@ -70,12 +69,6 @@ const LABELS: Record<string, Record<string, string>> = {
     chart_source: 'Tile chart shows',
     cs_forecast: 'Forecast (upcoming)',
     cs_history: 'History (past)',
-    goal_type: 'Goal direction',
-    gt_atleast: 'Reach at least',
-    gt_atmost: 'Stay at/below',
-    goal_entity: 'Goal sensor (overrides number)',
-    start: 'Start value (number)',
-    start_entity: 'Start sensor (overrides number)',
     tap_action: 'Tap action',
     ta_popup: 'Popup (detail view)',
     'ta_more-info': 'More-info (HA dialog)',
@@ -95,7 +88,9 @@ const LABELS: Record<string, Record<string, string>> = {
     part_night: 'Night entity',
     condition_entity: 'Condition sensor (overrides weather)',
     sun_entity: 'Sun entity (day/night)',
-    wind_entity: 'Wind entity (cloud drift)',
+    wind_entity: 'Wind sensor (local / cloud drift)',
+    temperature_entity: 'Temperature sensor (local station)',
+    humidity_entity: 'Humidity sensor (local station)',
     night: 'Force night mode',
     scene_offset_y: 'Scene vertical offset %',
     details: 'Values below the forecast (labeled chips)',
@@ -130,7 +125,6 @@ const LABELS: Record<string, Record<string, string>> = {
     color: 'Color',
     unit: 'Unit',
     graph: 'Chart',
-    goal: 'Goal (number)',
     precision: 'Decimals',
     aggregate: 'Aggregation',
     trend: 'Trend',
@@ -170,7 +164,6 @@ const LABELS: Record<string, Record<string, string>> = {
     style_mirror: 'Magic Mirror',
     tab_general: 'Allgemein',
     sec_display: 'Darstellung',
-    sec_goal: 'Ziel & Fortschritt',
     sec_behavior: 'Verhalten & Daten',
     sec_forecast: 'Vorhersage',
     sec_parts: 'Tageszeiten',
@@ -183,12 +176,6 @@ const LABELS: Record<string, Record<string, string>> = {
     chart_source: 'Kachel-Diagramm zeigt',
     cs_forecast: 'Vorhersage (kommend)',
     cs_history: 'Verlauf (vergangen)',
-    goal_type: 'Zielrichtung',
-    gt_atleast: 'Mindestens erreichen',
-    gt_atmost: 'Höchstens',
-    goal_entity: 'Ziel-Sensor (hat Vorrang)',
-    start: 'Startwert (Zahl)',
-    start_entity: 'Start-Sensor (hat Vorrang)',
     tap_action: 'Klick-Aktion',
     ta_popup: 'Popup (Detailansicht)',
     'ta_more-info': 'More-Info (HA-Dialog)',
@@ -208,7 +195,9 @@ const LABELS: Record<string, Record<string, string>> = {
     part_night: 'Nacht-Entität',
     condition_entity: 'Wetterlage-Sensor (überschreibt Wetter)',
     sun_entity: 'Sonnen-Entität (Tag/Nacht)',
-    wind_entity: 'Wind-Entität (Wolken-Drift)',
+    wind_entity: 'Wind-Sensor (lokal / Wolken-Drift)',
+    temperature_entity: 'Temperatur-Sensor (lokale Station)',
+    humidity_entity: 'Feuchte-Sensor (lokale Station)',
     night: 'Nachtmodus erzwingen',
     scene_offset_y: 'Vertikaler Versatz %',
     details: 'Werte unter der Vorhersage (Chips)',
@@ -243,7 +232,6 @@ const LABELS: Record<string, Record<string, string>> = {
     color: 'Farbe',
     unit: 'Einheit',
     graph: 'Diagramm',
-    goal: 'Ziel (Zahl)',
     precision: 'Nachkommastellen',
     aggregate: 'Aggregation',
     trend: 'Trend',
@@ -337,10 +325,7 @@ export class WeatherCardEditor extends LitElement {
         label: this._label('sec_forecast'),
       });
     }
-    tabs.push(
-      { id: 'goal', icon: 'mdi:flag-checkered', label: this._label('sec_goal') },
-      { id: 'behavior', icon: 'mdi:gesture-tap', label: this._label('sec_behavior') }
-    );
+    tabs.push({ id: 'behavior', icon: 'mdi:gesture-tap', label: this._label('sec_behavior') });
     const extra: Partial<Record<MetricType, { id: string; icon: string; label: string }>> = {
       sky: { id: 'sky', icon: 'mdi:weather-partly-cloudy', label: this._label('sec_sky') },
       sun: { id: 'sun', icon: 'mdi:weather-sunset', label: this._label('sec_sun') },
@@ -406,6 +391,9 @@ export class WeatherCardEditor extends LitElement {
                   ]
                 : []),
               { name: 'precision', selector: { number: { min: 0, max: 3, mode: 'box' } } },
+              ...(type === 'air_quality' || type === 'pollen'
+                ? [{ name: 'max', selector: { number: { min: 1, mode: 'box' } } }]
+                : []),
             ],
           },
           { name: 'label', selector: { text: {} } },
@@ -432,41 +420,6 @@ export class WeatherCardEditor extends LitElement {
                 name: 'forecast_count',
                 selector: { number: { min: 2, max: 24, mode: 'box' } },
               },
-            ],
-          },
-        ];
-
-      case 'goal':
-        return [
-          {
-            type: 'grid',
-            name: '',
-            schema: [
-              { name: 'goal', selector: { number: { mode: 'box', step: 'any' } } },
-              { name: 'start', selector: { number: { mode: 'box', step: 'any' } } },
-            ],
-          },
-          {
-            type: 'grid',
-            name: '',
-            schema: [
-              { name: 'goal_entity', selector: { entity: {} } },
-              { name: 'start_entity', selector: { entity: {} } },
-            ],
-          },
-          {
-            type: 'grid',
-            name: '',
-            schema: [
-              {
-                name: 'goal_type',
-                selector: {
-                  select: { mode: 'dropdown', options: opts(['atleast', 'atmost'], 'gt') },
-                },
-              },
-              ...(type === 'air_quality' || type === 'pollen'
-                ? [{ name: 'max', selector: { number: { min: 1, mode: 'box' } } }]
-                : []),
             ],
           },
         ];
@@ -520,6 +473,7 @@ export class WeatherCardEditor extends LitElement {
             schema: [
               { name: 'condition_entity', selector: { entity: {} } },
               { name: 'sun_entity', selector: { entity: { domain: 'sun' } } },
+              { name: 'temperature_entity', selector: { entity: {} } },
               { name: 'wind_entity', selector: { entity: {} } },
               {
                 name: 'scene_offset_y',
@@ -587,6 +541,15 @@ export class WeatherCardEditor extends LitElement {
       case 'summary':
         return [
           { name: 'summary_entity', selector: { entity: {} } },
+          {
+            type: 'grid',
+            name: '',
+            schema: [
+              { name: 'temperature_entity', selector: { entity: {} } },
+              { name: 'wind_entity', selector: { entity: {} } },
+              { name: 'humidity_entity', selector: { entity: {} } },
+            ],
+          },
           { name: 'summary_sources', selector: { entity: { multiple: true } } },
         ];
 
@@ -721,10 +684,6 @@ export class WeatherCardEditor extends LitElement {
         .hass=${this.hass}
         .data=${{
           ...m,
-          goal: typeof m.goal === 'number' ? m.goal : undefined,
-          goal_entity: typeof m.goal === 'string' ? m.goal : undefined,
-          start: typeof m.start === 'number' ? m.start : undefined,
-          start_entity: typeof m.start === 'string' ? m.start : undefined,
           parts_morning: m.parts?.morning,
           parts_noon: m.parts?.noon,
           parts_evening: m.parts?.evening,
@@ -857,12 +816,6 @@ export class WeatherCardEditor extends LitElement {
     }
     if (Object.keys(parts).length) value.parts = parts;
     else delete value.parts;
-
-    for (const key of ['goal', 'start']) {
-      const entityValue = value[`${key}_entity`];
-      delete value[`${key}_entity`];
-      if (typeof entityValue === 'string' && entityValue) value[key] = entityValue;
-    }
 
     const metrics = [...this._config.metrics];
     metrics[index] = this._clean(value as MetricConfig);

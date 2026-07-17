@@ -2,7 +2,6 @@ import type { HomeAssistant } from './types';
 
 const STRINGS: Record<string, Record<string, string>> = {
   en: {
-    goal: 'Goal',
     rising: 'rising',
     falling: 'falling',
     stable: 'steady',
@@ -87,7 +86,6 @@ const STRINGS: Record<string, Record<string, string>> = {
     stat_avg: 'Avg',
     stat_max: 'Max',
     stat_trend: 'Trend',
-    goal_left: 'To goal',
     period_day: 'D',
     period_week: 'W',
     period_month: 'M',
@@ -114,7 +112,6 @@ const STRINGS: Record<string, Record<string, string>> = {
     cond_exceptional: 'Exceptional',
   },
   de: {
-    goal: 'Ziel',
     rising: 'steigend',
     falling: 'fallend',
     stable: 'gleichbleibend',
@@ -190,7 +187,6 @@ const STRINGS: Record<string, Record<string, string>> = {
     stat_avg: 'Ø',
     stat_max: 'Max',
     stat_trend: 'Trend',
-    goal_left: 'Bis Ziel',
     period_day: 'T',
     period_week: 'W',
     period_month: 'M',

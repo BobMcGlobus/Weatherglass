@@ -1,4 +1,4 @@
-import type { Aggregate, GoalType, GraphType, MetricType, TrendMode } from './types';
+import type { Aggregate, GraphType, MetricType, TrendMode } from './types';
 
 export interface MetricPreset {
   icon: string;
@@ -9,7 +9,6 @@ export interface MetricPreset {
   trend: TrendMode;
   duration?: boolean;
   precision?: number;
-  goalType?: GoalType;
 }
 
 /**
@@ -110,7 +109,6 @@ export const PRESETS: Record<MetricType, MetricPreset> = {
     aggregate: 'max',
     trend: 'neutral',
     precision: 0,
-    goalType: 'atmost',
   },
   cloud: {
     icon: 'mdi:weather-cloudy',
@@ -120,7 +118,6 @@ export const PRESETS: Record<MetricType, MetricPreset> = {
     aggregate: 'mean',
     trend: 'neutral',
     precision: 0,
-    goalType: 'atmost',
   },
   visibility: {
     icon: 'mdi:eye',
@@ -138,7 +135,6 @@ export const PRESETS: Record<MetricType, MetricPreset> = {
     aggregate: 'mean',
     trend: 'down_good',
     precision: 0,
-    goalType: 'atmost',
   },
   sun: {
     icon: 'mdi:weather-sunset',
@@ -172,7 +168,6 @@ export const PRESETS: Record<MetricType, MetricPreset> = {
     aggregate: 'max',
     trend: 'down_good',
     precision: 0,
-    goalType: 'atmost',
   },
   radar: {
     icon: 'mdi:radar',

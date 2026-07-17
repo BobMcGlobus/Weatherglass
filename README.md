@@ -35,7 +35,8 @@ Vollständig Theme-kompatibel (Light & Dark).
 - 📅 **Zeiträume im Popup**: Tag (stündlich) / Woche / Monat / 3 Monate / Jahr / **Max** — lange Zeiträume kommen aus den Langzeit-Statistiken und der Graph wird horizontal scrollbar
 - 🖱️ **Klick-Aktion pro Kachel**: Popup, More-Info, Link oder nichts
 - 🎨 **5 Kartenstile** über `card_style`: Standard (Default), Liquid Glass, Material You, Bubble, Magic Mirror
-- 🖱️ **Visueller Editor mit Tabs**: Allgemein / Darstellung / Vorhersage / Ziel / Verhalten plus typspezifische Tabs (Himmel, Sonne, Mond, Gezeiten, Radar, Zusammenfassung, Tageszeiten)
+- 🖱️ **Visueller Editor mit Tabs**: Allgemein / Darstellung / Vorhersage / Verhalten plus typspezifische Tabs (Himmel, Sonne, Mond, Gezeiten, Radar, Zusammenfassung, Tageszeiten)
+- 🏡 **Lokale Wetterstation** (Shelly, Ecowitt, …): Jede Mess-Kachel akzeptiert ohnehin beliebige Sensor-Entitäten als `entity` — der aktuelle Wert und der Verlauf kommen dann von deiner Station, während Vorhersage-Chart und -Streifen weiter aus der Wetter-Entität gespeist werden. Auf der Himmel-Kachel und in der Zusammenfassung überschreiben `temperature_entity` / `wind_entity` / `humidity_entity` die Wetter-Attribute mit den lokalen Messwerten.
 - 🖱️ **Visueller Editor**: Metriken per UI hinzufügen, sortieren, konfigurieren
 - 🌍 Deutsch & Englisch (automatisch nach HA-Sprache)
 
@@ -174,7 +175,6 @@ metrics: [...]
 | `secondary`      | list          | Zusatz-Entitäten als Infozeile                                        |
 | `name` / `icon` / `color` / `unit` | – | Anzeige                                                     |
 | `graph`          | string        | `line`, `bar`, `progress`, `none`                                     |
-| `goal` / `start` / `goal_type` | – | Ziel & Fortschritt (Zahl oder Sensor)                           |
 | `max`            | number        | `air_quality`: Ring-Maximum · `progress`: Balken-Skala                 |
 | `precision` / `aggregate` / `trend` / `duration` | – | Datenverhalten                            |
 | `days`           | number        | History-Zeitraum nur für diese Metrik                                 |
@@ -191,7 +191,9 @@ metrics: [...]
 | **Himmel (`sky`)** |             |                                                                        |
 | `condition_entity` | string      | Wetterlage-Sensor (überschreibt die Wetter-Entität)                  |
 | `sun_entity`     | string        | `sun.sun` für Tag/Nacht                                               |
-| `wind_entity`    | string        | stärkerer Wind → schnellere Wolken                                    |
+| `wind_entity`    | string        | lokaler Wind-Sensor: schnellere Wolken, Wert für die Zusammenfassung |
+| `temperature_entity` | string    | lokaler Temperatur-Sensor: große Anzeige auf der Szene + Zusammenfassung |
+| `humidity_entity` | string       | lokaler Feuchte-Sensor (Zusammenfassung)                              |
 | `night`          | bool          | Nachtmodus erzwingen                                                   |
 | `details`        | list          | Beschriftete Wert-Chips unter der Vorhersage (Entity-IDs oder `{entity, name, attribute, unit}`); Default: Wind/Feuchte/Druck/UV aus der Wetter-Entität |
 | `scene_offset_y` | number        | Feinjustierung (vertikaler Versatz %)                                  |

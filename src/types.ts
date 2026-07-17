@@ -45,8 +45,6 @@ export type MetricType =
 export type GraphType = 'line' | 'bar' | 'progress' | 'none';
 export type Aggregate = 'mean' | 'min' | 'max' | 'last' | 'sum';
 export type TrendMode = 'up_good' | 'down_good' | 'neutral' | 'none';
-/** atleast: goal reached at/above the value; atmost: at/below (e.g. keep wind low) */
-export type GoalType = 'atleast' | 'atmost';
 /** popup = built-in detail popup, more-info = native HA dialog */
 export type TapAction = 'popup' | 'more-info' | 'link' | 'none';
 export type CardStyle = 'default' | 'glass' | 'material' | 'bubble' | 'mirror';
@@ -96,8 +94,6 @@ export interface SeriesConfig {
   icon?: string;
   color?: string;
   unit?: string;
-  /** Target: a number or an entity id */
-  goal?: number | string;
 }
 
 export interface MetricConfig {
@@ -118,12 +114,6 @@ export interface MetricConfig {
   unit?: string;
   days?: number;
   graph?: GraphType;
-  /** Target: a number or an entity id */
-  goal?: number | string;
-  /** Starting value: goal % = progress from start to goal */
-  start?: number | string;
-  /** Goal direction: atleast (default) or atmost */
-  goal_type?: GoalType;
   precision?: number;
   aggregate?: Aggregate;
   trend?: TrendMode;
@@ -169,6 +159,14 @@ export interface MetricConfig {
   night?: boolean;
   /** Wind entity — stronger wind drifts the clouds faster */
   wind_entity?: string;
+  /**
+   * Local station override (e.g. Shelly/Ecowitt): current temperature shown
+   * on the sky scene / used by the summary instead of the weather attribute.
+   * Forecasts keep coming from the weather entity.
+   */
+  temperature_entity?: string;
+  /** Local station override for the current humidity (summary) */
+  humidity_entity?: string;
   /**
    * Labeled values under the forecast strip. Defaults to wind / humidity /
    * pressure / UV pulled from the weather entity's attributes.

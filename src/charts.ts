@@ -139,18 +139,17 @@ export function lineChart(
   </svg>`;
 }
 
-/** Rounded daily/hourly bars with an optional dashed goal line. */
+/** Rounded daily/hourly bars. */
 export function barChart(
   values: number[],
   color: string,
-  goal?: number,
   opts: ChartOpts = {}
 ): TemplateResult | typeof nothing {
   const w = opts.w ?? W;
   const h = opts.h ?? H;
   if (!values.some((v) => Number.isFinite(v) && v > 0)) return nothing;
   const vals = values.map((v) => (Number.isFinite(v) && v > 0 ? v : 0));
-  const max = Math.max(...vals, goal ?? 0) || 1;
+  const max = Math.max(...vals) || 1;
   const n = vals.length;
   const ticks = opts.yFmt ? [max, max / 2] : [];
   const { padL, padB } = axisGeometry(opts, ticks);
@@ -188,13 +187,8 @@ export function barChart(
       rx=${Math.min(bw / 2, 4)} fill=${color} opacity=${v > 0 ? 1 : 0.25}/>`;
   });
 
-  const goalLine = Number.isFinite(goal as number)
-    ? svg`<line x1=${padL} x2=${w - PAD} y1=${h - padB - y(goal!)} y2=${h - padB - y(goal!)}
-        stroke=${color} stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>`
-    : nothing;
-
   return html`<svg class="chart" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-    ${grid}${marks}${goalLine}${bars}
+    ${grid}${marks}${bars}
   </svg>`;
 }
 
